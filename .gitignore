@@ -1,0 +1,4 @@
+*.pkl
+*.csv
+__pycache__
+.vscode
