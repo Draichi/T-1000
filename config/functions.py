@@ -8,6 +8,7 @@ from termcolor import cprint
 from config import *
 import numpy as np
 import pandas as pd
+from config.variables.prediction import *
 #------------------------------------------------------------->
 df = pd.read_csv(DATABASE, index_col=DATABASE_INDEX_COL)
 tickers = df.columns.values

@@ -9,6 +9,7 @@ def df_scatter(df, title, separate_y_axis=False, y_axis_label='', scale='linear'
         plot_bgcolor='#010008',
         paper_bgcolor='#010008',
         title=title,
+        font=dict(color='rgb(255, 255, 255)'),
         legend=dict(orientation="h"),
         xaxis=dict(type='date'),
         yaxis=dict(
@@ -58,7 +59,12 @@ def correlation_heatmap(df, title, absolute_bounds=True):
         y=df.columns,
         colorbar=dict(title='Pearson Coefficient')
     )
-    layout = go.Layout(title=title)
+    layout = go.Layout(
+        title=title,
+        plot_bgcolor='#010008',
+        paper_bgcolor='#010008',
+        font=dict(color='rgb(255, 255, 255)')
+    )
     
     if absolute_bounds:
         heatmap['zmax'] = 1.0

@@ -1,9 +1,8 @@
 import os, pickle, quandl
 import numpy as np
 import pandas as pd
-from config import *
-from functions.functions import *
-from functions.charts import *
+from config.functions import *
+from config.charts import *
 # --------------------------------------------------------------->
 # data source:
 # https://blog.quandl.com/api-for-bitcoin-data
@@ -65,4 +64,4 @@ df_scatter(
     y_axis_label='Coin Value (USD)',
     scale='log'
 )
-combined_df.to_csv('datasets/altcoins_joined_closes_20181405_.csv')
+# combined_df.to_csv('datasets/altcoins_joined_closes_20181405_.csv')

@@ -1,8 +1,9 @@
 from sklearn import svm, model_selection, neighbors
-from config import *
-from functions.functions import *
+from config.functions import *
+from config.vars import *
 from datetime import date
 from setup import *
+
 
 if __name__ == '__main__':
     if datetime.now() == 5:
