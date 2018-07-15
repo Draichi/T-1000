@@ -1,4 +1,6 @@
-# Altcoins Bot Advisor
+# Bot Advisor
+
+Bot advisor using machine learining to give insight on the altcoin markets movement
 
 ![python](https://forthebadge.com/images/badges/made-with-python.svg "python")
 
