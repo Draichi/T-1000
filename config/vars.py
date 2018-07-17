@@ -7,6 +7,7 @@ parser = argparse.ArgumentParser(description='Deep analysis of cryptocurrencies'
 parser.add_argument('-d', '--days', type=int, default=0, help='7')
 parser.add_argument('-c', '--change', type=float, default=0, help='0.02')
 parser.add_argument('-$', '--coin', type=str, default=0, help='BTC')
+parser.add_argument('-dd', '--title', type=str, default=0, help='BTC')
 args = parser.parse_args()
 #------------------------------------------------------------->
 exchanges = ['COINBASE', 'BITSTAMP', 'ITBIT', 'KRAKEN']
@@ -17,6 +18,7 @@ period = 86400 # daily, 86400 sec/day
 altcoins = ['ETH', 'LTC', 'DASH', 'XRP', 'ETC', 'SC', 'XMR', 'XEM']
 #------------------------------------------------------------->
 HOW_MANY_DAYS      = args.days
+title      = args.title
 REQUIREMENT        = args.change
 DATABASE           = 'datasets/altcoins_joined_closes_20181405.csv'
 COIN               = args.coin
