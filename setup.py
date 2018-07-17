@@ -24,10 +24,14 @@ btc_usd_datasets = merge_dfs_on_column(
     list(exchange_data.keys()),
     'Weighted Price'
 )
-btc_usd_datasets.replace(0, np.nan, inplace=True)
-btc_usd_datasets['MEAN_PRICE'] = btc_usd_datasets.mean(axis=1)
+
+btc_usd_df = get_quandl_data('BCHARTS/BITSTAMPUSD')
+
+btc_usd_df.replace(0, np.nan, inplace=True)
+# btc_usd_datasets['MEAN_PRICE'] = btc_usd_datasets.mean(axis=1)
 # uncomment the folowing to see the merged data
-#btc_usd_datasets.tail()
+# print(btc_usd_df.tail())
+# quit()
 # --------------------------------------------------------------->
 # generate a scatter plot of the entire dataframe
 
@@ -35,17 +39,17 @@ btc_usd_datasets['MEAN_PRICE'] = btc_usd_datasets.mean(axis=1)
 altcoin_data ={}
 for altcoin in altcoins:
     coinpair = 'BTC_{}'.format(altcoin)
-    crypto_price_df = get_crypto_data(coinpair)
-    altcoin_data[altcoin] = crypto_price_df
+    altcoin_data[altcoin] = get_crypto_data(coinpair)
     
 for altcoin in altcoin_data.keys():
-    altcoin_data[altcoin]['Price_USD'] = altcoin_data[altcoin]['weightedAverage'] * btc_usd_datasets['MEAN_PRICE']
-    
+    altcoin_data[altcoin]['Price_USD'] = altcoin_data[altcoin]['weightedAverage'] * btc_usd_df['Weighted Price']
+
+# print(list(altcoin_data['ETH']['Price_USD']))
+# quit()
 # merge USD price of each altcoin into single dataframe
 combined_df = merge_dfs_on_column(list(altcoin_data.values()), list(altcoin_data.keys()), 'Price_USD')
-
 # add BTC price to the dataframe
-combined_df['BTC'] = btc_usd_datasets['MEAN_PRICE']
+combined_df['BTC'] = btc_usd_df['Weighted Price']
 
 combined_df_2016 = combined_df[combined_df.index.year == 2016]
 combined_df_2016.pct_change().corr(method='pearson')

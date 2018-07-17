@@ -7,7 +7,7 @@ Bot advisor using machine learining to give insight on the altcoin markets movem
 ## Setup
 
 ```sh
-pip3 install -r requeriments.txt
+pip3 install -r requirements.txt
 
 python3 setup.py
 # a window will pop-up with the chart

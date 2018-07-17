@@ -1,5 +1,5 @@
 sklearn
 numpy
 pandas
-collections
 termcolor
+quandl
