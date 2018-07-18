@@ -18,15 +18,15 @@ def buy_sell_hold(*args):
     cols = [c for c in args]
     
     for col in cols:
-        if col > REQUIREMENT:
+        if col > requirement:
             return 'BUY'
-        if col < -REQUIREMENT:
+        if col < -requirement:
             return 'SELL'
     return 'HOLD'
 #------------------------------------------------------------->
 def process_data_for_labels(ticker):
     
-    for i in range(1, HOW_MANY_DAYS+1):
+    for i in range(1, days+1):
         df['{}_{}d'.format(ticker, i)] = (
             (df[ticker].shift(-i) - df[ticker]) / df[ticker]
         )
@@ -37,10 +37,10 @@ def process_data_for_labels(ticker):
 def extract_featuresets(ticker):
     tickers, df = process_data_for_labels(ticker)
     
-    for i in range(1, HOW_MANY_DAYS+1):
-        df['{}_target'.format(COIN)] = list(map(
+    for i in range(1, days+1):
+        df['{}_target'.format(coin)] = list(map(
             buy_sell_hold,
-            df['{}_{}d'.format(COIN,i)]
+            df['{}_{}d'.format(coin,i)]
         ))
 
     vals     = df['{}_target'.format(ticker)].values.tolist()

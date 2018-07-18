@@ -9,10 +9,15 @@ Bot advisor using machine learining to give insight on the altcoin markets movem
 ```sh
 pip3 install -r requirements.txt
 
-python3 setup.py
+python3 lin.py
 # a window will pop-up with the chart
 
-python3 main.py -d 7 -c 0.02 -$ BTC
-# or python3 main.py --help
+python3 log.py
+# a window will pop-up with the chart
+
+python3 heat.py --year 2017
+# a window will pop-up with the chart
+
+python3 predict.py --days 7 --change 0.02 --coin BTC
 
 ```

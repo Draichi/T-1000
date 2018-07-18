@@ -4,6 +4,9 @@ import pandas as pd
 from config.functions import *
 from config.charts import *
 
+
+
+# este so usa bitstamp
 exchange_data = {}
 for exchange in exchanges:
     exchange_code = 'BCHARTS/{}USD'.format(exchange)
