@@ -3,6 +3,9 @@
 Bot advisor using machine learining to give insight on the altcoin markets movement
 
 ![python](https://forthebadge.com/images/badges/made-with-python.svg "python")
+![lin](imgs/lin.png "linear")
+![log](imgs/log.png "log")
+![heatmap](imgs/heatmap.png "heatmap")
 
 ## Setup
 
