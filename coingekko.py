@@ -37,15 +37,17 @@ for coin in coins:
             dt = datetime.datetime.fromtimestamp(int(date)/1000).strftime('%Y-%m-%d %H:%M:%S')
             data.loc[i, 'date'] = dt
             data.loc[i, key] = price
+    data.drop(columns=['market_caps', 'total_volumes'], inplace=True)
+    data.set_index('date', inplace=True)
     coin_data[coin] = data
     df = pd.DataFrame(coin_data[coin])
-    df.to_csv('df_{}-{}-{}.csv'.format(coin, todays_day, todays_month), index=False)
+    df.to_csv('df_{}-{}-{}.csv'.format(coin, todays_day, todays_month))
 
 data = []
 for coin in coins:
     df = pd.read_csv('df_{}-{}-{}.csv'.format(coin, todays_day, todays_month))
     trace = go.Scatter(
-        x=df['date'],
+        x=df.date,
         y=df['prices'],
         name = coin,
     )
