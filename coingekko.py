@@ -6,7 +6,7 @@ import pandas as pd
 
 # https://plot.ly/python/time-series/
 
-coins = ['giant', 'rupaya', 'hush', 'fantasy-gold', 'ethereum']
+coins = ['giant', 'rupaya', 'hush', 'fantasy-gold', 'ethereum', 'bitcoin', 'litecoin', 'monero']
 keys = ['prices']
 todays_month = datetime.datetime.now().month
 todays_day = datetime.datetime.now().day
@@ -17,7 +17,7 @@ def get_coin_data(coin):
         print('--- loading {} from cache'.format(coin))
     except (OSError, IOError) as e:
         print('--- downloading {}, this will take some while'.format(coin))
-        url = 'https://api.coingecko.com/api/v3/coins/{}/market_chart?vs_currency=btc&days=1'.format(coin)
+        url = 'https://api.coingecko.com/api/v3/coins/{}/market_chart?vs_currency=btc&days=90'.format(coin)
         headers = {'User-Agent': 'Mozilla/5.0'}
         response = requests.get(url, headers=headers)
         df = pd.DataFrame(response.json())
@@ -36,11 +36,10 @@ for coin in coins:
             price = current_item[1]
             dt = datetime.datetime.fromtimestamp(int(date)/1000).strftime('%Y-%m-%d %H:%M:%S')
             data.loc[i, 'date'] = dt
-            data.loc[i, key] = price
-    data.drop(columns=['market_caps', 'total_volumes'], inplace=True)
+            data.loc[i, coin] = price
+    data = data[['date', coin]]
     data.set_index('date', inplace=True)
-    coin_data[coin] = data
-    df = pd.DataFrame(coin_data[coin])
+    df = pd.DataFrame(data)
     df.to_csv('df_{}-{}-{}.csv'.format(coin, todays_day, todays_month))
 
 data = []
@@ -48,7 +47,7 @@ for coin in coins:
     df = pd.read_csv('df_{}-{}-{}.csv'.format(coin, todays_day, todays_month))
     trace = go.Scatter(
         x=df.date,
-        y=df['prices'],
+        y=df[coin],
         name = coin,
     )
     data.append(trace)
