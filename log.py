@@ -1,5 +1,5 @@
 from config.charts import df_scatter
-from historical import combined_df
+from config.historical import combined_df
 from config.vars import separate_y_axis
 
 class Log:

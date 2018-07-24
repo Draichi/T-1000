@@ -13,7 +13,7 @@ todays_day = datetime.datetime.now().day
 
 def get_coin_data(coin):
     try:
-        df = pd.read_csv('{}-{}-{}.csv'.format(coin, todays_day, todays_month))
+        df = pd.read_csv('datasets/{}-{}-{}.csv'.format(coin, todays_day, todays_month))
         print('--- loading {} from cache'.format(coin))
     except (OSError, IOError) as e:
         print('--- downloading {}, this will take some while'.format(coin))
@@ -21,7 +21,7 @@ def get_coin_data(coin):
         headers = {'User-Agent': 'Mozilla/5.0'}
         response = requests.get(url, headers=headers)
         df = pd.DataFrame(response.json())
-        df.to_csv('{}-{}-{}.csv'.format(coin, todays_day, todays_month), index=False)
+        df.to_csv('datasets/{}-{}-{}.csv'.format(coin, todays_day, todays_month), index=False)
         print('--- caching {}'.format(coin))
     return df
 
@@ -40,11 +40,11 @@ for coin in coins:
     data = data[['date', coin]]
     data.set_index('date', inplace=True)
     df = pd.DataFrame(data)
-    df.to_csv('df_{}-{}-{}.csv'.format(coin, todays_day, todays_month))
+    df.to_csv('datasets/df_{}-{}-{}.csv'.format(coin, todays_day, todays_month))
 
 data = []
 for coin in coins:
-    df = pd.read_csv('df_{}-{}-{}.csv'.format(coin, todays_day, todays_month))
+    df = pd.read_csv('datasets/df_{}-{}-{}.csv'.format(coin, todays_day, todays_month))
     trace = go.Scatter(
         x=df.date,
         y=df[coin],

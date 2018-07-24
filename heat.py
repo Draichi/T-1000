@@ -1,5 +1,5 @@
 from config.charts import correlation_heatmap
-from historical import combined_df
+from config.historical import combined_df
 from config.vars import year
 
 class Lin:
