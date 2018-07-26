@@ -1,7 +1,6 @@
 import pandas as pd
-import numpy as np
-from config.functions import merge_dfs_on_column, get_quandl_data
-from config.charts import correlation_heatmap
+from configs.functions import get_quandl_data
+from configs.charts import correlation_heatmap
 import datetime
 
 coins = ['giant', 'rupaya', 'hush', 'fantasy-gold', 'ethereum', 'bitcoin', 'litecoin', 'monero']
