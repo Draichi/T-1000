@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from collections import Counter
-import pickle, warnings
+import pickle
 from sklearn import svm, model_selection, neighbors
 from sklearn.ensemble import VotingClassifier, RandomForestClassifier
 from termcolor import cprint
@@ -23,40 +23,32 @@ def buy_sell_hold(*args):
     return 'HOLD'
 #------------------------------------------------------------->
 def process_data_for_labels(ticker):
-    
     for i in range(1, days+1):
         df['{}_{}d'.format(ticker, i)] = (
             (df[ticker].shift(-i) - df[ticker]) / df[ticker]
         )
-    
     df.fillna(0, inplace=True)
     return tickers, df
 #------------------------------------------------------------->
 def extract_featuresets(ticker):
     tickers, df = process_data_for_labels(ticker)
-    
     for i in range(1, days+1):
         df['{}_target'.format(coin)] = list(map(
             buy_sell_hold,
             df['{}_{}d'.format(coin,i)]
         ))
-
     vals     = df['{}_target'.format(ticker)].values.tolist()
     str_vals = [str(i) for i in vals]
     print_div()
     cprint('~~> Data spread: {}'.format(Counter(str_vals)), 'magenta')
-
     df.fillna(0, inplace=True)
     df = df.replace([np.inf, -np.inf], np.nan)
     df.dropna(inplace=True)
-
     df_vals = df[[ticker for ticker in tickers]].pct_change()
     df_vals = df_vals.replace([np.inf, -np.inf], 0)
     df_vals.fillna(0, inplace=True)
-
     x = df_vals.values
     y = df['{}_target'.format(ticker)].values.tolist()
-
     return x, y, df
 #------------------------------------------------------------->
 def train_the_clf(ticker):
@@ -72,7 +64,6 @@ def train_the_clf(ticker):
         ('rfor', RandomForestClassifier())
     ])
     clf.fit(x_train, y_train)
-
     confidence  = clf.score(x_test, y_test)
     predictions = clf.predict(x_test)
 
@@ -85,7 +76,6 @@ def train_the_clf(ticker):
         'magenta'
     )
     print_div()
-    
     return confidence
 #------------------------------------------------------------->
 def print_div():
@@ -119,7 +109,7 @@ def get_json_data(json_url, path):
         f = open(cache_path, 'rb')
         df = pickle.load(f)
         print('-- loaded {} from cache'.format(path))
-    except (OSError, IOError) as e:
+    except (OSError, IOError) as _:
         print('-- downloading {}'.format(json_url))
         df = pd.read_json(json_url)
         df.to_pickle(cache_path)
