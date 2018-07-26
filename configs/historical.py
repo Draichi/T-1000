@@ -1,8 +1,8 @@
 import os, pickle, quandl
 import numpy as np
 import pandas as pd
-from config.functions import *
-from config.charts import *
+from configs.functions import *
+from configs.charts import *
 
 exchange_data = {}
 for exchange in exchanges:

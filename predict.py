@@ -1,5 +1,5 @@
-from config.functions import train_the_clf
-from config.vars import coin, requirement, days
+from configs.functions import train_the_clf
+from configs.vars import coin, requirement, days
 from termcolor import cprint
 
 class Predict:

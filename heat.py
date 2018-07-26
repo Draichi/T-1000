@@ -1,6 +1,6 @@
-from config.charts import correlation_heatmap
-from config.historical import combined_df
-from config.vars import year
+from configs.charts import correlation_heatmap
+from configs.historical import combined_df
+from configs.vars import year
 
 class Lin:
     """Plot correlation heatmap chart"""

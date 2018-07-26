@@ -39,11 +39,11 @@ def df_scatter(df, title, separate_y_axis=False, y_axis_label='', scale='linear'
         if separate_y_axis:
             trace['yaxis'] = 'y{}'.format(index + 1)
             layout['yaxis{}'.format(index + 1)] = y_axis_config
-        
+
         trace_arr.append(trace)
     offline.plot(
         {
-            'data': trace_arr, 
+            'data': trace_arr,
             'layout': layout
         },
         image = None,
@@ -65,11 +65,11 @@ def correlation_heatmap(df, title, absolute_bounds=True):
         paper_bgcolor='#010008',
         font=dict(color='rgb(255, 255, 255)')
     )
-    
+
     if absolute_bounds:
         heatmap['zmax'] = 1.0
         heatmap['zmin'] = -1.0
-    
+
     offline.plot(
         {
             'data': [heatmap],
