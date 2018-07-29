@@ -1,17 +1,12 @@
 import pandas as pd
-from configs.functions import get_quandl_data
 from configs.charts import correlation_heatmap
-import datetime
-
-coins = ['giant', 'rupaya', 'hush', 'fantasy-gold', 'ethereum', 'bitcoin', 'litecoin', 'monero']
-todays_month = datetime.datetime.now().month
-todays_day = datetime.datetime.now().day
+from configs.vars import coins, days, todays_day, todays_month
 
 def get_coin_data(coin):
-    df = pd.read_csv('datasets/df_{}-{}-{}.csv'.format(coin, todays_day, todays_month))
+    df = pd.read_csv('datasets/df_{}-{}-{}_{}-days.csv'.format(coin, todays_day, todays_month, days))
     return df
 
-base_df = get_coin_data('bitcoin')
+base_df = get_coin_data('ethereum')
 
 for coin in coins:
     df = get_coin_data(coin)

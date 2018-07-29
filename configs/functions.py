@@ -28,6 +28,7 @@ def process_data_for_labels(ticker):
             (df[ticker].shift(-i) - df[ticker]) / df[ticker]
         )
     df.fillna(0, inplace=True)
+    df.to_csv('process_data.csv')
     return tickers, df
 #------------------------------------------------------------->
 def extract_featuresets(ticker):
@@ -49,6 +50,7 @@ def extract_featuresets(ticker):
     df_vals.fillna(0, inplace=True)
     x = df_vals.values
     y = df['{}_target'.format(ticker)].values.tolist()
+    df.to_csv('{}-test.csv'.format(coin))
     return x, y, df
 #------------------------------------------------------------->
 def train_the_clf(ticker):

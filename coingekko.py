@@ -3,15 +3,12 @@ import plotly.offline as offline
 import plotly.graph_objs as go
 import requests, datetime
 import pandas as pd
+from configs.vars import coins, days, todays_month, todays_day, keys
 
 # https://plot.ly/python/time-series/
 
-# coins = ['giant','rupaya','hush','fantasy-gold','ethereum','bitcoin','litecoin','monero']
-coins = ['dash','zcoin','steem','bitshares','nano','bitcoin-cash','ethereum-classic','ethereum','bitcoin','litecoin','monero']
-keys = ['prices']
-todays_month = datetime.datetime.now().month
-todays_day = datetime.datetime.now().day
-days = 365
+# coins = ['giant','rupaya','zcoin','nano','ethereum','steem']
+# coins = ['dash','zcoin','steem','bitshares','nano','bitcoin-cash','ethereum-classic','ethereum','bitcoin','litecoin','monero']
 
 def get_coin_data(coin):
     try:
@@ -50,6 +47,7 @@ for coin in coins:
     trace = go.Scatter(
         x=df.date,
         y=df[coin],
+        hoverinfo='y',
         name = coin,
     )
     data.append(trace)

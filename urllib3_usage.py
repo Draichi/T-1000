@@ -7,7 +7,7 @@ import pandas as pd
 # https://plot.ly/python/time-series/
 
 # coins = ['giant','rupaya','hush','fantasy-gold','ethereum','bitcoin','litecoin','monero']
-coins = ['litecoin','monero']
+coins = ['litecoin','monero', 'ethereum', 'steem', 'zcoin', 'dash', 'nano']
 keys = ['prices']
 todays_month = datetime.datetime.now().month
 todays_day = datetime.datetime.now().day
