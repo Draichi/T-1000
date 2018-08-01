@@ -2,3 +2,4 @@ sklearn
 numpy
 pandas
 termcolor
+plotly
