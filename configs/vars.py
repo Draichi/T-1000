@@ -2,7 +2,6 @@ import warnings, argparse
 import datetime, numpy
 #------------------------------------------------------------->
 warnings.filterwarnings("ignore", category=DeprecationWarning)
-numpy.warnings.filterwarnings('ignore')
 #------------------------------------------------------------->
 coins = ['giant','steem', 'nano', 'binancecoin', 'neo', 'bitshares',]
 days = 7
