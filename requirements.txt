@@ -2,4 +2,3 @@ sklearn
 numpy
 pandas
 termcolor
-quandl
