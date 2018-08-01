@@ -2,9 +2,9 @@ import threading, requests, time, os, datetime
 from configs.vars import coins, days, todays_month, todays_day, keys
 import pandas as pd
 from termcolor import cprint
-
+#------------------------------------------------------------->
 start = time.time()
-
+#------------------------------------------------------------->
 def fetch_url(coin):
     if not (os.path.exists('datasets/df_{}-{}-{}_{}-days.csv'.format(coin, todays_day, todays_month, days))):
         cprint('-- downloading {}, {} days dataset, this will take a while'.format(coin, days), 'yellow')
@@ -27,7 +27,7 @@ def fetch_url(coin):
         cprint("---{} fetched and cached in {} seconds".format(coin, (time.time() - start)), 'green')
     else:
         cprint('-- loading {} from cache'.format(coin), 'green')
-
+#------------------------------------------------------------->
 threads = [threading.Thread(target=fetch_url, args=(coin,)) for coin in coins]
 for thread in threads:
     thread.start()
