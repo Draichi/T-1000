@@ -3,7 +3,7 @@ import plotly.graph_objs as go
 import get_datasets
 import pandas as pd
 from configs.vars import coins, days, todays_month, todays_day
-
+#------------------------------------------------------------->
 data = []
 for coin in coins:
     df = pd.read_csv('datasets/df_{}-{}-{}_{}-days.csv'.format(coin, todays_day, todays_month, days))
@@ -14,7 +14,7 @@ for coin in coins:
         name = str(coin).upper(),
     )
     data.append(trace)
-
+#------------------------------------------------------------->
 layout = go.Layout(
     plot_bgcolor='#010008',
     paper_bgcolor='#010008',
@@ -27,6 +27,5 @@ layout = go.Layout(
         type='log'
     )
 )
-
+#------------------------------------------------------------->
 offline.plot({'data': data, 'layout': layout})
-
