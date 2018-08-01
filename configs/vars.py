@@ -5,7 +5,6 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 numpy.warnings.filterwarnings('ignore')
 #------------------------------------------------------------->
 coins = ['giant','steem', 'nano', 'binancecoin', 'neo', 'bitshares',]
-# coins = ['zcoin']
 days = 7
 keys = ['prices']
 todays_month = datetime.datetime.now().month
