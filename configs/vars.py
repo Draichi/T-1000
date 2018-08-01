@@ -3,8 +3,8 @@ import datetime
 #------------------------------------------------------------->
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 #------------------------------------------------------------->
-coins = ['giant','steem', 'nano', 'binancecoin', 'neo', 'bitshares',]
-days = 7
+coins = ['monero','steem','nano','binancecoin','neo','bitshares','ethereum','litecoin','eos','ripple','cardano','stellar','zcash','verge','zilliqa']
+days = 400
 keys = ['prices']
 todays_month = datetime.datetime.now().month
 todays_day = datetime.datetime.now().day
