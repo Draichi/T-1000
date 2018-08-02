@@ -18,13 +18,13 @@ for coin in coins:
 layout = go.Layout(
     plot_bgcolor='#010008',
     paper_bgcolor='#010008',
-    title='Altcoins Logarithmic Prices in {} Days'.format(days),
+    title='logarithm altcoin prices in {} Days'.format(days),
     font=dict(color='rgb(255, 255, 255)'),
     legend=dict(orientation="h"),
     xaxis=dict(type='date'),
     yaxis=dict(
         title='Price (BTC)',
-        type='log'
+        type='linear'
     )
 )
 #------------------------------------------------------------->
