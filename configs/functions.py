@@ -5,7 +5,6 @@ import pickle
 from sklearn import svm, model_selection, neighbors
 from sklearn.ensemble import VotingClassifier, RandomForestClassifier
 from termcolor import cprint
-from configs import *
 from configs.vars import *
 #------------------------------------------------------------->
 df = pd.read_csv(DATABASE, index_col=DATABASE_INDEX_COL)
@@ -23,7 +22,7 @@ def buy_sell_hold(*args):
     return 'HOLD'
 #------------------------------------------------------------->
 def process_data_for_labels(ticker):
-    for i in range(1, days+1):
+    for i in range(1, forecast_days+1):
         df['{}_{}d'.format(ticker, i)] = (
             (df[ticker].shift(-i) - df[ticker]) / df[ticker]
         )
@@ -33,7 +32,7 @@ def process_data_for_labels(ticker):
 #------------------------------------------------------------->
 def extract_featuresets(ticker):
     tickers, df = process_data_for_labels(ticker)
-    for i in range(1, days+1):
+    for i in range(1, forecast_days+1):
         df['{}_target'.format(coin)] = list(map(
             buy_sell_hold,
             df['{}_{}d'.format(coin,i)]
