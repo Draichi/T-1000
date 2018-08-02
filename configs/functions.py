@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 from collections import Counter
-import pickle
 from sklearn import svm, model_selection, neighbors
 from sklearn.ensemble import VotingClassifier, RandomForestClassifier
 from termcolor import cprint
@@ -67,7 +66,6 @@ def train_the_clf(ticker):
     clf.fit(x_train, y_train)
     confidence  = clf.score(x_test, y_test)
     predictions = clf.predict(x_test)
-
     cprint(
         '\n~~> Spread prediction: {}'.format(Counter(predictions)),
         'magenta'
@@ -82,49 +80,3 @@ def train_the_clf(ticker):
 def print_div():
     cprint('~'*70, 'cyan')
 #------------------------------------------------------------->
-def get_quandl_data(quandl_id):
-    path = '{}.pkl'.format(quandl_id).replace('/','-')
-    cache_path = 'datasets/' + path
-    try:
-        f = open(cache_path, 'rb')
-        df = pickle.load(f)
-        print('-- loaded {} from cache'.format(quandl_id))
-    except (OSError, IOError) as _:
-        print('-- downloading {} from quandl'.format(quandl_id))
-        df = quandl.get(quandl_id, returns="pandas")
-        df.to_pickle(cache_path)
-        print('-- cached {} at {}'.format(quandl_id, cache_path))
-    return df
-#------------------------------------------------------------->
-def merge_dfs_on_column(dataframes, labels, col):
-    series_dict = {}
-    for index in enumerate(dataframes):
-        series_dict[labels[index]] = dataframes[index][col]
-    return pd.DataFrame(series_dict)
-#------------------------------------------------------------->
-def get_json_data(json_url, path):
-    # download and cache json data, return as dataframe
-    pkl = '{}.pkl'.format(path)
-    cache_path = 'datasets/' + pkl
-    try:
-        f = open(cache_path, 'rb')
-        df = pickle.load(f)
-        print('-- loaded {} from cache'.format(path))
-    except (OSError, IOError) as _:
-        print('-- downloading {}'.format(json_url))
-        df = pd.read_json(json_url)
-        df.to_pickle(cache_path)
-        print('-- cached {}'.format(path))
-    return df
-#------------------------------------------------------------->
-def get_crypto_data(poloniex_pair):
-    # retrive crypto data from poloniex
-    json_url = base_url.format(
-        poloniex_pair,
-        start_date.timestamp(),
-        end_date.timestamp(),
-        period
-    )
-    data_df = get_json_data(json_url, poloniex_pair)
-    data_df = data_df.set_index('date')
-    return data_df
