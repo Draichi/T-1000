@@ -2,15 +2,14 @@ import plotly.offline as offline
 import plotly.graph_objs as go
 import get_datasets
 import pandas as pd
-from configs.vars import coins, days, todays_month, todays_day
+from configs.vars import coins, days, todays_month, todays_day, currency
 #------------------------------------------------------------->
 data = []
 for coin in coins:
-    df = pd.read_csv('datasets/df_{}-{}-{}_{}-days.csv'.format(coin, todays_day, todays_month, days))
+    df = pd.read_csv('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day, todays_month, coin, days, currency))
     trace = go.Scatter(
         x=df.date,
-        y=df[coin],
-        hoverinfo='y',
+        y=df['prices'],
         name = str(coin).upper(),
     )
     data.append(trace)
@@ -18,12 +17,12 @@ for coin in coins:
 layout = go.Layout(
     plot_bgcolor='#010008',
     paper_bgcolor='#010008',
-    title='logarithm altcoin prices in {} Days'.format(days),
+    title='Linear Prices in {} Days ({})'.format(days, currency.upper()),
     font=dict(color='rgb(255, 255, 255)'),
     legend=dict(orientation="h"),
     xaxis=dict(type='date'),
     yaxis=dict(
-        title='Price (BTC)',
+        title='Price ({})'.format(currency.upper()),
         type='linear'
     )
 )
