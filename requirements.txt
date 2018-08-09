@@ -3,3 +3,5 @@ numpy
 pandas
 termcolor
 plotly
+pystan
+fbprophet
