@@ -1,14 +1,14 @@
 import threading, requests, time, os, datetime
-from configs.vars import coins, days, todays_month, todays_day, keys
+from configs.vars import coins, days, todays_month, todays_day, keys, currency
 import pandas as pd
 from termcolor import cprint
 #------------------------------------------------------------->
 start = time.time()
 #------------------------------------------------------------->
 def fetch_url(coin):
-    if not (os.path.exists('datasets/df_{}-{}-{}_{}-days.csv'.format(coin, todays_day, todays_month, days))):
+    if not (os.path.exists('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day, todays_month, coin, days, currency))):
         cprint('> downloading {}, {} days dataset, this will take a while'.format(coin, days), 'yellow')
-        url = "https://api.coingecko.com/api/v3/coins/{}/market_chart?vs_currency=btc&days={}".format(coin, days)
+        url = "https://api.coingecko.com/api/v3/coins/{}/market_chart?vs_currency={}&days={}".format(coin, currency, days)
         headers = {'User-Agent': 'Mozilla/5.0'}
         response = requests.get(url, headers=headers)
         df = pd.DataFrame(response.json())
@@ -20,10 +20,10 @@ def fetch_url(coin):
                 price = current_item[1]
                 dt = datetime.datetime.fromtimestamp(int(date)/1000).strftime('%Y-%m-%d %H:%M:%S')
                 df.loc[i, 'date'] = dt
-                df.loc[i, coin] = price
-        df = df[['date', coin]]
+                df.loc[i, key] = price
+        # df = df[['date', coin]]
         df.set_index('date', inplace=True)
-        df.to_csv('datasets/df_{}-{}-{}_{}-days.csv'.format(coin, todays_day, todays_month, days))
+        df.to_csv('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day, todays_month, coin, days, currency))
         cprint("> {} fetched and cached in {} seconds".format(coin, (time.time() - start)), 'green')
     else:
         cprint('> loading {} from cache'.format(coin), 'green')
