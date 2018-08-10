@@ -17,6 +17,7 @@ days = 365
 ```sh
 git clone
 cd bot_advisor
+mkdir models
 pip3 install -r requirements.txt
 python3 lin.py
 # python3 log.py to see in logarithm scale
