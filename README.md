@@ -18,6 +18,7 @@ days = 90
 git clone
 cd bot_advisor
 mkdir models
+mkdir datasets
 pip3 install -r requirements.txt
 python3 lin.py
 # python3 log.py to see in logarithm scale
@@ -25,10 +26,15 @@ python3 forecast.py [asset]
 # e.g.: python3 forecast bitcoin
 ```
 ![10-8-2018](imgs/bitcoin90days.png "10-8-2018")
+
 Forecast:
 ![10-8-2018](imgs/bitcoin_forecast.png "10-8-2018")
----
-### Zoom
+
+Zoom:
 ![10-8-2018](imgs/bitcoin_zoon.png "10-8-2018")
+
 Forecast:
 ![10-8-2018](imgs/bitcoin.png "10-8-2018")
+
+## Credits
+- [Analyzing](https://blog.patricktriest.com/analyzing-cryptocurrencies-python/) cryptocurrency markets using python

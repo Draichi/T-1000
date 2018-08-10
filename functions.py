@@ -1,14 +1,15 @@
 import numpy as np
 import math, os
 from termcolor import colored
+from configs.vars import currency
 width = os.get_terminal_size().columns
 
 # prints formatted price
 def formatPrice(n):
 	if n < 0:
-		return colored('Total profit: -BTC {0:.6f}'.format(abs(n)).center(width), 'red', attrs=['bold'])
+		return colored('Total profit: -{} {:.6f}'.format(currency.upper(), abs(n)).center(width), 'red', attrs=['bold'])
 	else:
-		return colored('Total profit: BTC {0:.7f}'.format(abs(n)).center(width), 'green', attrs=['bold'])
+		return colored('Total profit: {} {:.7f}'.format(currency.upper(), abs(n)).center(width), 'green', attrs=['bold'])
 	# return ("-BTC " if n < 0 else "BTC ") + "{0:.7f}".format(abs(n))
 
 # returns the vector containing stock data from a fixed file
@@ -17,7 +18,7 @@ def getStockDataVec(key):
 	lines = open("datasets/" + key + ".csv", "r").read().splitlines()
 
 	for line in lines[1:]:
-		vec.append(float(line.split(",")[1]))
+		vec.append(float(line.split(",")[2]))# 1=marketcap, 2=prices, 3=vol
 
 	return vec
 

@@ -8,13 +8,13 @@ import keras, os
 from keras.models import load_model
 from agent import Agent
 from functions import *
-from configs.vars import days, currency
+from configs.vars import days, currency, todays_day, todays_month
 
 width = os.get_terminal_size().columns
 asset_name, model_name = sys.argv[1], sys.argv[2]
 model = load_model("models/" + model_name)
 window_size = model.layers[0].input.shape.as_list()[1]
-asset = '{}_d{}_{}'.format(asset_name, days, currency)	
+asset = '{}-{}_{}_d{}_{}'.format(todays_day, todays_month, asset_name, days, currency)	
 
 agent = Agent(window_size, True, model_name)
 data = getStockDataVec(asset)
@@ -30,15 +30,15 @@ for t in range(l):
 	action = agent.act(state)
 	next_state = getState(data, t + 1, window_size + 1)
 	reward = 0
-	print("> {} BTC {:.7f}".format(t, data[t]), end='\r') #hold
+	print("> {} {} {:.7f}".format(t, currency.upper(),data[t]), end='\r') #hold
 	if action == 1: # buy
 		agent.inventory.append(data[t])
-		print(colored("> {} BTC {:.7f} |".format(t, data[t]), 'cyan'), formatPrice(total_profit), end='\r')
+		print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'cyan'), formatPrice(total_profit), end='\r')
 	elif action == 2 and len(agent.inventory) > 0: # sell
 		bought_price = agent.inventory.pop(0)
 		reward = max(data[t] - bought_price, 0)
 		total_profit += data[t] - bought_price
-		print(colored("> {} BTC {:.7f} |".format(t, data[t]), 'yellow'), formatPrice(total_profit), end='\r')
+		print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'yellow'), formatPrice(total_profit), end='\r')
 	done = True if t == l - 1 else False
 	agent.memory.append((state, action, reward, next_state, done))
 	state = next_state
