@@ -4,7 +4,7 @@ import datetime
 #     'steem','binancecoin','litecoin',
 #     'bitcoin', 'giant', 'steem-dollars','ethereum'
 # ]
-coins = ['bitcoin', 'giant']
+coins = ['bitcoin', 'litecoin']
 days = 90
 keys = ['prices', 'total_volumes', 'market_caps']
 currency = 'usd'

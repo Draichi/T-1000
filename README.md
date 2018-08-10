@@ -1,39 +1,31 @@
-# Bot Advisor
-
-Bot advisor using machine learning to give insights about market movements
-
 ![python](https://forthebadge.com/images/badges/made-with-python.svg "python")
+
+# Cryptocurrency prediction
+
+Deep tecnical analysis with **ANY** cryptocurrency
 
 ## Setup
 
-Go to `configs/vars` and add what coins you want and how many days of data
+Go to `configs/vars` and edit these lines:
 ```python
 coins = ['giant','steem', 'nano', 'binancecoin', 'neo', 'bitshares',]
 days = 365
 ```
 ---
+## Run
+
 ```sh
+git clone
+cd bot_advisor
 pip3 install -r requirements.txt
-
-python3 predict.py --days 7 --change 0.02 --coin bitcoin
-```
-![predict](imgs/prediction.png "predict")
----
-```sh
 python3 lin.py
+# python3 log.py to see in logarithm scale
+python3 forecast.py [asset]
+# e.g.: python3 forecast bitcoin
 ```
-![lin](imgs/lin.png "linear")
+![10-8-2018](imgs/bitcoin90days.png "10-8-2018")
+![10-8-2018](imgs/bitcoin_forecast.png "10-8-2018")
 ---
-```sh
-python3 log.py
-# a window will pop-up with the chart
-```
-![log](imgs/log.png "log")
----
-```sh
-python3 heat.py --year 2017
-```
-![heatmap](imgs/heatmap.png "heatmap")
----
-
-as we have 3 options (hold, buy, sell) accuracy is calculated different, 33% accuracy means randomness, we difficult will get more than 70%
+### Zoom
+![10-8-2018](imgs/bitcoin_zoon.png "10-8-2018")
+![10-8-2018](imgs/bitcoin.png "10-8-2018")

@@ -1,32 +1,39 @@
-# pip3 install fbprophet
 import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.offline as offline
 import plotly.graph_objs as go
-import fbprophet
+import fbprophet, sys
+from configs.vars import days, todays_month, todays_day, currency
+
+if len(sys.argv) != 2:
+	print(colored("Usage: python3 forecast.py [asset]", 'red', attrs=['bold']))
+	exit()
+
+asset_name = sys.argv[1]
+
 # plt.style.use('dark_background')
-dash = pd.read_csv('datasets/df_binancecoin-6-8_400-days.csv')
-# dash_trends = pd.read_csv('dash_trends.csv')
+df = pd.read_csv('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day, todays_month, asset_name, days, currency))
 
-dash.head(5)
-dash['ds'] = dash['date']
-dash['y'] = dash['binancecoin']
+# df.head(5)
+df['ds'] = df['date']
+df['y'] = df['prices']
 
-dash = dash[['ds', 'y']]
+df = df[['ds', 'y']]
 
-dash_prophet = fbprophet.Prophet(changepoint_prior_scale=0.35)
-dash_prophet.fit(dash)
+df_prophet = fbprophet.Prophet(changepoint_prior_scale=0.35)
+df_prophet.fit(df)
 
-dash_forecast = dash_prophet.make_future_dataframe(periods=30)
-dash_forecast = dash_prophet.predict(dash_forecast)
+df_forecast = df_prophet.make_future_dataframe(periods=5)
+df_forecast = df_prophet.predict(df_forecast)
+df_forecast.to_csv('datasets/{}-{}_{}_forecast_d{}_{}.csv'.format(todays_day, todays_month, asset_name, days, currency))
 
-dash_prophet.plot(dash_forecast, xlabel='Date', ylabel='Price')
-dash_prophet.plot_components(dash_forecast)
-# plt.title('Dash')
+df_prophet.plot(df_forecast, xlabel='Date', ylabel='Price')
+# df_prophet.plot_components(df_forecast)
+plt.title('Dash')
 
 # plt.plot(dash.index, dash['y'])
 # plt.title('Dash Price')
-# plt.ylabel('Price (BTC)')
+plt.ylabel('Price (BTC)')
 
 # dash_trends['Semana'] = pd.to_datetime(dash_trends['Semana'])
 # dash_changepoints = [str(date) for date in dash_prophet.changepoints]
@@ -50,34 +57,3 @@ plt.show()
 # ax.plot(dash['dash'], label='True Data')
 # plt.show()
 # --------------
-# def plot_results_multiple(predicted_data, true_data, prediction_len):
-#     fig = plt.figure(facecolor='white')
-#     ax = fig.add_subplot(111)
-#     ax.plot(true_data, label='True Data')
-#     #Pad the list of predictions to shift it in the graph to it's correct start
-#     for i, data in enumerate(predicted_data):
-#         padding = [None for p in range(i * prediction_len)]
-#         plt.plot(padding + data, label='Prediction')
-#         plt.legend()
-#     plt.show()
-
-# data = go.Scatter(
-#     x=dash.date,
-#     y=dash['dash'],
-#     hoverinfo='y',
-#     name = 'Dash',
-# )
-# layout = go.Layout(
-#     plot_bgcolor='#010008',
-#     paper_bgcolor='#010008',
-#     title='Dash',
-#     font=dict(color='rgb(255, 255, 255)'),
-#     legend=dict(orientation="h"),
-#     xaxis=dict(type='date'),
-#     yaxis=dict(
-#         title='Price (BTC)',
-#         type='log'
-#     )
-# )
-# #------------------------------------------------------------->
-# offline.plot({'data': [data], 'layout': layout})
