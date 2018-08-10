@@ -8,8 +8,8 @@ Deep tecnical analysis with **ANY** cryptocurrency
 
 Go to `configs/vars` and edit these lines:
 ```python
-coins = ['giant','steem', 'nano', 'binancecoin', 'neo', 'bitshares',]
-days = 365
+coins = ['bitcoin','nano','binancecoin','steem']
+days = 90
 ```
 ---
 ## Run
@@ -25,8 +25,10 @@ python3 forecast.py [asset]
 # e.g.: python3 forecast bitcoin
 ```
 ![10-8-2018](imgs/bitcoin90days.png "10-8-2018")
+Forecast:
 ![10-8-2018](imgs/bitcoin_forecast.png "10-8-2018")
 ---
 ### Zoom
 ![10-8-2018](imgs/bitcoin_zoon.png "10-8-2018")
+Forecast:
 ![10-8-2018](imgs/bitcoin.png "10-8-2018")
