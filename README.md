@@ -15,8 +15,8 @@ days = 90
 ## Run
 
 ```sh
-git clone
-cd bot_advisor
+git clone https://github.com/Draichi/cryptocurrency_prediction.git
+cd cryptocurrency_prediction
 mkdir models
 mkdir datasets
 pip3 install -r requirements.txt
