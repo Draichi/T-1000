@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.offline as offline
 import plotly.graph_objs as go
-import fbprophet, sys
+import fbprophet, sys, get_datasets
 from configs.vars import days, todays_month, todays_day, currency
 
 if len(sys.argv) != 2:
