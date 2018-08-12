@@ -10,6 +10,7 @@ Go to `configs/vars` and edit these lines:
 ```python
 coins = ['bitcoin','nano','binancecoin','steem']
 days = 90
+currency = 'usd'
 ```
 ---
 ## Run

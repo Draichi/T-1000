@@ -23,17 +23,17 @@ batch_size = 32
 # prints formatted price
 def formatPrice(n):
 	if n < 0:
-		return colored('Total profit: -{} {0:.6f}'.format(currency.upper(), abs(n)), 'red', attrs=['bold'])
+		return colored('Total profit: -{} {:.6f}'.format(currency.upper(), abs(n)), 'red', attrs=['bold'])
 	else:
-		return colored('Total profit: {} {0:.7f}'.format(currency.upper(), abs(n)), 'green', attrs=['bold'])
+		return colored('Total profit: {} {:.7f}'.format(currency.upper(), abs(n)), 'green', attrs=['bold'])
 
 print(chr(27) + "[2J")
 print(colored('{}/{}'.format(asset_name.upper(), currency.upper()).center(width), 'blue',attrs=['bold']))
-print(colored('{} {:.7f} ~> {} {:.7f}\n\n'.format(currency.upper(),data[0], currency.upper(), data[-1]).center(width), 'blue'))
-print(colored('Trainning new model'.center(width), 'magenta',attrs=['bold']))
-print(colored('Episode count: {}'.format(episode_count).center(width), 'magenta'))
-print(colored('Window size: {}'.format(window_size).center(width), 'magenta'))
-print(colored('Sample size: {}\n\n'.format(l).center(width), 'magenta'))
+print(colored('{} {:.7f} ~> {} {:.7f}'.format(currency.upper(),data[0], currency.upper(), data[-1]).center(width), 'blue'))
+print(colored('{} days'.format(days).center(width), 'blue',attrs=['bold']))
+print(colored('Episode count: {}'.format(episode_count).center(width), 'blue'))
+print(colored('Window size: {}'.format(window_size).center(width), 'blue'))
+print(colored('Sample size: {}'.format(l).center(width), 'blue'))
 
 for e in range(episode_count+1):
     state = getState(data, 0, window_size + 1)
@@ -58,7 +58,7 @@ for e in range(episode_count+1):
         if done:
             print('\n\n')
             print(colored("---------------------------------------------".center(width), 'cyan'))
-            print(colored("Episode {}/{}".format(str(e), str(episode_count)).center(width), 'cyan',  attrs=['bold']))
+            print(colored("Episode {}/{} - Window size {}".format(str(e), str(episode_count), window_size).center(width), 'cyan',  attrs=['bold']))
             print(colored("---------------------------------------------".center(width), 'cyan'))
             print(formatPrice(total_profit).center(width))
             print(colored("---------------------------------------------".center(width), 'cyan'))
