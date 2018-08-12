@@ -1,6 +1,7 @@
 import plotly.offline as offline
 import plotly.graph_objs as go
 import get_datasets
+from functions import print_dollar
 import pandas as pd
 from configs.vars import coins, days, todays_month, todays_day, currency
 #------------------------------------------------------------->
@@ -27,4 +28,5 @@ layout = go.Layout(
     )
 )
 #------------------------------------------------------------->
+print_dollar()
 offline.plot({'data': data, 'layout': layout})
