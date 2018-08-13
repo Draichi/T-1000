@@ -37,5 +37,31 @@ Zoom:
 Forecast:
 ![10-8-2018](imgs/bitcoin.png "10-8-2018")
 
+## Genetic Algorithm
+
+Now you have the data you can use reinforcement learning to predict those market movements
+
+```sh
+python3 train.py [asset] [window_size] [how_many_episodes]
+# e.g.: python3 train.py bitcoin 10 1000
+```
+
+![trainning](imgs/trainning.gif)
+
+Use historical data to train a model and evaluate with fresh data
+
+```sh
+python3 evaluate.py [asset] [model]
+# e.g.: python3 evaluate.py bitcoin 10-8_bitcoin_d90_e20_w12_c50_usd
+```
+
+![evaluate](imgs/evaluating.gif)
+
 ## Credits
-- [Analyzing](https://blog.patricktriest.com/analyzing-cryptocurrencies-python/) cryptocurrency markets using python
+- Analyzing cryptocurrency markets using python: [article](https://blog.patricktriest.com/analyzing-cryptocurrencies-python/)
+- Q-trader: [repo](https://github.com/edwardhdlu/q-trader)
+
+## To-do
+- [x] grab data from coingekko
+- [x] use genetic algorithm
+- [ ] implement model with exchanges or gekko
