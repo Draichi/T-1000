@@ -2,7 +2,7 @@ import datetime
 #------------------------------------------------------------->
 # customize these: 
 coins = ['bitcoin', 'litecoin']
-days = 7
+days = 20
 currency = 'usd'
 changepoint_prior_scale = 0.15 # 0.10 ~ 0.50
 #------------------------------------------------------------->
