@@ -24,7 +24,11 @@ state = getState(data, 0, window_size + 1)
 total_profit = 0
 agent.inventory = []
 
-# print(chr(27) + "[2J")
+print(chr(27) + "[2J")
+print(colored('{}/{}'.format(asset_name.upper(), currency.upper()).center(width), 'cyan', attrs=['reverse','bold']))
+print(colored('{} {:.7f} ~> {} {:.7f}'.format(currency.upper(),data[0], currency.upper(), data[-1]).center(width), 'cyan', attrs=['bold']))
+print(colored('Model: {} - Window size: {}'.format(model_name, window_size).center(width), 'cyan', attrs=['bold']))
+print(colored('Sample size: {} - {} days'.format(l, days).center(width), 'cyan', attrs=['underline','bold']))
 
 for t in range(l):
 	action = agent.act(state)
@@ -43,11 +47,6 @@ for t in range(l):
 	agent.memory.append((state, action, reward, next_state, done))
 	state = next_state
 	if done:
-		print(colored('{}/{}'.format(asset_name.upper(), currency.upper()).center(width), 'blue', attrs=['bold']))
-		print(colored('{} {:.7f} ~> {} {:.7f}'.format(currency.upper(),data[0], currency.upper(), data[-1]).center(width), 'blue'))
-		print(colored('Model {}'.format(model_name).center(width), 'blue'))
-		print(colored('Window size: {}'.format(window_size).center(width), 'magenta'))
-		print(colored('Sample size: {}'.format(l).center(width), 'magenta'))
 		print(colored("-----------------------------".center(width), 'cyan'))
 		print(formatPrice(total_profit).center(width))
 		print(colored("-----------------------------".center(width),'cyan'))
