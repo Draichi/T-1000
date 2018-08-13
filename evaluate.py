@@ -28,7 +28,7 @@ print(chr(27) + "[2J")
 print(colored('{}/{}'.format(asset_name.upper(), currency.upper()).center(width), 'cyan', attrs=['reverse','bold']))
 print(colored('{} {:.7f} ~> {} {:.7f}'.format(currency.upper(),data[0], currency.upper(), data[-1]).center(width), 'cyan', attrs=['bold']))
 print(colored('Model: {} - Window size: {}'.format(model_name, window_size).center(width), 'cyan', attrs=['bold']))
-print(colored('Sample size: {} - {} days'.format(l, days).center(width), 'cyan', attrs=['underline','bold']))
+print(colored('Sample size: {} = {} days'.format(l, days).center(width), 'cyan', attrs=['underline','bold']))
 
 for t in range(l):
 	action = agent.act(state)
