@@ -13,7 +13,8 @@ asset_name = sys.argv[1]
 window_size, episode_count = int(sys.argv[2]), int(sys.argv[3])
 
 width = os.get_terminal_size().columns
-asset = '{}-{}_{}_d{}_{}'.format(todays_day, todays_month, asset_name, days, currency)	
+date_day, date_month, date_days = 10, 8, 90 # day and month of data, how many days
+asset = '{}-{}_{}_d{}_{}'.format(date_day, date_month, asset_name, date_days, currency)	
 
 agent = Agent(window_size)
 data = getStockDataVec(asset)
@@ -30,7 +31,7 @@ def formatPrice(n):
 print(chr(27) + "[2J")
 print(colored('{}/{}'.format(asset_name.upper(), currency.upper()).center(width), 'blue',attrs=['bold']))
 print(colored('{} {:.7f} ~> {} {:.7f}'.format(currency.upper(),data[0], currency.upper(), data[-1]).center(width), 'blue'))
-print(colored('{} days'.format(days).center(width), 'blue',attrs=['bold']))
+print(colored('{} days'.format(date_days).center(width), 'blue',attrs=['bold']))
 print(colored('Episode count: {}'.format(episode_count).center(width), 'blue'))
 print(colored('Window size: {}'.format(window_size).center(width), 'blue'))
 print(colored('Sample size: {}'.format(l).center(width), 'blue'))
@@ -66,5 +67,5 @@ for e in range(episode_count+1):
         if len(agent.memory) > batch_size:
             agent.expReplay(batch_size)
     if e % 10 == 0:
-        agent.model.save("models/{}-{}_{}_d{}_e{}_w{}_c{}_{}".format(todays_day, todays_month, asset_name,days, str(e), window_size, episode_count, currency))
+        agent.model.save("models/{}-{}_{}_d{}_e{}_w{}_c{}_{}".format(date_day, date_month, asset_name,date_days, str(e), window_size, episode_count, currency))
 print(colored('D O N E'.center(width),'white','on_green',attrs=['bold']),'\n\n')
