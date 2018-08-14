@@ -5,7 +5,7 @@ if len(sys.argv) != 2:
 	exit()
 import plotly.offline as offline
 import plotly.graph_objs as go
-import get_datasets
+import configs.get_datasets
 import pandas as pd
 from configs.vars import coins, days, todays_month, todays_day, currency
 #------------------------------------------------------------->
