@@ -28,8 +28,8 @@ python3 scatter.py log
 ![10-8-2018](imgs/log.png "10-8-2018")
 
 ```sh
-python3 forecast.py [asset]
-# e.g.: python3 forecast.py bitcoin
+python3 forecast.py [asset] [how_many_days]
+# e.g.: python3 forecast.py bitcoin 5
 ```
 
 ![10-8-2018](imgs/bitcoin_forecast.png "10-8-2018")
@@ -38,7 +38,7 @@ python3 forecast.py [asset]
 
 ## Genetic Algorithm
 
-Now you have the data you can use reinforcement learning to predict those market movements
+Now you have the data you can use reinforcement learning to make profit into those market movements
 
 ```sh
 python3 train.py [asset] [window_size] [how_many_episodes]
@@ -55,6 +55,7 @@ python3 evaluate.py [asset] [model]
 ```
 
 ![evaluate](imgs/evaluating.gif)
+Price in: blue = buy, yellow = sell, white = hold
 
 ## Credits
 - Analyzing cryptocurrency markets using python: [article](https://blog.patricktriest.com/analyzing-cryptocurrencies-python/)
