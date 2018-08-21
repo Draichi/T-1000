@@ -57,7 +57,8 @@ def operate(agent, asset_name, model_name=False, window_size=False):
 	#------------------------------------------------------------->
 	print(colored('{}/{}'.format(asset_name.upper(), currency.upper()).center(terminal_width), 'cyan', attrs=['reverse','bold']))
 	print(colored('{} {:.7f} ~> {} {:.7f}'.format(currency.upper(),data[0], currency.upper(), data[-1]).center(terminal_width), 'cyan', attrs=['bold']))
-	print(colored('Model: {} - Window size: {}'.format(model_name, window_size).center(terminal_width), 'cyan', attrs=['bold']))
+	if not model_name == False:
+		print(colored('Model: {} - Window size: {}'.format(model_name, window_size).center(terminal_width), 'cyan', attrs=['bold']))
 	print(colored('Sample size: {} = {} days'.format(l, days).center(terminal_width), 'cyan', attrs=['underline','bold']))
 	#------------------------------------------------------------->
 	for t in range(l):
@@ -67,19 +68,25 @@ def operate(agent, asset_name, model_name=False, window_size=False):
 		print("> {} {} {:.7f}".format(t, currency.upper(),data[t]), end='\r') #hold
 		if action == 1: # buy
 			agent.inventory.append(data[t])
-			print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'cyan'), format_price(total_profit), end='\r')
+			if not model_name == False:
+				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'cyan'), format_price(total_profit))
+			else:			
+				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'cyan'), format_price(total_profit), end='\r')
 		elif action == 2 and len(agent.inventory) > 0: # sell
 			bought_price = agent.inventory.pop(0)
 			reward = max(data[t] - bought_price, 0)
 			total_profit += data[t] - bought_price
-			print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'yellow'), format_price(total_profit), end='\r')
+			if not model_name == False:
+				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'yellow'), format_price(total_profit))
+			else:
+				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'yellow'), format_price(total_profit), end='\r')
 		done = True if t == l - 1 else False
 		agent.memory.append((state, action, reward, next_state, done))
 		state = next_state
 		if done:
-			print(colored("-----------------------------".center(terminal_width), 'cyan'))
+			print(colored("---------------------------------------".center(terminal_width), 'cyan'))
 			print(format_price(total_profit).center(terminal_width))
-			print(colored("-----------------------------".center(terminal_width),'cyan'))
+			print(colored("---------------------------------------".center(terminal_width),'cyan'))
 		if len(agent.memory) > batch_size:
 			agent.expReplay(batch_size)
 #------------------------------------------------------------->
