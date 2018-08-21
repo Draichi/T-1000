@@ -9,6 +9,23 @@ import fbprophet, sys, configs.get_datasets
 from configs.functions import print_dollar
 from configs.vars import days, todays_month, todays_day, currency, changepoint_prior_scale
 #------------------------------------------------------------->
+plt.rcParams.update({
+    "lines.color": "#2d2929",
+    "patch.edgecolor": "#2d2929",
+    "text.color": "#e5e5e5",
+    "axes.facecolor": "#2d2929",
+    "axes.titlepad": 1.0,
+    "axes.edgecolor": "#2d2929",
+    "axes.labelcolor": "#e5e5e5",
+    "xtick.color": "#e5e5e5",
+    "ytick.color": "#e5e5e5",
+    "grid.color": "#2d2929",
+    "figure.facecolor": "#2d2929",
+    "figure.edgecolor": "#2d2929",
+    "savefig.facecolor": "#2d2929",
+    "savefig.edgecolor": "#2d2929"}
+)
+#------------------------------------------------------------->
 asset_name, forecast_days = sys.argv[1], sys.argv[2]
 df = pd.read_csv('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day,todays_month,asset_name,days,currency))
 df['ds'] = df['date']
@@ -24,7 +41,7 @@ df_forecast.to_csv('datasets/{}-{}_{}_forecast_d{}_{}.csv'.format(todays_day,tod
 #------------------------------------------------------------->
 df_prophet.plot(df_forecast, xlabel='Date', ylabel='Price')
 # df_prophet.plot_components(df_forecast)
-plt.title(asset_name.upper())
+plt.title('Forecasting {} days, {}, {} days data, {} changepoint prior scale'.format(forecast_days,asset_name.upper(),days,changepoint_prior_scale))
 plt.ylabel('Price ({})'.format(currency.upper()))
 print_dollar()
 plt.show()
