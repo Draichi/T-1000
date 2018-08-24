@@ -1,10 +1,13 @@
 import datetime, os
 #------------------------------------------------------------->
 # customize these: 
-coins = ['nano', 'binancecoin', 'monero', 'zcash']
-days = 90
+coins = ['ethereum-classic', 'qtum']
+# coins= ['ethereum', 'giant']
+# coins = ['bitcoin']
+days = 6
 currency = 'btc'
-changepoint_prior_scale = 0.15 # 0.10 ~ 0.50
+changepoint_prior_scale = 0.09 # 0.01 ~ 0.9
+forecast_days = 2
 #------------------------------------------------------------->
 keys = ['prices', 'total_volumes', 'market_caps'] # if change that, will have to change the getDataVec in function.py
 todays_month = datetime.datetime.now().month

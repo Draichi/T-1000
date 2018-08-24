@@ -44,22 +44,13 @@ def get_state(data, t, n):
 		res.append(_sigmoid(block[i + 1] - block[i]))
 	return np.array([res])
 #------------------------------------------------------------->
-def operate(agent, asset_name, model_name=False, window_size=False):
-	if not model_name == False:
-		model = load_model("models/" + model_name)
-		window_size = model.layers[0].input.shape.as_list()[1]
+def operate(agent, asset_name, window_size, model_name=False):
 	asset = '{}-{}_{}_d{}_{}'.format(todays_day, todays_month, asset_name, days, currency)	
 	data = get_stock_data_vec(asset)
 	l = len(data) - 1
 	state = get_state(data, 0, window_size + 1)
 	total_profit = 0
 	agent.inventory = []
-	#------------------------------------------------------------->
-	print(colored('{}/{}'.format(asset_name.upper(), currency.upper()).center(terminal_width), 'cyan', attrs=['reverse','bold']))
-	print(colored('{} {:.7f} ~> {} {:.7f}'.format(currency.upper(),data[0], currency.upper(), data[-1]).center(terminal_width), 'cyan', attrs=['bold']))
-	if not model_name == False:
-		print(colored('Model: {} - Window size: {}'.format(model_name, window_size).center(terminal_width), 'cyan', attrs=['bold']))
-	print(colored('Sample size: {} = {} days'.format(l, days).center(terminal_width), 'cyan', attrs=['underline','bold']))
 	#------------------------------------------------------------->
 	for t in range(l):
 		action = agent.act(state)
@@ -84,11 +75,19 @@ def operate(agent, asset_name, model_name=False, window_size=False):
 		agent.memory.append((state, action, reward, next_state, done))
 		state = next_state
 		if done:
-			print(colored("---------------------------------------".center(terminal_width), 'cyan'))
+			print(colored("--------------------------------------------------------".center(terminal_width), 'cyan'))
 			print(format_price(total_profit).center(terminal_width))
-			print(colored("---------------------------------------".center(terminal_width),'cyan'))
+			print(colored("--------------------------------------------------------".center(terminal_width),'cyan'))
 		if len(agent.memory) > batch_size:
 			agent.expReplay(batch_size)
+	#------------------------------------------------------------->
+	print(colored('{}/{}'.format(asset_name.upper(), currency.upper()).center(terminal_width), 'cyan', attrs=['reverse','bold']))
+	if not model_name == False:
+		print(colored('MODEL: {}'.format(model_name).center(terminal_width), 'cyan', attrs=['bold','reverse']))
+	print(colored('PRICE: {} {:.7f} ~~~> {} {:.7f}'.format(currency.upper(),data[0], currency.upper(), data[-1]).center(terminal_width), 'cyan', attrs=['bold']))
+	print(colored('SAMPLE SIZE: {} = {} days'.format((l-1), days).center(terminal_width), 'cyan', attrs=['bold']))
+	print(colored('WINDOW SIZE: {}'.format(window_size).center(terminal_width), 'cyan', attrs=['underline','bold']))
+	
 #------------------------------------------------------------->
 def print_dollar():
 	print(chr(27) + "[2J")
