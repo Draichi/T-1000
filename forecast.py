@@ -1,13 +1,13 @@
 import sys
 from termcolor import colored
-if len(sys.argv) != 3:
-	print(colored("Usage: python3 forecast.py [asset] [days]", 'red', attrs=['bold']))
+if len(sys.argv) != 4:
+	print(colored("Usage: python3 forecast.py [asset] [days] [changepoint_prior_scale]", 'red', attrs=['bold']))
 	exit()
 import pandas as pd
 import matplotlib.pyplot as plt
 import fbprophet, sys, configs.get_datasets
 from configs.functions import print_dollar
-from configs.vars import days, todays_month, todays_day, currency, changepoint_prior_scale
+from configs.vars import days, todays_month, todays_day, currency
 #------------------------------------------------------------->
 plt.rcParams.update({
     "lines.color": "#2d2929",
@@ -26,7 +26,7 @@ plt.rcParams.update({
     "savefig.edgecolor": "#2d2929"}
 )
 #------------------------------------------------------------->
-asset_name, forecast_days = sys.argv[1], sys.argv[2]
+asset_name, forecast_days, changepoint_prior_scale = sys.argv[1], sys.argv[2], sys.argv[3]
 df = pd.read_csv('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day,todays_month,asset_name,days,currency))
 df['ds'] = df['date']
 df['y'] = df['prices']

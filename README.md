@@ -21,20 +21,22 @@ cd cryptocurrency_prediction
 mkdir models
 mkdir datasets
 pip3 install -r requirements.txt
-python3 scatter.py log
-# log/linear = layout type
 ```
-
-![10-8-2018](imgs/log.png "10-8-2018")
 
 ```sh
 python3 forecast.py [asset] [how_many_days]
 # e.g.: python3 forecast.py bitcoin 5
 ```
 
-![10-8-2018](imgs/bitcoin_forecast.png "10-8-2018")
+![10-8-2018](imgs/15-8_bitcoin_forecast120days_d500_cp001.png "10-8-2018")
+![10-8-2018](imgs/21-8_bitcoin_forecast5days_d45_cp002.png "10-8-2018")
 
-![10-8-2018](imgs/bitcoin.png "10-8-2018")
+```sh
+python3 scatter.py log
+# log/linear = layout type
+```
+
+![10-8-2018](imgs/log.png "10-8-2018")
 
 ## Genetic Algorithm
 

@@ -3,7 +3,7 @@ from termcolor import colored
 if len(sys.argv) != 4:
 	print(colored("Usage: python3 train.py [asset] [window] [episodes]", 'red', attrs=['bold']))
 	exit()
-import os
+import os, configs.get_datasets
 from configs.agent import Agent
 from configs.functions import *
 from configs.vars import days, currency, todays_day, todays_month, batch_size, terminal_width
@@ -22,6 +22,6 @@ for e in range(episode_count+1):
         model_name=False,
         window_size=window_size
     )
-    if e % 10 == 0:
+    if e % 50 == 0:
         agent.model.save("models/{}-{}_{}_d{}_e{}_w{}_c{}_{}".format(todays_day,todays_month,asset_name,days,str(e),window_size,episode_count,currency))
 print(colored('D O N E'.center(terminal_width),'white','on_green',attrs=['bold']),'\n\n')
