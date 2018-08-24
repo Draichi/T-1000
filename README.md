@@ -29,12 +29,10 @@ python3 forecast.py [asset] [how_many_days]
 ```
 <div>
     <a href="https://plot.ly/~randy_marsh/9/?share_key=s1LOA27GbNRR8n1TZmEWL9" target="_blank" title="bitcoin 120 days forecast" style="display: block; text-align: center;"><img src="https://plot.ly/~randy_marsh/9.png?share_key=s1LOA27GbNRR8n1TZmEWL9" alt="bitcoin 120 days forecast" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
-    <script data-plotly="randy_marsh:9" sharekey-plotly="s1LOA27GbNRR8n1TZmEWL9" src="https://plot.ly/embed.js" async></script>
 </div>
 
 <div>
     <a href="https://plot.ly/~randy_marsh/19/?share_key=TVMTXwPLQ051PC4h6Fp9CO" target="_blank" title="24-8 bitcoin 0.01" style="display: block; text-align: center;"><img src="https://plot.ly/~randy_marsh/19.png?share_key=TVMTXwPLQ051PC4h6Fp9CO" alt="24-8 bitcoin 0.01" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
-    <script data-plotly="randy_marsh:19" sharekey-plotly="TVMTXwPLQ051PC4h6Fp9CO" src="https://plot.ly/embed.js" async></script>
 </div>
 
 
