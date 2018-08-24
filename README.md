@@ -1,4 +1,5 @@
 ![reinforcement_learning](https://img.shields.io/badge/reinforcement_learning-cryptocurrencys-8440c4.svg?colorA=32073d&longCache=true&style=for-the-badge "reinforcement learning cryptocurrencys")
+
 ![lucasdraichi](https://img.shields.io/badge/made_by-lucas_draichi-32073d.svg?colorA=8440c4&longCache=true&style=for-the-badge "lucas draichi")
 
 # Cryptocurrency prediction
