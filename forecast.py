@@ -6,6 +6,8 @@ if len(sys.argv) != 4:
 import pandas as pd
 import matplotlib.pyplot as plt
 import fbprophet, sys, configs.get_datasets
+import plotly.offline as offline
+import plotly.graph_objs as go
 from configs.functions import print_dollar
 from configs.vars import days, todays_month, todays_day, currency
 #------------------------------------------------------------->
@@ -39,9 +41,25 @@ df_forecast = df_prophet.make_future_dataframe(periods=int(forecast_days))
 df_forecast = df_prophet.predict(df_forecast)
 df_forecast.to_csv('datasets/{}-{}_{}_forecast_d{}_{}.csv'.format(todays_day,todays_month,asset_name,days,currency))
 #------------------------------------------------------------->
-df_prophet.plot(df_forecast, xlabel='Date', ylabel='Price')
 # df_prophet.plot_components(df_forecast)
-plt.title('Forecasting {} days, {}, {} days data, {} changepoint prior scale'.format(forecast_days,asset_name.upper(),days,changepoint_prior_scale))
-plt.ylabel('Price ({})'.format(currency.upper()))
+layout = go.Layout(
+    plot_bgcolor='#2d2929',
+    paper_bgcolor='#2d2929',
+    title='{} price forecast, {} days data, changepoint prior scale: {}'.format(asset_name,days,changepoint_prior_scale).title(),
+    font=dict(color='rgb(255, 255, 255)'),
+    legend=dict(orientation="h"),
+    xaxis=dict(type='date'),
+    yaxis=dict(
+        title='Price ({})'.format(currency.upper())
+    )
+)
+data = [
+    go.Scatter(x=df['ds'], y=df['y'], name='PRICE', mode='markers',marker=dict(symbol='diamond-dot')),
+    go.Scatter(x=df_forecast['ds'], y=df_forecast['yhat'], name='PRICE HAT'),
+    go.Scatter(x=df_forecast['ds'], y=df_forecast['yhat_upper'], fill='tonexty', mode='none', name='UPPER HAT', fillcolor='rgba(204,231,230,.31)'),
+    go.Scatter(x=df_forecast['ds'], y=df_forecast['yhat_lower'], fill='tonexty', mode='none', name='LOWER HAT', fillcolor='rgba(193,175,230,.31)'),
+    go.Scatter(x=df_forecast['ds'], y=df_forecast['trend'], name='TREND')
+]
+
+offline.plot({'data': data, 'layout': layout})
 print_dollar()
-plt.show()
