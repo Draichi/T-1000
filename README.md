@@ -60,6 +60,7 @@ python3 evaluate.py [asset] [model]
 ```
 
 ![evaluate](imgs/evaluating.gif)
+
 Price in: blue = buy, yellow = sell, white = hold
 
 ## Credits
