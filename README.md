@@ -1,4 +1,5 @@
-![python](https://forthebadge.com/images/badges/made-with-python.svg "python")
+![reinforcement_learning](https://img.shields.io/badge/reinforcement_learning-cryptocurrencys-8440c4.svg?colorA=32073d&longCache=true&style=for-the-badge "reinforcement learning cryptocurrencys")
+![lucasdraichi](https://img.shields.io/badge/made_by-lucas_draichi-32073d.svg?colorA=8440c4&longCache=true&style=for-the-badge "lucas draichi")
 
 # Cryptocurrency prediction
 
@@ -18,8 +19,6 @@ currency = 'usd'
 ```sh
 git clone https://github.com/Draichi/cryptocurrency_prediction.git
 cd cryptocurrency_prediction
-mkdir models
-mkdir datasets
 pip3 install -r requirements.txt
 ```
 
@@ -27,9 +26,16 @@ pip3 install -r requirements.txt
 python3 forecast.py [asset] [how_many_days]
 # e.g.: python3 forecast.py bitcoin 5
 ```
+<div>
+    <a href="https://plot.ly/~randy_marsh/9/?share_key=s1LOA27GbNRR8n1TZmEWL9" target="_blank" title="bitcoin 120 days forecast" style="display: block; text-align: center;"><img src="https://plot.ly/~randy_marsh/9.png?share_key=s1LOA27GbNRR8n1TZmEWL9" alt="bitcoin 120 days forecast" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
+    <script data-plotly="randy_marsh:9" sharekey-plotly="s1LOA27GbNRR8n1TZmEWL9" src="https://plot.ly/embed.js" async></script>
+</div>
 
-![10-8-2018](imgs/15-8_bitcoin_forecast120days_d500_cp001.png "10-8-2018")
-![10-8-2018](imgs/21-8_bitcoin_forecast5days_d45_cp002.png "10-8-2018")
+<div>
+    <a href="https://plot.ly/~randy_marsh/19/?share_key=TVMTXwPLQ051PC4h6Fp9CO" target="_blank" title="24-8 bitcoin 0.01" style="display: block; text-align: center;"><img src="https://plot.ly/~randy_marsh/19.png?share_key=TVMTXwPLQ051PC4h6Fp9CO" alt="24-8 bitcoin 0.01" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
+    <script data-plotly="randy_marsh:19" sharekey-plotly="TVMTXwPLQ051PC4h6Fp9CO" src="https://plot.ly/embed.js" async></script>
+</div>
+
 
 ```sh
 python3 scatter.py log
@@ -39,8 +45,6 @@ python3 scatter.py log
 ![10-8-2018](imgs/log.png "10-8-2018")
 
 ## Genetic Algorithm
-
-Now you have the data you can use reinforcement learning to make profit into those market movements
 
 ```sh
 python3 train.py [asset] [window_size] [how_many_episodes]
@@ -67,3 +71,5 @@ Price in: blue = buy, yellow = sell, white = hold
 - [x] grab data from coingekko
 - [x] use genetic algorithm
 - [ ] implement model with exchanges or gekko
+
+![python](https://img.shields.io/badge/i_accept-pull_requests-2d72e2.svg?colorA=ae2ce2&longCache=true&style=for-the-badge "python")
