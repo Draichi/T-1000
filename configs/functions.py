@@ -7,12 +7,15 @@ from configs.vars import days, currency, todays_day, todays_month, terminal_widt
 #------------------------------------------------------------->
 width = os.get_terminal_size().columns
 #------------------------------------------------------------->
+def _div():
+	print(colored("-"*terminal_width,'white'))
+
 # prints formatted price
 def format_price(n):
 	if n < 0:
-		return colored('Total profit: -{} {:.6f}'.format(currency.upper(), abs(n)), 'red', attrs=['bold'])
+		return colored('Total profit: -{:3} {:.7f}'.format(currency.upper(), abs(n)), 'yellow', attrs=['bold'])
 	else:
-		return colored('Total profit: {} {:.7f}'.format(currency.upper(), abs(n)), 'green', attrs=['bold'])
+		return colored('Total profit: {:4} {:.7f}'.format(currency.upper(), abs(n)), 'cyan', attrs=['bold'])
 #------------------------------------------------------------->
 # returns the vector containing stock data from a fixed file
 def get_stock_data_vec(key):
@@ -52,6 +55,7 @@ def operate(agent, asset_name, window_size, model_name=False):
 	total_profit = 0
 	agent.inventory = []
 	#------------------------------------------------------------->
+	
 	for t in range(l):
 		action = agent.act(state)
 		next_state = get_state(data, t + 1, window_size + 1)
@@ -60,34 +64,37 @@ def operate(agent, asset_name, window_size, model_name=False):
 		if action == 1: # buy
 			agent.inventory.append(data[t])
 			if not model_name == False:
-				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'cyan'), format_price(total_profit))
+				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'green'), format_price(total_profit))
 			else:			
-				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'cyan'), format_price(total_profit), end='\r')
+				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'green'), format_price(total_profit), end='\r')
 		elif action == 2 and len(agent.inventory) > 0: # sell
 			bought_price = agent.inventory.pop(0)
 			reward = max(data[t] - bought_price, 0)
 			total_profit += data[t] - bought_price
 			if not model_name == False:
-				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'yellow'), format_price(total_profit))
+				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'red'), format_price(total_profit))
 			else:
-				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'yellow'), format_price(total_profit), end='\r')
+				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'red'), format_price(total_profit), end='\r')
 		done = True if t == l - 1 else False
 		agent.memory.append((state, action, reward, next_state, done))
 		state = next_state
 		if done:
-			print(colored("--------------------------------------------------------".center(terminal_width), 'cyan'))
-			print(format_price(total_profit).center(terminal_width))
-			print(colored("--------------------------------------------------------".center(terminal_width),'cyan'))
+			_div()
+			print('        {}'.format(format_price(total_profit).center(terminal_width)))
+			_div()
 		if len(agent.memory) > batch_size:
 			agent.expReplay(batch_size)
 	#------------------------------------------------------------->
-	print(colored('{}/{}'.format(asset_name.upper(), currency.upper()).center(terminal_width), 'cyan', attrs=['reverse','bold']))
+	print(colored('{}/{}'.format(asset_name.upper(), currency.upper()).center(terminal_width), 'white', attrs=['bold']))
 	if not model_name == False:
-		print(colored('MODEL: {}'.format(model_name).center(terminal_width), 'cyan', attrs=['bold','reverse']))
-	print(colored('PRICE: {} {:.7f} ~~~> {} {:.7f}'.format(currency.upper(),data[0], currency.upper(), data[-1]).center(terminal_width), 'cyan', attrs=['bold']))
-	print(colored('SAMPLE SIZE: {} = {} days'.format((l-1), days).center(terminal_width), 'cyan', attrs=['bold']))
-	print(colored('WINDOW SIZE: {}'.format(window_size).center(terminal_width), 'cyan', attrs=['underline','bold']))
-	
+		print(colored('MODEL: {}'.format(model_name).center(terminal_width), 'white', attrs=['bold']))
+	_div()
+	print(colored('PRICE  {} {:.7f}  ==>  {} {:.7f}'.format(currency.upper(),data[0], currency.upper(), data[-1]).center(terminal_width), 'magenta', attrs=['bold']))
+	print(colored('SAMPLE  {:12}  ==> {:9} days'.format((l-1), days).center(terminal_width), 'magenta', attrs=['bold']))
+	print(colored('WINDOW                ==> {:14}'.format(window_size).center(terminal_width), 'magenta', attrs=['bold']))
+	_div()
+	#------------------------------------------------------------->
+
 #------------------------------------------------------------->
 def print_dollar():
 	print(chr(27) + "[2J")
@@ -115,4 +122,4 @@ def print_dollar():
 ||(100)===================  ONE HUNDRED DOLLARS =================(100)||
 ||\\\$//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\$//||
 ||====================================================================||           
-	""", 'green'))
+	""", 'green', attrs=['bold']))
