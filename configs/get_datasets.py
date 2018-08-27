@@ -5,7 +5,7 @@ from termcolor import cprint
 #------------------------------------------------------------->
 def fetch_url(coin):
     if not (os.path.exists('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day, todays_month, coin, days, currency))):
-        cprint('> downloading {}/{}, {} days dataset, this will take a while'.format(coin, currency,days), 'yellow')
+        cprint('> downloading {}/{}, {} days dataset, this will take a while'.format(coin, currency,days), 'yellow', attrs=['bold'])
         url = "https://api.coingecko.com/api/v3/coins/{}/market_chart?vs_currency={}&days={}".format(coin, currency, days)
         headers = {'User-Agent': 'Mozilla/5.0'}
         response = requests.get(url, headers=headers)
@@ -22,9 +22,9 @@ def fetch_url(coin):
         df.set_index('date', inplace=True)
         df.to_csv('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day, todays_month, coin, days, currency))
         #------------------------------------------------------------->        
-        cprint("> {} fetched and cached".format(coin), 'green')
+        cprint("> {} fetched and cached".format(coin), 'green', attrs=['bold'])
     else:
-        cprint('> loading {} from cache'.format(coin), 'green')
+        cprint('> loading {} from cache'.format(coin), 'blue', attrs=['bold'])
 #------------------------------------------------------------->
 print(chr(27) + "[2J")
 threads = [threading.Thread(target=fetch_url, args=(coin,)) for coin in coins]
