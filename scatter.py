@@ -21,9 +21,9 @@ for coin in coins:
     data.append(trace)
 #------------------------------------------------------------->
 layout = go.Layout(
-    plot_bgcolor='#010008',
-    paper_bgcolor='#010008',
-    title='Prices in {} Days ({})'.format(days, currency.upper()),
+    plot_bgcolor='#2d2929',
+    paper_bgcolor='#2d2929',
+    title='{} Prices in {} Days'.format(layout_type,days).title(),
     font=dict(color='rgb(255, 255, 255)'),
     legend=dict(orientation="h"),
     xaxis=dict(type='date'),
