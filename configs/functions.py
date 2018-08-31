@@ -55,7 +55,6 @@ def operate(agent, asset_name, window_size, model_name=False):
 	total_profit = 0
 	agent.inventory = []
 	#------------------------------------------------------------->
-	
 	for t in range(l):
 		action = agent.act(state)
 		next_state = get_state(data, t + 1, window_size + 1)
