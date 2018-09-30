@@ -1,9 +1,9 @@
 import datetime, os
 #------------------------------------------------------------->
-# coins = ['bitcoin']
-coins= ['giant','ethereum-classic', 'binancecoin']
-days = 12
-currency = 'btc'
+coins = ['bitcoin']
+# coins= ['bitcoin','ethereum-classic', 'binancecoin', 'litecoin', 'ethereum', 'bitshares', 'steem','dash','nano','zcash','eos','neo','blocknet']
+days = '400'
+currency = 'usd'
 batch_size = 32
 #------------------------------------------------------------->
 keys = ['prices', 'total_volumes', 'market_caps'] # if change this, change configs/function.py:22
