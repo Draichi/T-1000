@@ -27,8 +27,8 @@ heatmap = go.Heatmap(
 )
 layout = go.Layout(
     title='Correlation heatmap - {} days'.format(days),
-    plot_bgcolor='#010008',
-    paper_bgcolor='#010008',
+    plot_bgcolor='#2d2929',
+    paper_bgcolor='#2d2929',
     font=dict(color='rgb(255, 255, 255)')
 )
 heatmap['zmax'] = 1.0
