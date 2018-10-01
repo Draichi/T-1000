@@ -29,12 +29,10 @@ python3 forecast.py [asset] [how_many_days]
 ```
 <div>
     <a href="https://plot.ly/~randy_marsh/43/?share_key=CXbolfQrLgKWSBiPSM3CU0" target="_blank" title="Bitcoin all time forecasting 120 days" style="display: block; text-align: center;"><img src="https://plot.ly/~randy_marsh/43.png?share_key=CXbolfQrLgKWSBiPSM3CU0" alt="Bitcoin all time forecasting 120 days" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
-    <script data-plotly="randy_marsh:43" sharekey-plotly="CXbolfQrLgKWSBiPSM3CU0" src="https://plot.ly/embed.js" async></script>
 </div>
 
 <div>
     <a href="https://plot.ly/~randy_marsh/45/?share_key=12TLlplPG26co8BzHCFSPn" target="_blank" title="bitcoinall time zoom" style="display: block; text-align: center;"><img src="https://plot.ly/~randy_marsh/45.png?share_key=12TLlplPG26co8BzHCFSPn" alt="bitcoinall time zoom" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
-    <script data-plotly="randy_marsh:45" sharekey-plotly="12TLlplPG26co8BzHCFSPn" src="https://plot.ly/embed.js" async></script>
 </div>
 
 
@@ -50,7 +48,6 @@ python3 correlation_heatmap.py
 ```
 <div>
     <a href="https://plot.ly/~randy_marsh/47/?share_key=KiwLmIfF01AgF7CqocfQbR" target="_blank" title="correlation heatmap" style="display: block; text-align: center;"><img src="https://plot.ly/~randy_marsh/47.png?share_key=KiwLmIfF01AgF7CqocfQbR" alt="correlation heatmap" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
-    <script data-plotly="randy_marsh:47" sharekey-plotly="KiwLmIfF01AgF7CqocfQbR" src="https://plot.ly/embed.js" async></script>
 </div>
 
 
