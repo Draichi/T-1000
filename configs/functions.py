@@ -46,7 +46,7 @@ def get_state(data, t, n):
 	res = []
 	for i in range(n - 1):
 		res.append([ _sigmoid(block[i+1][0] - block[i][0]) , _sigmoid(block[i+1][1] - block[i][1]) ])
-	print('======= debug:',np.array([res]))
+	# print('======= debug:',np.array([res]))
 	return np.array([res])
 #------------------------------------------------------------->
 def operate(agent, asset_name, window_size, model_name=False):
