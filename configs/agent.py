@@ -1,6 +1,6 @@
 import keras, random
 from keras.models import Sequential, load_model
-from keras.layers import Dense
+from keras.layers import Dense, LSTM
 from keras.optimizers import Adam
 import numpy as np
 from collections import deque
@@ -22,8 +22,14 @@ class Agent:
 		self.model = load_model("models/" + model_name) if is_eval else self._model()
 
 	def _model(self):
+		# print(type(self.state_size))
+		# print(self.state_size)
+		# quit()
 		model = Sequential()
-		model.add(Dense(units=64, input_dim=self.state_size, activation="relu"))
+		model.add(LSTM(128, input_shape=(10,2), activation='relu', return_sequences=True))
+
+		# model.add(Dense(units=128, input_dim=(10,), activation="relu"))
+		model.add(Dense(units=64, activation="relu"))
 		model.add(Dense(units=32, activation="relu"))
 		model.add(Dense(units=8, activation="relu"))
 		model.add(Dense(self.action_size, activation="linear"))

@@ -22,7 +22,8 @@ def get_stock_data_vec(key):
 	vec = []
 	lines = open("datasets/" + key + ".csv", "r").read().splitlines()
 	for line in lines[1:]:
-		vec.append(float(line.split(",")[2]))# 1=marketcap, 2=prices, 3=vol
+		vec.append([float(line.split(",")[2]), float(line.split(",")[3])])# 1=marketcap, 2=prices, 3=vol
+	# print('-- debug:',vec)
 	return vec
 #------------------------------------------------------------->
 # returns the sigmoid
@@ -44,7 +45,8 @@ def get_state(data, t, n):
 	block = data[d:t + 1] if d >= 0 else -d * [data[0]] + data[0:t + 1] # pad with t0
 	res = []
 	for i in range(n - 1):
-		res.append(_sigmoid(block[i + 1] - block[i]))
+		res.append([ _sigmoid(block[i+1][0] - block[i][0]) , _sigmoid(block[i+1][1] - block[i][1]) ])
+	print('======= debug:',np.array([res]))
 	return np.array([res])
 #------------------------------------------------------------->
 def operate(agent, asset_name, window_size, model_name=False):
@@ -59,21 +61,21 @@ def operate(agent, asset_name, window_size, model_name=False):
 		action = agent.act(state)
 		next_state = get_state(data, t + 1, window_size + 1)
 		reward = 0
-		print("> {} {} {:.7f}".format(t, currency.upper(),data[t]), end='\r') #hold
+		print("> {} {} {:.7f}".format(t, currency.upper(),data[t][0]), end='\r') #hold
 		if action == 1: # buy
-			agent.inventory.append(data[t])
+			agent.inventory.append(data[t][0]) # append just the price
 			if not model_name == False:
-				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'green'), format_price(total_profit))
+				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t][0]), 'green'), format_price(total_profit))
 			else:			
-				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'green'), format_price(total_profit), end='\r')
+				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t][0]), 'green'), format_price(total_profit), end='\r')
 		elif action == 2 and len(agent.inventory) > 0: # sell
 			bought_price = agent.inventory.pop(0)
-			reward = max(data[t] - bought_price, 0)
-			total_profit += data[t] - bought_price
+			reward = max(data[t][0] - bought_price, 0)
+			total_profit += data[t][0] - bought_price
 			if not model_name == False:
-				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'red'), format_price(total_profit))
+				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t][0]), 'red'), format_price(total_profit))
 			else:
-				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t]), 'red'), format_price(total_profit), end='\r')
+				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t][0]), 'red'), format_price(total_profit), end='\r')
 		done = True if t == l - 1 else False
 		agent.memory.append((state, action, reward, next_state, done))
 		state = next_state
