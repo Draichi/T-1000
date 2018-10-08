@@ -81,3 +81,4 @@ Price in: blue = buy, yellow = sell, white = hold
 - [ ] implement model with exchanges or gekko
 
 ![python](https://img.shields.io/badge/i_accept-pull_requests-2d72e2.svg?colorA=ae2ce2&longCache=true&style=for-the-badge "python")
+
