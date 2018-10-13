@@ -1,8 +1,8 @@
 import datetime, os
 #------------------------------------------------------------->
-coins = ['bitcoin']
-# coins= ['bitcoin','ethereum-classic', 'binancecoin', 'litecoin', 'ethereum', 'bitshares', 'steem','dash','nano','zcash','eos','neo','blocknet']
-days = '30'
+# coins = ['bitcoin']
+coins= ['bitcoin','giant','ethereum-classic', 'binancecoin', 'litecoin', 'ethereum', 'bitshares', 'steem','dash','nano','zcash','eos','neo','blocknet']
+days = '90'
 currency = 'usd'
 batch_size = 32
 #------------------------------------------------------------->
