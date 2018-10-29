@@ -22,7 +22,7 @@ def get_stock_data_vec(key):
 	vec = []
 	lines = open("datasets/" + key + ".csv", "r").read().splitlines()
 	for line in lines[1:]:
-		vec.append(float(line.split(",")[2]))# 1=marketcap, 2=prices, 3=vol
+		vec.append(float(line.split(",")[1]))# 1=prices, 2=market_caps, 3=vol
 	return vec
 #------------------------------------------------------------->
 # returns the sigmoid
