@@ -54,8 +54,8 @@ class Agent:
 		
 		for i in range(l - batch_size + 1, l):
 			mini_batch.append(self.memory.popleft())
-		print(mini_batch)
-		quit()
+		# print(mini_batch)
+		# quit()
 		for state, action, reward, next_state, done in mini_batch:
 			target = reward
 			if not done:

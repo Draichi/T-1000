@@ -22,7 +22,7 @@ def get_stock_data_vec(key):
 	vec = []
 	lines = open("datasets/" + key + ".csv", "r").read().splitlines()
 	for line in lines[1:]:
-		vec.append([float(line.split(",")[2]), float(line.split(",")[3])])# 1=marketcap, 2=prices, 3=vol
+		vec.append([float(line.split(",")[1]), float(line.split(",")[3])])# 1=price, 2=market_cap, 3=vol
 	# print('-- debug:',vec)
 	return vec
 #------------------------------------------------------------->
@@ -41,12 +41,18 @@ def _sigmoid(x):
 #------------------------------------------------------------->
 # returns an an n-day state representation ending at time t
 def get_state(data, t, n):
+	# mudar aqui
 	d = t - n + 1
 	block = data[d:t + 1] if d >= 0 else -d * [data[0]] + data[0:t + 1] # pad with t0
+	
+	# entender e adaptar o block
 	res = []
 	for i in range(n - 1):
+		# dar o append de um sigmoid ou 2?
 		res.append([ _sigmoid(block[i+1][0] - block[i][0]) , _sigmoid(block[i+1][1] - block[i][1]) ])
 	# print('======= debug:',np.array([res]))
+	print(res)
+	quit()
 	return np.array([res])
 #------------------------------------------------------------->
 def operate(agent, asset_name, window_size, model_name=False):
