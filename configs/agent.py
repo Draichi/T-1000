@@ -43,14 +43,14 @@ class Agent:
 
 		options = self.model.predict(state)
 		# print('==options==',options)
-		print('==options[0]==')
-		print('==options[0]==',state)
-		print('==options[0]==',options)
-		print('==options[0]==',options[0])
-		print('==options[0]==',np.argmax(options[0]))
-		quit()
+		# print('==options[0]==')
+		# print('==options[0]==',state)
+		# print('==options[0]==',options)
+		# print('==options[0]==',options[0][0])
+		# print('==options[0]==',np.argmax(options[0][0]))
+		# quit()
 
-		return np.argmax(options[0])
+		return np.argmax(options[0][0])
 
 	def expReplay(self, batch_size):
 		mini_batch = []
@@ -69,13 +69,15 @@ class Agent:
 
 			target_f = self.model.predict(state)
 
-			# print('==target_f==',target_f)
+			print('--------')
+			print('==target_f==',target_f)
 			# print('==action==',action)
-			# print('==target==',target)
-			# print('==target_f[0][0]==',target_f[0][0])
+			print('==target==',target)
+			print('==target_f[0][0]==',target_f[0][0])
 			# print('==target=',target)
-			# print('==action=',action)
+			print('==action=',action)
 			# print('==state=',state)
+			quit()
 			target_f[0][action] = target
 			self.model.fit(state, target_f, epochs=1, verbose=0)
 
