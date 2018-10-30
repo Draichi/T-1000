@@ -51,8 +51,8 @@ def get_state(data, t, n):
 		# dar o append de um sigmoid ou 2?
 		res.append([ _sigmoid(block[i+1][0] - block[i][0]) , _sigmoid(block[i+1][1] - block[i][1]) ])
 	# print('======= debug:',np.array([res]))
-	print(res)
-	quit()
+	# print(res)
+	# quit()
 	return np.array([res])
 #------------------------------------------------------------->
 def operate(agent, asset_name, window_size, model_name=False):
@@ -65,6 +65,7 @@ def operate(agent, asset_name, window_size, model_name=False):
 	#------------------------------------------------------------->
 	for t in range(l):
 		action = agent.act(state)
+		# print('action ->',action)
 		next_state = get_state(data, t + 1, window_size + 1)
 		reward = 0
 		print("> {} {} {:.7f}".format(t, currency.upper(),data[t][0]), end='\r') #hold
