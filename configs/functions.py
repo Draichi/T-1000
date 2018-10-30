@@ -97,7 +97,7 @@ def operate(agent, asset_name, window_size, model_name=False):
 	if not model_name == False:
 		print(colored('MODEL: {}'.format(model_name).center(terminal_width), 'white', attrs=['bold']))
 	_div()
-	print(colored('PRICE  {} {:.7f}  ==>  {} {:.7f}'.format(currency.upper(),data[0], currency.upper(), data[-1]).center(terminal_width), 'magenta', attrs=['bold']))
+	print(colored('PRICE  {} {:.7f}  ==>  {} {:.7f}'.format(currency.upper(),data[0][0], currency.upper(), data[-1][0]).center(terminal_width), 'magenta', attrs=['bold']))
 	print(colored('SAMPLE  {:12}  ==> {:9} days'.format((l-1), days).center(terminal_width), 'magenta', attrs=['bold']))
 	print(colored('WINDOW                ==> {:14}'.format(window_size).center(terminal_width), 'magenta', attrs=['bold']))
 	_div()

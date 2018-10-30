@@ -1,6 +1,6 @@
 import keras, random
 from keras.models import Sequential, load_model
-from keras.layers import Dense, LSTM
+from keras.layers import Dense, LSTM, Flatten
 from keras.optimizers import Adam
 import numpy as np
 from collections import deque
@@ -32,6 +32,7 @@ class Agent:
 		model.add(Dense(units=64, activation="relu"))
 		model.add(Dense(units=32, activation="relu"))
 		model.add(Dense(units=8, activation="relu"))
+		model.add(Flatten())
 		model.add(Dense(self.action_size, activation="linear"))
 		model.compile(loss="mse", optimizer=Adam(lr=0.001))
 
@@ -69,15 +70,6 @@ class Agent:
 
 			target_f = self.model.predict(state)
 
-			print('--------')
-			print('==target_f==',target_f)
-			# print('==action==',action)
-			print('==target==',target)
-			print('==target_f[0][0]==',target_f[0][0])
-			# print('==target=',target)
-			print('==action=',action)
-			# print('==state=',state)
-			quit()
 			target_f[0][action] = target
 			self.model.fit(state, target_f, epochs=1, verbose=0)
 
