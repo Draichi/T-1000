@@ -3,7 +3,7 @@ import math, os, keras
 from termcolor import colored
 from keras.models import load_model
 from configs.agent import Agent
-from configs.vars import days, currency, todays_day, todays_month, terminal_width, batch_size
+from configs.vars import days, currency, todays_day, todays_month, terminal_width, batch_size, wallet, fees
 #------------------------------------------------------------->
 width = os.get_terminal_size().columns
 #------------------------------------------------------------->
@@ -12,10 +12,10 @@ def _div():
 
 # prints formatted price
 def format_price(n):
-	if n < 0:
-		return colored('Total profit: -{:3} {:.7f}'.format(currency.upper(), abs(n)), 'yellow', attrs=['bold'])
+	if n <= wallet:
+		return colored('Wallet: {:3} {:.7f}'.format(currency.upper(), abs(n)), 'yellow', attrs=['bold'])
 	else:
-		return colored('Total profit: {:4} {:.7f}'.format(currency.upper(), abs(n)), 'cyan', attrs=['bold'])
+		return colored('Wallet: {:4} {:.7f}'.format(currency.upper(), abs(n)), 'cyan', attrs=['bold'])
 #------------------------------------------------------------->
 # returns the vector containing stock data from a fixed file
 def get_stock_data_vec(key):
@@ -60,7 +60,8 @@ def operate(agent, asset_name, window_size, model_name=False):
 	data = get_stock_data_vec(asset)
 	l = len(data) - 1
 	state = get_state(data, 0, window_size + 1)
-	total_profit = 0
+	# total_profit = 0
+	w = wallet
 	agent.inventory = []
 	#------------------------------------------------------------->
 	for t in range(l):
@@ -70,25 +71,33 @@ def operate(agent, asset_name, window_size, model_name=False):
 		reward = 0
 		print("> {} {} {:.7f}".format(t, currency.upper(),data[t][0]), end='\r') #hold
 		if action == 1: # buy
-			agent.inventory.append(data[t][0]) # append just the price
-			if not model_name == False:
-				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t][0]), 'green'), format_price(total_profit))
-			else:			
-				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t][0]), 'green'), format_price(total_profit), end='\r')
+			# print('data ---- ',data[t][0])
+			# print('wallet ---- ',w)
+			if w >= (data[t][0] + fees):
+				w -= (data[t][0] + fees) # implemetn fees
+				agent.inventory.append(data[t][0]) # append just the price
+				if not model_name == False:
+					print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t][0]), 'green'), format_price(w))
+				else:			
+					print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t][0]), 'green'), format_price(w), end='\r')
 		elif action == 2 and len(agent.inventory) > 0: # sell
 			bought_price = agent.inventory.pop(0)
-			reward = max(data[t][0] - bought_price, 0)
-			total_profit += data[t][0] - bought_price
+			profit = data[t][0] - fees - bought_price
+			# reward = max(data[t][0] - bought_price, 0)
+			# total_profit += profit
+			w += profit # implement fees
+			# wallet_diff = w - wallet
+			reward = max(profit, 0)
 			if not model_name == False:
-				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t][0]), 'red'), format_price(total_profit))
+				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t][0]), 'red'), format_price(w))
 			else:
-				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t][0]), 'red'), format_price(total_profit), end='\r')
+				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t][0]), 'red'), format_price(w), end='\r')
 		done = True if t == l - 1 else False
 		agent.memory.append((state, action, reward, next_state, done))
 		state = next_state
 		if done:
 			_div()
-			print('        {}'.format(format_price(total_profit).center(terminal_width)))
+			print('        {}'.format(format_price(w).center(terminal_width)))
 			_div()
 		if len(agent.memory) > batch_size:
 			agent.expReplay(batch_size)

@@ -4,6 +4,7 @@ from keras.layers import Dense, LSTM, Flatten
 from keras.optimizers import Adam
 import numpy as np
 from collections import deque
+from configs.vars import gamma, epsilon, epsilon_min, epsilon_decay
 
 class Agent:
 	def __init__(self, state_size, is_eval=False, model_name=""):
@@ -13,11 +14,10 @@ class Agent:
 		self.inventory = []
 		self.model_name = model_name
 		self.is_eval = is_eval
-
-		self.gamma = 0.95
-		self.epsilon = 1.0
-		self.epsilon_min = 0.01
-		self.epsilon_decay = 0.995
+		self.gamma = gamma
+		self.epsilon = epsilon
+		self.epsilon_min = epsilon_min
+		self.epsilon_decay = epsilon_decay
 
 		self.model = load_model("models/" + model_name) if is_eval else self._model()
 
@@ -26,7 +26,7 @@ class Agent:
 		# print(self.state_size)
 		# quit()
 		model = Sequential()
-		model.add(LSTM(128, input_shape=(10,2), activation='relu', return_sequences=True))
+		model.add(LSTM(128, input_shape=(self.state_size,2), activation='relu', return_sequences=True))
 
 		# model.add(Dense(units=128, input_dim=(10,), activation="relu"))
 		model.add(Dense(units=64, activation="relu"))
