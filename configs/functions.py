@@ -105,7 +105,7 @@ def operate(agent, asset_name, window_size, model_name=False):
 				bought_price = agent.inventory.pop(0)
 				profit = data[t][0] - fees - bought_price
 				w += profit
-				reward = max(profit*50, 0)
+				reward = max(profit*30, 0)
 		done = True if t == l - 1 else False
 		agent.memory.append((state, action, reward, next_state, done))
 		state = next_state
