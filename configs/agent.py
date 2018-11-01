@@ -26,7 +26,8 @@ class Agent:
 		# print(self.state_size)
 		# quit()
 		model = Sequential()
-		model.add(LSTM(128, input_shape=(self.state_size,2), activation='relu', return_sequences=True))
+		#  3 = prices, market caps, vol
+		model.add(LSTM(128, input_shape=(self.state_size,3), activation='relu', return_sequences=True))
 
 		# model.add(Dense(units=128, input_dim=(10,), activation="relu"))
 		model.add(Dense(units=64, activation="relu"))

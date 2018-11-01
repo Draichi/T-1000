@@ -22,7 +22,7 @@ def get_stock_data_vec(key):
 	vec = []
 	lines = open("datasets/" + key + ".csv", "r").read().splitlines()
 	for line in lines[1:]:
-		vec.append([float(line.split(",")[1]), float(line.split(",")[3])])# 1=price, 2=market_cap, 3=vol
+		vec.append([float(line.split(",")[1]), float(line.split(",")[2]), float(line.split(",")[3])])# 1=price, 2=market_cap, 3=vol
 	# print('-- debug:',vec)
 	return vec
 #------------------------------------------------------------->
@@ -49,7 +49,7 @@ def get_state(data, t, n):
 	res = []
 	for i in range(n - 1):
 		# dar o append de um sigmoid ou 2?
-		res.append([ _sigmoid(block[i+1][0] - block[i][0]) , _sigmoid(block[i+1][1] - block[i][1]) ])
+		res.append([ _sigmoid(block[i+1][0] - block[i][0]) , _sigmoid(block[i+1][1] - block[i][1]), _sigmoid(block[i+1][2] - block[i][2]) ])
 	# print('======= debug:',np.array([res]))
 	# print(res)
 	# quit()
@@ -63,9 +63,14 @@ def operate(agent, asset_name, window_size, model_name=False):
 	# total_profit = 0
 	w = wallet
 	agent.inventory = []
+	place_order = 0
 	#------------------------------------------------------------->
 	for t in range(l):
-		action = agent.act(state)
+		if t == 0:
+			action = 1
+		else:
+			action = agent.act(state)
+		# action = agent.act(state)
 		# print('action ->',action)
 		next_state = get_state(data, t + 1, window_size + 1)
 		reward = 0
@@ -75,29 +80,39 @@ def operate(agent, asset_name, window_size, model_name=False):
 			# print('wallet ---- ',w)
 			if w >= (data[t][0] + fees):
 				w -= (data[t][0] + fees) # implemetn fees
+				place_order += 1
 				agent.inventory.append(data[t][0]) # append just the price
 				if not model_name == False:
 					print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t][0]), 'green'), format_price(w))
 				else:			
 					print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t][0]), 'green'), format_price(w), end='\r')
 		elif action == 2 and len(agent.inventory) > 0: # sell
+			place_order += 1
 			bought_price = agent.inventory.pop(0)
 			profit = data[t][0] - fees - bought_price
-			# reward = max(data[t][0] - bought_price, 0)
-			# total_profit += profit
-			w += profit # implement fees
+			w += profit
 			# wallet_diff = w - wallet
-			reward = max(profit, 0)
+			# reward = w
+			reward = max(profit*50, 0)
 			if not model_name == False:
-				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t][0]), 'red'), format_price(w))
+				print(colored("> {} {} {:.7f} - reward:{} |".format(t, currency.upper(), data[t][0], reward), 'red'), format_price(w))
 			else:
-				print(colored("> {} {} {:.7f} |".format(t, currency.upper(), data[t][0]), 'red'), format_price(w), end='\r')
+				print(colored("> {} {} {:.7f} - reward:{} |".format(t, currency.upper(), data[t][0], reward), 'red'), format_price(w), end='\r')
+		elif (t == l - 2) and len(agent.inventory) > 0: # end
+			assets = len(agent.inventory)
+			place_order += assets
+			for _ in range(assets):
+				bought_price = agent.inventory.pop(0)
+				profit = data[t][0] - fees - bought_price
+				w += profit
+				reward = max(profit*50, 0)
 		done = True if t == l - 1 else False
 		agent.memory.append((state, action, reward, next_state, done))
 		state = next_state
 		if done:
 			_div()
 			print('        {}'.format(format_price(w).center(terminal_width)))
+			print('Actions: {}'.format(place_order).center(terminal_width))
 			_div()
 		if len(agent.memory) > batch_size:
 			agent.expReplay(batch_size)

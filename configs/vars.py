@@ -2,13 +2,13 @@ import datetime, os
 #------------------------------------------------------------->
 # coins = ['steem']
 # coins = ['bitcoin']
-coins= ['bitcoin','ethereum-classic', 'binancecoin', 'litecoin', 'ethereum', 'bitshares', 'steem','dash','nano','zcash','eos','neo','blocknet']
-days = '7'
+coins= ['bitcoin','ethereum-classic', 'binancecoin', 'litecoin', 'ethereum', 'bitshares', 'steem','dash','nano','eos','neo','blocknet']
+days = '14'
 currency = 'usd'
 batch_size = 32
 
-wallet = 100
-fees = 0.02
+wallet = 30
+fees = 0.0
 gamma = 0.95
 epsilon = 1.0
 epsilon_min = 0.01

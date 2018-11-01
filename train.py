@@ -23,6 +23,6 @@ for e in range(episode_count+1):
         model_name=False,
         window_size=window_size
     )
-    if e % 50 == 0:
-        agent.model.save("models/{}-{}_{}_d{}_e{}_w{}_c{}_{}_b{}".format(todays_day,todays_month,asset_name,days,str(e),window_size,episode_count,currency,batch_size))
+    # if e % 50 == 0:
+    #     agent.model.save("models/{}-{}_{}_d{}_e{}_w{}_c{}_{}_b{}".format(todays_day,todays_month,asset_name,days,str(e),window_size,episode_count,currency,batch_size))
 print('\n\n',colored('D O N E'.center(terminal_width),'white','on_green',attrs=['bold']))
