@@ -20,11 +20,13 @@ currency = 'usd'
 ```sh
 git clone https://github.com/Draichi/cryptocurrency_prediction.git
 cd cryptocurrency_prediction
-pip3 install -r requirements.txt
+conda create -n env python=3.6
+source activate env
+pip install -r requirements.txt
 ```
 
 ```sh
-python3 forecast.py [asset] [how_many_days]
+python forecast.py [asset] [how_many_days]
 # e.g.: python3 forecast.py bitcoin 5
 ```
 <div>
@@ -37,14 +39,14 @@ python3 forecast.py [asset] [how_many_days]
 
 
 ```sh
-python3 scatter.py log
+python scatter.py log
 # log/linear = layout type
 ```
 
 ![10-8-2018](imgs/log_520.png "10-8-2018")
 
 ```sh
-python3 correlation_heatmap.py
+python correlation_heatmap.py
 ```
 <div>
     <a href="https://plot.ly/~randy_marsh/47/?share_key=KiwLmIfF01AgF7CqocfQbR" target="_blank" title="correlation heatmap" style="display: block; text-align: center;"><img src="https://plot.ly/~randy_marsh/47.png?share_key=KiwLmIfF01AgF7CqocfQbR" alt="correlation heatmap" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
@@ -54,7 +56,7 @@ python3 correlation_heatmap.py
 ## Genetic Algorithm
 
 ```sh
-python3 train.py [asset] [window_size] [how_many_episodes]
+python train.py [asset] [window_size] [how_many_episodes]
 # e.g.: python3 train.py bitcoin 10 1000
 ```
 
@@ -63,7 +65,7 @@ python3 train.py [asset] [window_size] [how_many_episodes]
 Use historical data to train a model and evaluate with fresh data
 
 ```sh
-python3 evaluate.py [asset] [model]
+python evaluate.py [asset] [model]
 # e.g.: python3 evaluate.py bitcoin 10-8_bitcoin_d90_e20_w12_c50_usd
 ```
 
