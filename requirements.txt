@@ -1,9 +1,10 @@
 absl-py==0.5.0
 astor==0.7.1
-certifi==2018.8.24
+certifi==2018.10.15
+cffi==1.11.5
 chardet==3.0.4
 cycler==0.10.0
-Cython==0.28.5
+Cython==0.29
 decorator==4.3.0
 fbprophet==0.3.post2
 gast==0.2.0
@@ -13,21 +14,32 @@ idna==2.7
 ipython-genutils==0.2.0
 jsonschema==2.6.0
 jupyter-core==4.4.0
+Keras==2.2.4
 Keras-Applications==1.0.6
 Keras-Preprocessing==1.0.5
 kiwisolver==1.0.1
 Markdown==3.0.1
 matplotlib==3.0.0
+mkl-fft==1.0.6
+mkl-random==1.0.1
 nbformat==4.4.0
 numpy==1.15.2
+olefile==0.46
 pandas==0.23.4
+Pillow==5.3.0
 plotly==3.3.0
 protobuf==3.6.1
+pycparser==2.19
 pyparsing==2.2.2
 pystan==2.18.0.0
 python-dateutil==2.7.3
 pytz==2018.5
+<<<<<<< HEAD
 requests==2.19.1
+=======
+PyYAML==3.13
+requests>=2.20.0
+>>>>>>> latest
 retrying==1.3.3
 scikit-learn==0.20.0
 scipy==1.1.0
@@ -36,6 +48,11 @@ sklearn==0.0
 tensorboard==1.11.0
 tensorflow==1.11.0
 termcolor==1.1.0
+<<<<<<< HEAD
+=======
+torch==0.4.1.post2
+torchvision==0.2.1
+>>>>>>> latest
 traitlets==4.3.2
 urllib3==1.23
 Werkzeug==0.14.1
