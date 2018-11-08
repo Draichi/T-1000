@@ -4,10 +4,11 @@ coins = ['bitcoin', 'binancecoin']
 # coins= ['bitcoin','giant','ethereum-classic', 'binancecoin', 'litecoin', 'ethereum', 'bitshares', 'steem','dash','nano','zcash','eos','neo','blocknet']
 days = '14'
 currency = 'usd'
-batch_size = 32
+batch_size = 64
 
-wallet = 30
-fees = 0.0
+wallet = 3000
+n_orders = 30
+fees = 0
 gamma = 0.95
 epsilon = 1.0
 epsilon_min = 0.01
