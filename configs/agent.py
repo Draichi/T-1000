@@ -1,6 +1,6 @@
 import keras, random
 from keras.models import Sequential, load_model
-from keras.layers import Dense, LSTM, Flatten
+from keras.layers import Dense, LSTM, Flatten, Dropout, BatchNormalization
 from keras.optimizers import Adam
 import numpy as np
 from collections import deque
@@ -28,12 +28,25 @@ class Agent:
 		model = Sequential()
 		#  3 = prices, market caps, vol
 		model.add(LSTM(128, input_shape=(self.state_size,3), activation='relu', return_sequences=True))
+		model.add(Dropout(0.2))
+		model.add(BatchNormalization())
+
+		model.add(LSTM(128, input_shape=(self.state_size,3), activation='relu', return_sequences=True))
+		model.add(Dropout(0.1))
+		model.add(BatchNormalization())
+
+		model.add(LSTM(128, input_shape=(self.state_size,3), activation='relu', return_sequences=True))
+		model.add(Dropout(0.2))
+		model.add(BatchNormalization())
 
 		# model.add(Dense(units=128, input_dim=(10,), activation="relu"))
-		model.add(Dense(units=64, activation="relu"))
-		model.add(Dense(units=32, activation="relu"))
-		model.add(Dense(units=8, activation="relu"))
+		# model.add(Dense(units=64, activation="relu"))
+		# model.add(Dense(units=32, activation="relu"))
+		# model.add(Dense(units=8, activation="relu"))
 		model.add(Flatten())
+		model.add(Dense(32, activation="relu"))
+		model.add(Dropout(0.2))
+
 		model.add(Dense(self.action_size, activation="linear"))
 		model.compile(loss="mse", optimizer=Adam(lr=0.001))
 
