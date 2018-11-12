@@ -34,12 +34,8 @@ pyparsing==2.2.2
 pystan==2.18.0.0
 python-dateutil==2.7.3
 pytz==2018.5
-<<<<<<< HEAD
-requests==2.19.1
-=======
 PyYAML==3.13
 requests>=2.20.0
->>>>>>> latest
 retrying==1.3.3
 scikit-learn==0.20.0
 scipy==1.1.0
@@ -48,11 +44,8 @@ sklearn==0.0
 tensorboard==1.11.0
 tensorflow==1.11.0
 termcolor==1.1.0
-<<<<<<< HEAD
-=======
 torch==0.4.1.post2
 torchvision==0.2.1
->>>>>>> latest
 traitlets==4.3.2
 urllib3==1.23
 Werkzeug==0.14.1
