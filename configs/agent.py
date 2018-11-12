@@ -22,9 +22,6 @@ class Agent:
 		self.model = load_model("models/" + model_name) if is_eval else self._model()
 
 	def _model(self):
-		# print(type(self.state_size))
-		# print(self.state_size)
-		# quit()
 		model = Sequential()
 		#  3 = prices, market caps, vol
 		model.add(LSTM(128, input_shape=(self.state_size,3), activation='relu', return_sequences=True))
@@ -39,10 +36,6 @@ class Agent:
 		model.add(Dropout(0.2))
 		model.add(BatchNormalization())
 
-		# model.add(Dense(units=128, input_dim=(10,), activation="relu"))
-		# model.add(Dense(units=64, activation="relu"))
-		# model.add(Dense(units=32, activation="relu"))
-		# model.add(Dense(units=8, activation="relu"))
 		model.add(Flatten())
 		model.add(Dense(32, activation="relu"))
 		model.add(Dropout(0.2))
@@ -57,27 +50,17 @@ class Agent:
 			return random.randrange(self.action_size)
 
 		options = self.model.predict(state)
-		# print('==options==',options)
-		# print('==options[0]==')
-		# print('==options[0]==',state)
-		# print('==options[0]==',options)
-		# print('==options[0]==',options[0][0])
-		# print('==options[0]==',np.argmax(options[0][0]))
-		# quit()
 
 		return np.argmax(options[0][0])
 
 	def expReplay(self, batch_size):
 		mini_batch = []
 		l = len(self.memory)
-		# print('self.memory',self.memory)
-		# quit()
 		
 		for i in range(l - batch_size + 1, l):
 			mini_batch.append(self.memory.popleft())
-		# print(mini_batch)
-		# quit()
-		for state, action, reward, next_state, done in mini_batch:
+		
+        for state, action, reward, next_state, done in mini_batch:
 			target = reward
 			if not done:
 				target = reward + self.gamma * np.amax(self.model.predict(next_state)[0])
