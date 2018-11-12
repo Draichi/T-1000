@@ -71,12 +71,12 @@ def operate(agent, asset_name, window_size, model_name=False):
 		next_state = get_state(data, t + 1, window_size + 1)
 		price = data[t][0]
 		total_price_plus_fee = (price*n_orders) + fees
-        total_price_minus_fee = (price*n_orders) - fees
+		total_price_minus_fee = (price*n_orders) - fees
 		# if t == 0:
 		# 	action = 1 #buy if its the beginning
 		# else:
 		# 	action = agent.act(state)
-        action = agent.act(state) # test without buying the first one
+		action = agent.act(state) # test without buying the first one
 		print("> {} {} {:.7f}".format(t, currency.upper(),price), end='\r') #hold
 		if action == 1: # buy
 			if w >= total_price_plus_fee:
@@ -116,7 +116,7 @@ def operate(agent, asset_name, window_size, model_name=False):
 		# 	reward_counter += 1
 		# if reward > 0 or reward_counter < half_length: # do not append if we alredy appended half of lenght with reward 0.
 		# 	agent.memory.append((state, action, reward, next_state, done))
-    	agent.memory.append((state, action, reward, next_state, done))
+		agent.memory.append((state, action, reward, next_state, done))
 		state = next_state
 		# if done:
 		# 	_div()
@@ -132,9 +132,9 @@ def operate(agent, asset_name, window_size, model_name=False):
 	print(colored('{}/{}'.format(asset_name.upper(), currency.upper()).center(terminal_width), 'white', attrs=['bold']))
 	if not model_name == False:
 		print(colored('MODEL: {}'.format(model_name).center(terminal_width), 'white', attrs=['bold']))
-    _div()
-	print('Initial Wallet: {}'.format(wallet).center(terminal_width))
-	print('Final Wallet: {}'.format(format_price(w).center(terminal_width)))
+	_div()
+	print('Initial Wallet: {} {}'.format(currency.upper(), wallet).center(terminal_width))
+	print('          Final Wallet: {}'.format(format_price(w)).center(terminal_width))
 	print('Actions: {}'.format(place_order).center(terminal_width))
 	print('Orders Per Action: {}'.format(n_orders).center(terminal_width))
 	_div()
