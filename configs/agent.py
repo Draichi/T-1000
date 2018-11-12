@@ -60,7 +60,7 @@ class Agent:
 		for i in range(l - batch_size + 1, l):
 			mini_batch.append(self.memory.popleft())
 		
-        for state, action, reward, next_state, done in mini_batch:
+		for state, action, reward, next_state, done in mini_batch:
 			target = reward
 			if not done:
 				target = reward + self.gamma * np.amax(self.model.predict(next_state)[0])
