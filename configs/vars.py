@@ -1,14 +1,15 @@
 import datetime, os
 #------------------------------------------------------------->
-coins = ['bitcoin', 'binancecoin']
+coins = ['bitcoin', 'nano', 'ripple']
+# coins = ['binancecoin', 'nano', 'ripple']
 # coins= ['bitcoin','giant','ethereum-classic', 'binancecoin', 'litecoin', 'ethereum', 'bitshares', 'steem','dash','nano','zcash','eos','neo','blocknet']
-days = '14'
+days = '30'
 currency = 'usd'
-batch_size = 64
+batch_size = 512 # 16, 32, 64, 128, 256...
 
-wallet = 3000
-n_orders = 30
-fees = 0
+wallet = 8000
+n_orders = 350
+fees = 1
 gamma = 0.95
 epsilon = 1.0
 epsilon_min = 0.01
