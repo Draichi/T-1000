@@ -4,7 +4,7 @@
 
 # Cryptocurrency prediction
 
-Deep tecnical analysis with **ANY** cryptocurrency
+Deep tecnical analysis with [**ANY**](https://www.coingecko.com/en) cryptocurrency
 
 ## Setup
 
