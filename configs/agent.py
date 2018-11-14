@@ -1,10 +1,11 @@
 import keras, random
 from keras.models import Sequential, load_model
-from keras.layers import Dense, LSTM, Flatten, Dropout, BatchNormalization
+from keras.layers import Dense, LSTM, Flatten, Dropout, BatchNormalization, GRU
+# from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
 from keras.optimizers import Adam
 import numpy as np
 from collections import deque
-from configs.vars import gamma, epsilon, epsilon_min, epsilon_decay
+from configs.vars import gamma, epsilon, epsilon_min, epsilon_decay, epochs
 
 class Agent:
 	def __init__(self, state_size, is_eval=False, model_name=""):
@@ -23,25 +24,43 @@ class Agent:
 
 	def _model(self):
 		model = Sequential()
-		#  3 = prices, market caps, vol
-		model.add(LSTM(128, input_shape=(self.state_size,3), activation='relu', return_sequences=True))
+
+		# --------------LSTM------------- #
+		# model.add(LSTM(128, input_shape=(self.state_size,3), activation='relu', return_sequences=True))
+		# model.add(Dropout(0.2))
+		# model.add(BatchNormalization())
+		# model.add(LSTM(128, input_shape=(self.state_size,3), activation='relu', return_sequences=True))
+		# model.add(Dropout(0.1))
+		# model.add(BatchNormalization())
+		# model.add(LSTM(128, input_shape=(self.state_size,3), activation='relu', return_sequences=True))
+		# model.add(Dropout(0.2))
+		# model.add(BatchNormalization())
+		# model.add(Flatten())
+		# model.add(Dense(32, activation="relu"))
+		# model.add(Dropout(0.2))
+		# --------------LSTM------------- #
+
+		# --------------GRU-------------- #
+		model.add(GRU(128, input_shape=(self.state_size,self.action_size), return_sequences=True))
 		model.add(Dropout(0.2))
 		model.add(BatchNormalization())
-
-		model.add(LSTM(128, input_shape=(self.state_size,3), activation='relu', return_sequences=True))
+		model.add(GRU(64, input_shape=(self.state_size,self.action_size), return_sequences=True))
 		model.add(Dropout(0.1))
 		model.add(BatchNormalization())
-
-		model.add(LSTM(128, input_shape=(self.state_size,3), activation='relu', return_sequences=True))
+		model.add(GRU(32, input_shape=(self.state_size,self.action_size), return_sequences=True))
 		model.add(Dropout(0.2))
 		model.add(BatchNormalization())
-
 		model.add(Flatten())
-		model.add(Dense(32, activation="relu"))
+		model.add(Dense(16, activation="relu"))
 		model.add(Dropout(0.2))
+		# --------------GRU-------------- #
 
 		model.add(Dense(self.action_size, activation="linear"))
-		model.compile(loss="mse", optimizer=Adam(lr=0.001))
+
+		# --------------OPTIMIZER-------------- #
+		model.compile(loss="mse", optimizer="rmsprop")
+		# model.compile(loss="mse", optimizer=Adam(lr=0.001))
+		# --------------OPTIMIZER-------------- #
 
 		return model
 
@@ -68,7 +87,15 @@ class Agent:
 			target_f = self.model.predict(state)
 			
 			target_f[0][action] = target
-			self.model.fit(state, target_f, epochs=1, verbose=0)
+			self.model.fit(state, target_f, epochs=epochs, verbose=0)
 
 		if self.epsilon > self.epsilon_min:
 			self.epsilon *= self.epsilon_decay 
+
+		# opt = tf.keras.optimizers.Adam(lr=0.001, decay=1e-6)
+		# model.compile(optimizer=opt,loss='sparse_categorical_crossentropy',metrics=['accuracy'])
+		# tensorboard = TensorBoard(log_dir=f'logs/{NAME}')
+		# filepath = 'RNN-{epoch:02d}-{val_acc:.3f}'
+		# checkpoint = ModelCheckpoint('models/{}.model'.format(filepath, monitor='val_acc',verbose=1,save_best_only=True,mode='max'))
+		# history = model.fit(x_train,y_train,batch_size=BATCH_SIZE,epochs=EPOCHS,validation_data=(x_test,y_test),callbacks=[tensorboard,checkpoint])
+
