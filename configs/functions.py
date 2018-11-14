@@ -103,7 +103,8 @@ def operate(agent, asset_name, window_size, model_name=False):
 		# ---------add all or half? testing----------
 		if reward == 0:
 			reward_counter += 1
-		if reward > 0 or reward_counter < (batch_size*.66):
+		if reward > 0:
+		# if reward > 0 or reward_counter < (batch_size*.5):
 			agent.memory.append((state, action, reward, next_state, done))
 		# agent.memory.append((state, action, reward, next_state, done))
 		# ---------add all or half? testing----------
@@ -114,7 +115,7 @@ def operate(agent, asset_name, window_size, model_name=False):
 	wallet_percentage = ((w - wallet) / ((w + wallet) / 2))*100	
 	# -----save the model if profit is made ----
 	if w > wallet:
-		agent.model.save("models/{}-{}_{}_d{}_w{}_{}_{:.0f}->{:.0f}_b{}".format(
+		agent.model.save("models/{}-{}_{}_d{}_w{}_{}_{:.0f}-{:.0f}_b{}".format(
 			todays_day,todays_month,asset_name,days,window_size,currency,wallet,w,batch_size))
 	#------------------------------------------------------------->
 	div()
