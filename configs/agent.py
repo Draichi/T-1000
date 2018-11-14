@@ -47,11 +47,11 @@ class Agent:
 		model.add(GRU(64, input_shape=(self.state_size,self.action_size), return_sequences=True))
 		model.add(Dropout(0.1))
 		model.add(BatchNormalization())
-		model.add(GRU(32, input_shape=(self.state_size,self.action_size), return_sequences=True))
+		model.add(GRU(64, input_shape=(self.state_size,self.action_size), return_sequences=True))
 		model.add(Dropout(0.2))
 		model.add(BatchNormalization())
 		model.add(Flatten())
-		model.add(Dense(16, activation="relu"))
+		model.add(Dense(32, activation="relu"))
 		model.add(Dropout(0.2))
 		# --------------GRU-------------- #
 
