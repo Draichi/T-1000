@@ -6,12 +6,12 @@ coins = ['bitcoin', 'nano', 'ripple']
 days = '14'
 currency = 'usd'
 
-wallet = 8000.00
+wallet = 3000.00
 n_orders = 350
 fees = 1
 
-epochs = 10
-batch_size = 8 # 4, 8, 16, 32...
+epochs = 1
+batch_size = 16 # 4, 8, 16, 32...
 gamma = 0.95
 epsilon = 1.0
 epsilon_min = 0.01
