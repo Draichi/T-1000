@@ -101,12 +101,12 @@ def operate(agent, asset_name, window_size, model_name=False):
 				reward = max(profit, 0)
 		done = True if t == l - 1 else False
 		# ---------add all or half? testing----------
-		if reward == 0:
-			reward_counter += 1
-		if reward > 0:
+		# if reward == 0:
+		# 	reward_counter += 1
+		# if reward > 0:
 		# if reward > 0 or reward_counter < (batch_size*.5):
-			agent.memory.append((state, action, reward, next_state, done))
-		# agent.memory.append((state, action, reward, next_state, done))
+			# agent.memory.append((state, action, reward, next_state, done))
+		agent.memory.append((state, action, reward, next_state, done))
 		# ---------add all or half? testing----------
 		state = next_state
 		if len(agent.memory) > batch_size:
