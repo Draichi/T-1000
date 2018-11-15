@@ -11,9 +11,9 @@ n_orders = 350
 fees = 1
 
 epochs = 1
-batch_size = 16 # 4, 8, 16, 32...
+batch_size = 128 # 4, 8, 16, 32...
 gamma = 0.95
-epsilon = 1.0
+epsilon = 0.1
 epsilon_min = 0.01
 epsilon_decay = 0.995
 #------------------------------------------------------------->
