@@ -87,7 +87,8 @@ def operate(agent, asset_name, window_size, model_name=False):
 			bought_price = agent.inventory.pop(0)
 			profit = total_price_minus_fee - bought_price
 			w += total_price_minus_fee
-			reward = max(profit, 0)
+			# reward = max(profit, 0)
+			reward = profit
 			print(colored("> {} {} {:.7f} | Wallet:".format(
 				t, currency.upper(), price), 'red'), format_price(w), "| Profit: {} {}".format(currency.upper(), profit))
 		# ----------sell all at end---------
@@ -98,7 +99,8 @@ def operate(agent, asset_name, window_size, model_name=False):
 				bought_price = agent.inventory.pop(0)
 				profit = price - fees - bought_price
 				w += profit
-				reward = max(profit, 0)
+				# reward = max(profit, 0)
+				reward = profit
 		done = True if t == l - 1 else False
 		# ---------add all or half? testing----------
 		# if reward == 0:
@@ -114,7 +116,7 @@ def operate(agent, asset_name, window_size, model_name=False):
 	#------------------------------------------------------------->
 	wallet_percentage = ((w - wallet) / ((w + wallet) / 2))*100	
 	# -----save the model if profit is made ----
-	if w > wallet:
+	if w > wallet and wallet_percentage > market_percentage:
 		agent.model.save("models/{}-{}_{}_d{}_w{}_{}_{:.0f}-{:.0f}_b{}".format(
 			todays_day,todays_month,asset_name,days,window_size,currency,wallet,w,batch_size))
 	#------------------------------------------------------------->
