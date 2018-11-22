@@ -1,11 +1,11 @@
 import keras, random
 from keras.models import Sequential, load_model
-from keras.layers import Dense, LSTM, Flatten, Dropout, BatchNormalization, GRU
+from keras.layers import Dense, LSTM, Flatten, Dropout, BatchNormalization, GRU, Conv1D, MaxPooling1D, PReLU, Bidirectional
 # from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
 from keras.optimizers import Adam
 import numpy as np
 from collections import deque
-from configs.vars import gamma, epsilon, epsilon_min, epsilon_decay, epochs
+from configs.vars import gamma, epsilon, epsilon_min, epsilon_decay, epochs, n_features
 
 class Agent:
 	def __init__(self, state_size, is_eval=False, model_name=""):
@@ -41,19 +41,51 @@ class Agent:
 		# --------------LSTM------------- #
 
 		# --------------GRU-------------- #
-		model.add(GRU(128, input_shape=(self.state_size,self.action_size), return_sequences=True))
-		model.add(Dropout(0.2))
-		model.add(BatchNormalization())
-		model.add(GRU(64, input_shape=(self.state_size,self.action_size), return_sequences=True))
-		model.add(Dropout(0.1))
-		model.add(BatchNormalization())
-		model.add(GRU(64, input_shape=(self.state_size,self.action_size), return_sequences=True))
-		model.add(Dropout(0.2))
-		model.add(BatchNormalization())
-		model.add(Flatten())
-		model.add(Dense(32, activation="relu"))
-		model.add(Dropout(0.2))
+		# model.add(GRU(128, input_shape=(self.state_size,self.action_size), return_sequences=True))
+		# model.add(Dropout(0.2))
+		# model.add(BatchNormalization())
+		# model.add(GRU(64, input_shape=(self.state_size,self.action_size), return_sequences=True))
+		# model.add(Dropout(0.1))
+		# model.add(BatchNormalization())
+		# model.add(GRU(64, input_shape=(self.state_size,self.action_size), return_sequences=True))
+		# model.add(Dropout(0.2))
+		# model.add(BatchNormalization())
+		# model.add(Flatten())
+		# model.add(Dense(32, activation="relu"))
+		# model.add(Dropout(0.2))
 		# --------------GRU-------------- #
+
+        # ----------------CONV2D-----------------#
+		model.add(Dense(512,input_shape=(self.state_size,n_features)))
+		model.add(Conv1D(filters=32,kernel_size=1, dilation_rate=2, activation='relu',padding='valid', kernel_initializer='he_normal', kernel_regularizer=keras.regularizers.l2(0.005), input_shape=(self.state_size,n_features)))
+		model.add(Dropout(0.1))
+		model.add(Conv1D(kernel_size = (1), filters = 32, dilation_rate=4, padding='valid', kernel_initializer='he_normal', activation='relu',kernel_regularizer=keras.regularizers.l2(0.005)))
+		model.add(Dropout(0.2))
+		model.add(Conv1D(kernel_size = (1), filters = 64, dilation_rate=8, padding='valid', kernel_initializer='he_normal', activation='relu',kernel_regularizer=keras.regularizers.l2(0.005)))
+		model.add(Dropout(0.1))
+		model.add(Conv1D(kernel_size = (1), filters = 64, dilation_rate=16, padding='valid', kernel_initializer='he_normal', activation='relu',kernel_regularizer=keras.regularizers.l2(0.005)))
+		model.add(MaxPooling1D())
+		model.add(Dropout(0.2))
+		model.add(Conv1D(kernel_size = (1), filters = 64, dilation_rate=32, padding='valid', kernel_initializer='he_normal', activation='relu',kernel_regularizer=keras.regularizers.l2(0.005)))
+		model.add(Dropout(0.1))
+		model.add(Conv1D(kernel_size = (1), filters = 128, strides=2, padding='valid', kernel_initializer='he_normal', activation='relu',kernel_regularizer=keras.regularizers.l2(0.005)))
+		model.add(Dropout(0.2))
+		model.add(Conv1D(kernel_size = (1), filters = 128, strides=2, padding='valid', kernel_initializer='he_normal', activation='relu',kernel_regularizer=keras.regularizers.l2(0.005)))
+		model.add(Dropout(0.1))
+		model.add(Conv1D(kernel_size = (1), filters = 128, strides=2, padding='valid', kernel_initializer='he_normal', activation='relu',kernel_regularizer=keras.regularizers.l2(0.005)))
+		model.add(Dropout(0.2))
+		model.add(Bidirectional(GRU(48,return_sequences=True),merge_mode='concat'))
+		model.add(PReLU())
+		model.add(Flatten())
+		model.add(Dense(24, use_bias=False))
+		#model.add(LeakyReLU(alpha=0.1))
+		model.add(PReLU())
+		model.add(Dense(12, use_bias=False))
+		#model.add(LeakyReLU(alpha=0.1))
+		model.add(PReLU())
+		#adamw =  AdamW(lr=self.learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0, weight_decay=0.025, batch_size=1, samples_per_epoch=1, epochs=1)
+		# adam = keras.optimizers.Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+		# ---------------CONV2D--------------
 
 		model.add(Dense(self.action_size, activation="linear"))
 
