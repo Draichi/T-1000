@@ -41,13 +41,13 @@ class Agent:
 		# --------------LSTM------------- #
 
 		# --------------GRU-------------- #
-		# model.add(GRU(128, input_shape=(self.state_size,self.action_size), return_sequences=True))
+		# model.add(GRU(128, input_shape=(self.state_size,n_features), return_sequences=True))
 		# model.add(Dropout(0.2))
 		# model.add(BatchNormalization())
-		# model.add(GRU(64, input_shape=(self.state_size,self.action_size), return_sequences=True))
+		# model.add(GRU(64, input_shape=(self.state_size,n_features), return_sequences=True))
 		# model.add(Dropout(0.1))
 		# model.add(BatchNormalization())
-		# model.add(GRU(64, input_shape=(self.state_size,self.action_size), return_sequences=True))
+		# model.add(GRU(64, input_shape=(self.state_size,n_features), return_sequences=True))
 		# model.add(Dropout(0.2))
 		# model.add(BatchNormalization())
 		# model.add(Flatten())

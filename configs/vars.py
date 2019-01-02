@@ -3,12 +3,12 @@ import datetime, os
 coins = ['bitcoin', 'nano', 'ripple']
 # coins = ['binancecoin', 'nano', 'ripple']
 # coins= ['bitcoin','giant','ethereum-classic', 'binancecoin', 'litecoin', 'ethereum', 'bitshares', 'steem','dash','nano','zcash','eos','neo','blocknet']
-days = '14'
+days = '90'
 currency = 'usd'
 
 wallet = 3000.00
-n_orders = 1000
-fees = 1
+n_orders = 500
+fees = 3
 
 epochs = 1
 batch_size = 64 # 4, 8, 16, 32...
