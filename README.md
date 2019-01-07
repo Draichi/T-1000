@@ -37,7 +37,6 @@ python forecast.py [asset] [how_many_days]
 ```
 <div>
     <a href="https://plot.ly/~randy_marsh/19/" target="_blank" title="24-8 bitcoin 0.01" style="display: block; text-align: center;"><img src="https://plot.ly/~randy_marsh/19.png" alt="24-8 bitcoin 0.01" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
-    <script data-plotly="randy_marsh:19" src="https://plot.ly/embed.js" async></script>
 </div>
 
 
