@@ -1,10 +1,16 @@
-![reinforcement_learning](https://img.shields.io/badge/reinforcement_learning-cryptocurrencys-8440c4.svg?colorA=32073d&longCache=true&style=for-the-badge "reinforcement learning cryptocurrencys")
+![windows](https://img.shields.io/badge/windows-not_supported-000.svg?colorA=ba2750&longCache=true&style=for-the-badge "windows")
 
-![lucasdraichi](https://img.shields.io/badge/made_by-lucas_draichi-32073d.svg?colorA=8440c4&longCache=true&style=for-the-badge "lucas draichi")
+![ubuntu](https://img.shields.io/badge/ubuntu-supported-000.svg?colorA=00cc25&longCache=true&style=for-the-badge "ubuntu")
 
 # Cryptocurrency prediction
 
 Deep tecnical analysis with [**ANY**](https://www.coingecko.com/en) cryptocurrency
+
+## Prerequisites
+
+1. Ubuntu (tested on 16.04)
+2. Python 3
+3. [Miniconda](https://conda.io/docs/user-guide/install/index.html) or Anaconda
 
 ## Setup
 
@@ -30,12 +36,10 @@ python forecast.py [asset] [how_many_days]
 # e.g.: python3 forecast.py bitcoin 5
 ```
 <div>
-    <a href="https://plot.ly/~randy_marsh/43/?share_key=CXbolfQrLgKWSBiPSM3CU0" target="_blank" title="Bitcoin all time forecasting 120 days" style="display: block; text-align: center;"><img src="https://plot.ly/~randy_marsh/43.png?share_key=CXbolfQrLgKWSBiPSM3CU0" alt="Bitcoin all time forecasting 120 days" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
+    <a href="https://plot.ly/~randy_marsh/19/" target="_blank" title="24-8 bitcoin 0.01" style="display: block; text-align: center;"><img src="https://plot.ly/~randy_marsh/19.png" alt="24-8 bitcoin 0.01" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
+    <script data-plotly="randy_marsh:19" src="https://plot.ly/embed.js" async></script>
 </div>
 
-<div>
-    <a href="https://plot.ly/~randy_marsh/45/?share_key=12TLlplPG26co8BzHCFSPn" target="_blank" title="bitcoinall time zoom" style="display: block; text-align: center;"><img src="https://plot.ly/~randy_marsh/45.png?share_key=12TLlplPG26co8BzHCFSPn" alt="bitcoinall time zoom" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
-</div>
 
 
 ```sh
