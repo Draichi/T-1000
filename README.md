@@ -26,11 +26,7 @@ currency = 'usd'
 ## Run
 
 ```sh
-git clone https://github.com/Draichi/cryptocurrency_prediction.git
-cd cryptocurrency_prediction
-conda create -n crypto_env python=3.6
-source activate crypto_env
-pip install -r requirements.txt
+conda env create -f environment.yml
 ```
 
 ```sh
