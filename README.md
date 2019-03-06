@@ -27,6 +27,7 @@ currency = 'usd'
 
 ```sh
 conda env create -f environment.yml
+# create env
 ```
 
 ```sh
