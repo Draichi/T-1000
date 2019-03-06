@@ -26,6 +26,9 @@ currency = 'usd'
 ## Run
 
 ```sh
+sudo apt-get install gcc g++ build-essential python-dev python3-dev
+# make sure you have these installed
+
 conda env create -f environment.yml
 # create env
 ```
@@ -33,6 +36,7 @@ conda env create -f environment.yml
 ```sh
 python forecast.py [asset] [how_many_days]
 # e.g.: python3 forecast.py bitcoin 5
+# open the /path/to/crytocurrency_prediction/temp-plot.html file
 ```
 <div>
     <a href="https://plot.ly/~randy_marsh/19/" target="_blank" title="24-8 bitcoin 0.01" style="display: block; text-align: center;"><img src="https://plot.ly/~randy_marsh/19.png" alt="24-8 bitcoin 0.01" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
