@@ -59,7 +59,7 @@ python correlation_heatmap.py
 </div>
 
 
-## Genetic Algorithm
+## DQN
 
 ```sh
 python train.py [asset] [window_size] [how_many_episodes]
