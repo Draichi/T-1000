@@ -1,4 +1,4 @@
-name: prophet
+name: crypto_prediction
 channels:
   - conda-forge
   - defaults
@@ -101,5 +101,4 @@ dependencies:
     - keras-preprocessing==1.0.9
     - pyyaml==3.13
     - scipy==1.2.1
-prefix: /home/lucas/miniconda3/envs/prophet
 
