@@ -1,5 +1,6 @@
 ![ubuntu](https://img.shields.io/badge/ubuntu-supported-000.svg?colorA=00cc25&longCache=true&style=for-the-badge "ubuntu")
 ![windows](https://img.shields.io/badge/windows-supported-000.svg?colorA=00cc25&longCache=true&style=for-the-badge "windows")
+![OS](https://img.shields.io/badge/OS-supported-000.svg?colorA=00cc25&longCache=true&style=for-the-badge "OS")
 
 # Cryptocurrency prediction
 
@@ -27,18 +28,22 @@ currency = 'usd'
 ```sh
 sudo apt-get install gcc g++ build-essential python-dev python3-dev
 # make sure you have these installed
-
 conda env create -f UBUNTU_CPU.yml
 # create env
 ```
 ### Windows
 ```sh
 # make sure you have a recent C++ compiler
-
 conda env create -f WINDOWS_CPU.yml
 # create env
 ```
+### Mac
+```sh
+conda env create -f MAC_CPU.yml
+# create env
+```
 
+---
 
 ```sh
 python forecast.py [asset] [how_many_days]
