@@ -1,6 +1,5 @@
-![windows](https://img.shields.io/badge/windows-not_supported-000.svg?colorA=ba2750&longCache=true&style=for-the-badge "windows")
-
 ![ubuntu](https://img.shields.io/badge/ubuntu-supported-000.svg?colorA=00cc25&longCache=true&style=for-the-badge "ubuntu")
+![windows](https://img.shields.io/badge/windows-supported-000.svg?colorA=00cc25&longCache=true&style=for-the-badge "windows")
 
 # Cryptocurrency prediction
 
@@ -23,15 +22,23 @@ days = 90
 currency = 'usd'
 ```
 ---
-## Run
 
+### Ubuntu
 ```sh
 sudo apt-get install gcc g++ build-essential python-dev python3-dev
 # make sure you have these installed
 
-conda env create -f environment.yml
+conda env create -f UBUNTU_CPU.yml
 # create env
 ```
+### Windows
+```sh
+# make sure you have a recent C++ compiler
+
+conda env create -f WINDOWS_CPU.yml
+# create env
+```
+
 
 ```sh
 python forecast.py [asset] [how_many_days]
@@ -58,6 +65,7 @@ python correlation_heatmap.py
     <a href="https://plot.ly/~randy_marsh/47/?share_key=KiwLmIfF01AgF7CqocfQbR" target="_blank" title="correlation heatmap" style="display: block; text-align: center;"><img src="https://plot.ly/~randy_marsh/47.png?share_key=KiwLmIfF01AgF7CqocfQbR" alt="correlation heatmap" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
 </div>
 
+---
 
 ## DQN
 
@@ -78,6 +86,8 @@ python evaluate.py [asset] [model]
 ![evaluate](imgs/evaluating.gif)
 
 Price in: blue = buy, yellow = sell, white = hold
+
+---
 
 ## Credits
 - Analyzing cryptocurrency markets using python: [article](https://blog.patricktriest.com/analyzing-cryptocurrencies-python/)
