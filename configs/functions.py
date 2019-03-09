@@ -1,9 +1,11 @@
 import numpy as np
 import math, os, keras
+import colorama
 from termcolor import colored
 from keras.models import load_model
 from configs.agent import Agent
 from configs.vars import days, currency, todays_day, todays_month, terminal_width, batch_size, wallet, fees, n_orders
+colorama.init()
 #------------------------------------------------------------->
 def div():
 	print(colored("-"*terminal_width,'white'))

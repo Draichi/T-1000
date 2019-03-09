@@ -1,5 +1,7 @@
 import sys
 from termcolor import colored
+import colorama
+colorama.init()
 if len(sys.argv) != 4:
 	print(colored("Usage: python3 train.py [asset] [window] [episodes]", 'red', attrs=['bold']))
 	exit()

@@ -1,8 +1,10 @@
 import sys
 from termcolor import colored
+import colorama
+colorama.init()
 if len(sys.argv) != 2:
-	print(colored("Usage: python3 scatter.py [layout_type]", 'red', attrs=['bold']))
-	exit()
+    print(colored("Usage: python3 scatter.py [layout_type]", 'red', attrs=['bold']))
+    exit()
 import plotly.offline as offline
 import plotly.graph_objs as go
 import configs.get_datasets
