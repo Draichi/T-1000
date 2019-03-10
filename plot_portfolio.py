@@ -7,12 +7,14 @@ Run:
 """
 
 import pandas as pd
+import numpy as np
 from configs.vars import coins, days, todays_day, todays_month, currency
+from configs.functions import print_dollar
 import plotly.graph_objs as go
 import plotly.offline as offline
 import fbprophet
 #---------------------------------------------------------------------------------->
-def _build_layout(title, y_axis_title, y_axis_type=None):
+def _build_layout(title, y_axis_title=None, y_axis_type=None):
     """[summary]
     
     Arguments:
@@ -31,7 +33,6 @@ def _build_layout(title, y_axis_title, y_axis_type=None):
                        title=title,
                        font=dict(color='rgb(255, 255, 255)'),
                        legend=dict(orientation="h"),
-                       xaxis=dict(type='date'),
                        yaxis=dict(title=y_axis_title, type=y_axis_type))
     return layout
 #---------------------------------------------------------------------------------->
@@ -85,12 +86,11 @@ def main():
         plot(data=_build_data(pct_change=True),
              layout=_build_layout(title='Portfolio Change in {} Days'.format(days),
                                   y_axis_title='Change (%)'),
-             file_name='pct_change',
-             pct_change=True)
+             file_name='pct_change')
 #---------------------------------------------------------------------------------->
     if args.linear or args.log:
         plot(data=_build_data(),
-             layout=_build_layout(title='Portfolio in {} Days'.format(days),
+             layout=_build_layout(title='Portfolio {} in {} Days'.format('Linear' if args.linear else 'Log Scale', days),
                                   y_axis_title='Price ({})'.format(currency.upper()),
                                   y_axis_type='linear' if args.linear else 'log'),
              file_name='linear' if args.linear else 'log')
@@ -115,7 +115,34 @@ def main():
                                   y_axis_title='Price ({})'.format(currency.upper())),
              file_name='forecast')
 #---------------------------------------------------------------------------------->
-
+    if args.correlation:
+        base_df = pd.read_csv('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day,
+                                                                todays_month,
+                                                                coins[0],
+                                                                days,
+                                                                currency))
+        for coin in coins:
+            coin_price = pd.read_csv('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day,
+                                                            todays_month,
+                                                            coin,
+                                                            days,
+                                                            currency))
+            base_df[coin] = coin_price['prices']
+        base_df.set_index('date', inplace=True)
+        base_df.drop(['market_caps','prices','total_volumes'], 1, inplace=True)
+        base_df.to_csv('datasets/teste_correlation.csv')
+        heatmap = go.Heatmap(
+            z=base_df.pct_change().corr(method='pearson').values,
+            x=base_df.pct_change().columns,
+            y=base_df.pct_change().columns,
+            colorbar=dict(title='Pearson Coefficient'),
+            colorscale=[[0, 'rgb(255,0,0)'], [1, 'rgb(0,255,0)']],
+            zmin=-1.0,
+            zmax=1.0
+        )
+        plot(data=[heatmap],
+             layout=_build_layout(title='Correlation heatmap - {} days'.format(days)),
+             file_name='correlation')
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Deep analysis of cryptocurrencies')
@@ -128,3 +155,4 @@ if __name__ == '__main__':
     parser.add_argument('--forecast_scale', '-fs', type=float, default=0.1, help='plot forecast graph')
     args = parser.parse_args()
     main()
+    print_dollar()

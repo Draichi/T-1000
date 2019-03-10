@@ -4,6 +4,7 @@ import plotly.graph_objs as go
 import plotly.offline as offline
 # correlation methods: {pearson, kendall, spearman} 
 # correlation or covariance?
+#  Dirichlet distribution.
 #---------------------------------------------------------------------------------->
 def _get_coin_data(coin):
     df = pd.read_csv('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day,
