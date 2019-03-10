@@ -2,6 +2,8 @@ import pandas as pd
 from configs.vars import coins, days, todays_day, todays_month, currency
 import plotly.graph_objs as go
 import plotly.offline as offline
+# correlation methods: {pearson, kendall, spearman} 
+# correlation or covariance?
 #---------------------------------------------------------------------------------->
 def _get_coin_data(coin):
     df = pd.read_csv('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day,
@@ -29,7 +31,10 @@ heatmap = go.Heatmap(
     z=base_df.pct_change().corr(method='pearson').values,
     x=base_df.pct_change().columns,
     y=base_df.pct_change().columns,
-    colorbar=dict(title='Pearson Coefficient')
+    colorbar=dict(title='Pearson Coefficient'),
+    colorscale=[[0, 'rgb(255,0,0)'], [1, 'rgb(0,255,0)']],
+    zmin=-1.0,
+    zmax=1.0
 )
 layout = go.Layout(
     title='Correlation heatmap - {} days'.format(days),
@@ -37,6 +42,4 @@ layout = go.Layout(
     paper_bgcolor='#2d2929',
     font=dict(color='rgb(255, 255, 255)')
 )
-heatmap['zmax'] = 1.0
-heatmap['zmin'] = -1.0
 offline.plot({'data': [heatmap],'layout': layout})
