@@ -83,27 +83,27 @@ def main():
     """[summary]
     """
 
-    if args.change:
+    if FLAGS.change:
         plot(data=_build_data(pct_change=True),
              layout=_build_layout(title='Portfolio Change in {} Days'.format(days),
                                   y_axis_title='Change (%)'),
              file_name='pct_change')
 #---------------------------------------------------------------------------------->
-    if args.linear or args.log:
+    if FLAGS.linear or FLAGS.log:
         plot(data=_build_data(),
-             layout=_build_layout(title='Portfolio {} in {} Days'.format('Linear' if args.linear else 'Log Scale', days),
+             layout=_build_layout(title='Portfolio {} in {} Days'.format('Linear' if FLAGS.linear else 'Log Scale', days),
                                   y_axis_title='Price ({})'.format(currency.upper()),
-                                  y_axis_type='linear' if args.linear else 'log'),
-             file_name='linear' if args.linear else 'log')
+                                  y_axis_type='linear' if FLAGS.linear else 'log'),
+             file_name='linear' if FLAGS.linear else 'log')
 #---------------------------------------------------------------------------------->
-    if args.forecast_coin and args.forecast_days and args.forecast_scale:
-        df = pd.read_csv('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day,todays_month,args.forecast_coin,days,currency))
+    if FLAGS.forecast_coin and FLAGS.forecast_days and FLAGS.forecast_scale:
+        df = pd.read_csv('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day,todays_month,FLAGS.forecast_coin,days,currency))
         df['ds'] = df['date']
         df['y'] = df['prices']
         df = df[['ds', 'y']]
-        df_prophet = fbprophet.Prophet(changepoint_prior_scale=args.forecast_scale)
+        df_prophet = fbprophet.Prophet(changepoint_prior_scale=FLAGS.forecast_scale)
         df_prophet.fit(df)
-        df_forecast = df_prophet.make_future_dataframe(periods=int(args.forecast_days))
+        df_forecast = df_prophet.make_future_dataframe(periods=int(FLAGS.forecast_days))
         df_forecast = df_prophet.predict(df_forecast)
         data = [
             go.Scatter(x=df['ds'], y=df['y'], name='Price', line=dict(color='#94B7F5')),
@@ -112,11 +112,11 @@ def main():
             go.Scatter(x=df_forecast['ds'], y=df_forecast['yhat_lower'], fill='tonexty', mode='none', name='yhat_lower', fillcolor='rgba(252,201,5,.05)'),
         ]
         plot(data=data,
-             layout=_build_layout(title='{} Days of {} Forecast'.format(args.forecast_days, currency.upper()),
+             layout=_build_layout(title='{} Days of {} Forecast'.format(FLAGS.forecast_days, currency.upper()),
                                   y_axis_title='Price ({})'.format(currency.upper())),
              file_name='forecast')
 #---------------------------------------------------------------------------------->
-    if args.correlation:
+    if FLAGS.correlation:
         base_df = pd.read_csv('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day,
                                                                 todays_month,
                                                                 coins[0],
@@ -133,7 +133,7 @@ def main():
         base_df.drop(['market_caps','prices','total_volumes'], 1, inplace=True)
         base_df.to_csv('datasets/teste_correlation.csv')
         heatmap = go.Heatmap(
-            z=base_df.pct_change().corr(method='pearson').values,
+            z=base_df.pct_change().corr(method=FLAGS.correlation).values,
             x=base_df.pct_change().columns,
             y=base_df.pct_change().columns,
             colorbar=dict(title='Pearson Coefficient'),
@@ -142,18 +142,18 @@ def main():
             zmax=1.0
         )
         plot(data=[heatmap],
-             layout=_build_layout(title='Correlation heatmap - {} days'.format(days)),
+             layout=_build_layout(title='{} Correlation Heatmap - {} days'.format(FLAGS.correlation, days).title()),
              file_name='correlation')
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Deep analysis of cryptocurrencies')
-    parser.add_argument('--correlation', action='store_true', help='plot correlation')
+    parser.add_argument('--correlation', type=str, default=None, help='plot correlation with method - {pearson, kendall, spearman} ')
     parser.add_argument('--change', action='store_true', help='plot percent change')
     parser.add_argument('--linear', action='store_true', help='plot linear graph')
     parser.add_argument('--log', action='store_true', help='plot log graph')
     parser.add_argument('--forecast_coin', '-fc', type=str, help='plot forecast graph')
     parser.add_argument('--forecast_days', '-fd', type=int, default=5, help='plot forecast graph')
     parser.add_argument('--forecast_scale', '-fs', type=float, default=0.1, help='plot forecast graph')
-    args = parser.parse_args()
+    FLAGS = parser.parse_args()
     main()
     print_dollar()
