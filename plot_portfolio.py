@@ -6,6 +6,7 @@ Run:
     python plot_portfolio.py --help
 """
 
+import configs.get_datasets
 import pandas as pd
 import numpy as np
 from configs.vars import coins, days, todays_day, todays_month, currency

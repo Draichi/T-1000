@@ -2,9 +2,17 @@ import pandas as pd
 from configs.vars import coins, days, todays_day, todays_month, currency
 import plotly.graph_objs as go
 import plotly.offline as offline
-# correlation methods: {pearson, kendall, spearman} 
-# correlation or covariance?
-#  Dirichlet distribution.
+"""
+- correlation methods: {pearson, kendall, spearman} 
+- correlation or covariance?
+- Dirichlet distribution.
+- normalizing an array:
+    >>> x = np.array([1.0, -1.0, 5, 10])
+    >>> array([ 1., -1.,  5., 10.])
+    >>> norm = normalize(x[:,np.newaxis], axis=0).ravel()
+    >>> array([ 0.08873565, -0.08873565,  0.44367825,  0.88735651])
+
+"""
 #---------------------------------------------------------------------------------->
 def _get_coin_data(coin):
     df = pd.read_csv('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day,
