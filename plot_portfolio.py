@@ -91,13 +91,18 @@ def main():
 #---------------------------------------------------------------------------------->
     if FLAGS.linear or FLAGS.log:
         plot(data=_build_data(),
-             layout=_build_layout(title='Portfolio {} in {} Days'.format('Linear' if FLAGS.linear else 'Log Scale', days),
+             layout=_build_layout(title='Portfolio {} in {} Days'.format('Linear' if FLAGS.linear 
+                                                                         else 'Log Scale', days),
                                   y_axis_title='Price ({})'.format(currency.upper()),
                                   y_axis_type='linear' if FLAGS.linear else 'log'),
              file_name='linear' if FLAGS.linear else 'log')
 #---------------------------------------------------------------------------------->
     if FLAGS.forecast_coin and FLAGS.forecast_days and FLAGS.forecast_scale:
-        df = pd.read_csv('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day,todays_month,FLAGS.forecast_coin,days,currency))
+        df = pd.read_csv('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day,
+                                                               todays_month,
+                                                               FLAGS.forecast_coin,
+                                                               days,
+                                                               currency))
         df['ds'] = df['date']
         df['y'] = df['prices']
         df = df[['ds', 'y']]
@@ -108,11 +113,14 @@ def main():
         data = [
             go.Scatter(x=df['ds'], y=df['y'], name='Price', line=dict(color='#94B7F5')),
             go.Scatter(x=df_forecast['ds'], y=df_forecast['yhat'], name='yhat'),
-            go.Scatter(x=df_forecast['ds'], y=df_forecast['yhat_upper'], fill='tonexty', mode='none', name='yhat_upper', fillcolor='rgba(0,201,253,.21)'),
-            go.Scatter(x=df_forecast['ds'], y=df_forecast['yhat_lower'], fill='tonexty', mode='none', name='yhat_lower', fillcolor='rgba(252,201,5,.05)'),
+            go.Scatter(x=df_forecast['ds'], y=df_forecast['yhat_upper'], fill='tonexty',
+                       mode='none', name='yhat_upper', fillcolor='rgba(0,201,253,.21)'),
+            go.Scatter(x=df_forecast['ds'], y=df_forecast['yhat_lower'], fill='tonexty',
+                       mode='none', name='yhat_lower', fillcolor='rgba(252,201,5,.05)'),
         ]
         plot(data=data,
-             layout=_build_layout(title='{} Days of {} Forecast'.format(FLAGS.forecast_days, currency.upper()),
+             layout=_build_layout(title='{} Days of {} Forecast'.format(FLAGS.forecast_days,
+                                                                        currency.upper()),
                                   y_axis_title='Price ({})'.format(currency.upper())),
              file_name='forecast')
 #---------------------------------------------------------------------------------->
@@ -147,13 +155,13 @@ def main():
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Deep analysis of cryptocurrencies')
-    parser.add_argument('--correlation', type=str, default=None, help='plot correlation with method - {pearson, kendall, spearman} ')
-    parser.add_argument('--change', action='store_true', help='plot percent change')
-    parser.add_argument('--linear', action='store_true', help='plot linear graph')
-    parser.add_argument('--log', action='store_true', help='plot log graph')
-    parser.add_argument('--forecast_coin', '-fc', type=str, help='plot forecast graph')
-    parser.add_argument('--forecast_days', '-fd', type=int, default=5, help='plot forecast graph')
-    parser.add_argument('--forecast_scale', '-fs', type=float, default=0.1, help='plot forecast graph')
+    parser.add_argument('--correlation', type=str, default=None, help='Plot correlation heatmap. Choose the method {pearson, kendall, spearman} ')
+    parser.add_argument('--change', action='store_true', help='Plot portfolio percent change')
+    parser.add_argument('--linear', action='store_true', help='plot portfolio linear prices')
+    parser.add_argument('--log', action='store_true', help='Plot portfolio log prices')
+    parser.add_argument('--forecast_coin', '-fc', type=str, help='Coin name')
+    parser.add_argument('--forecast_days', '-fd', type=int, default=5, help='How many days to forecast')
+    parser.add_argument('--forecast_scale', '-fs', type=float, default=0.1, help='Changepoint priot scale [0.1 ~ 0.9]')
     FLAGS = parser.parse_args()
     main()
     print_dollar()
