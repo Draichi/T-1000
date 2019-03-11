@@ -2,6 +2,8 @@ import threading, requests, os, datetime
 from configs.vars import coins, days, todays_month, todays_day, keys, currency
 import pandas as pd
 from termcolor import cprint
+import colorama
+colorama.init()
 #------------------------------------------------------------->
 def fetch_url(coin):
     if not (os.path.exists('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day, todays_month, coin, days, currency))):
