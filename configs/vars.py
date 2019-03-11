@@ -3,10 +3,11 @@ import datetime, os
 ####### PORTFOLIO: #########
 coins = [
     'enjincoin','ethereum-classic', 'binancecoin', 'litecoin', 'ethereum',
-    'kyber-network', 'steem', 'dash', 'nano', 'zcash', 'eos', 'neo', 'theta-token',
-    'fetch-ai'
+    'kyber-network', 'dash', 'nano', 'zcash', 'eos', 'neo', 'theta-token',
+    'fetch-ai', 'stellar', 'ripple', 'tron', 'icon', 'cardano', 'nexus',
+    'ravencoin', 'etherparty', '0x', 'omisego', 'chainlink', 'ontology'
 ]
-days = '120'
+days = '90'
 currency = 'btc'
 #---------------------------------------------------------------------------------->
 ####### MARKET PARAMETERS: #########
