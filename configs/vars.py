@@ -3,7 +3,7 @@ import datetime, os
 ####### PORTFOLIO: #########
 coins = [
     'ethereum-classic', 'binancecoin', 'litecoin', 'ethereum',
-    # 'dash', 'nano', 'zcash', 'eos', 'neo', 'theta-token',
+    'dash', 'nano', 'zcash', 'eos', 'neo', 'theta-token',
     # 'stellar', 'ripple', 'tron', 'icon', 'cardano', 'nexus',
     # 'ravencoin', 'etherparty', '0x', 'omisego'
 ]
