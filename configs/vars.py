@@ -2,12 +2,12 @@ import datetime, os
 #---------------------------------------------------------------------------------->
 ####### PORTFOLIO: #########
 coins = [
-    'enjincoin','ethereum-classic', 'binancecoin', 'litecoin', 'ethereum',
-    'kyber-network', 'dash', 'nano', 'zcash', 'eos', 'neo', 'theta-token',
-    'fetch-ai', 'stellar', 'ripple', 'tron', 'icon', 'cardano', 'nexus',
-    'ravencoin', 'etherparty', '0x', 'omisego', 'chainlink', 'ontology'
+    'ethereum-classic', 'binancecoin', 'litecoin', 'ethereum',
+    # 'dash', 'nano', 'zcash', 'eos', 'neo', 'theta-token',
+    # 'stellar', 'ripple', 'tron', 'icon', 'cardano', 'nexus',
+    # 'ravencoin', 'etherparty', '0x', 'omisego'
 ]
-days = '90'
+days = '120'
 currency = 'btc'
 #---------------------------------------------------------------------------------->
 ####### MARKET PARAMETERS: #########
@@ -17,7 +17,7 @@ fees = 3
 #---------------------------------------------------------------------------------->
 ####### HYPERPARAMETERS: #########
 epochs = 1
-batch_size = 64 # 4, 8, 16, 32...
+batch_size = 32 # 4, 8, 16, 32...
 gamma = 0.95
 epsilon = 0.1
 epsilon_min = 0.01

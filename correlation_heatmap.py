@@ -6,7 +6,8 @@ import plotly.offline as offline
 - correlation methods: {pearson, kendall, spearman} 
 - correlation or covariance?
 - Dirichlet distribution.
-- normalizing an array:
+- from sklearn.preprocessing import normalize
+  normalizing an array:
     >>> x = np.array([1.0, -1.0, 5, 10])
     >>> array([ 1., -1.,  5., 10.])
     >>> norm = normalize(x[:,np.newaxis], axis=0).ravel()

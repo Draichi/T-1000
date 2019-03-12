@@ -65,7 +65,7 @@ def operate(agent, asset_name, window_size, model_name=False):
 		reward = 0
 		reward_counter = 0
 		next_state = get_state(data, t + 1, window_size + 1)
-		price = data[t][0]
+		price = data[t][1]
 		total_price_plus_fee = (price*n_orders) + fees
 		total_price_minus_fee = (price*n_orders) - fees
 		# --------force buy at first? testig---------
