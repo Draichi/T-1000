@@ -26,33 +26,33 @@ class Agent:
 		model = Sequential()
 
 		# --------------LSTM------------- #
-		# model.add(LSTM(128, input_shape=(self.state_size,3), activation='relu', return_sequences=True))
-		# model.add(Dropout(0.2))
-		# model.add(BatchNormalization())
-		# model.add(LSTM(128, input_shape=(self.state_size,3), activation='relu', return_sequences=True))
-		# model.add(Dropout(0.1))
-		# model.add(BatchNormalization())
-		# model.add(LSTM(128, input_shape=(self.state_size,3), activation='relu', return_sequences=True))
-		# model.add(Dropout(0.2))
-		# model.add(BatchNormalization())
-		# model.add(Flatten())
-		# model.add(Dense(32, activation="relu"))
-		# model.add(Dropout(0.2))
-		# --------------LSTM------------- #
-
-		# --------------GRU-------------- #
-		model.add(GRU(128, input_shape=(self.state_size,n_features), return_sequences=True))
+		model.add(LSTM(128, input_shape=(1,1), activation='relu', return_sequences=True))
 		model.add(Dropout(0.2))
 		model.add(BatchNormalization())
-		model.add(GRU(64, input_shape=(self.state_size,n_features), return_sequences=True))
+		model.add(LSTM(128, input_shape=(self.state_size,1), activation='relu', return_sequences=True))
 		model.add(Dropout(0.1))
 		model.add(BatchNormalization())
-		model.add(GRU(64, input_shape=(self.state_size,n_features), return_sequences=True))
+		model.add(LSTM(128, input_shape=(self.state_size,1), activation='relu', return_sequences=True))
 		model.add(Dropout(0.2))
 		model.add(BatchNormalization())
 		model.add(Flatten())
 		model.add(Dense(32, activation="relu"))
 		model.add(Dropout(0.2))
+		# --------------LSTM------------- #
+
+		# --------------GRU-------------- #
+		# model.add(GRU(128, input_shape=(self.state_size,n_features), return_sequences=True))
+		# model.add(Dropout(0.2))
+		# model.add(BatchNormalization())
+		# model.add(GRU(64, input_shape=(self.state_size,n_features), return_sequences=True))
+		# model.add(Dropout(0.1))
+		# model.add(BatchNormalization())
+		# model.add(GRU(64, input_shape=(self.state_size,n_features), return_sequences=True))
+		# model.add(Dropout(0.2))
+		# model.add(BatchNormalization())
+		# model.add(Flatten())
+		# model.add(Dense(32, activation="relu"))
+		# model.add(Dropout(0.2))
 		# --------------GRU-------------- #
 
         # ----------------CONV2D-----------------#
@@ -100,7 +100,7 @@ class Agent:
 		if not self.is_eval and random.random() <= self.epsilon:
 			return random.randrange(self.action_size)
 
-		options = self.model.predict(state)
+		options = self.model.predict([state])
 
 		return np.argmax(options[0][0])
 
