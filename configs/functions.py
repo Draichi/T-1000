@@ -2,6 +2,8 @@ import numpy as np
 import math, os, keras
 import colorama
 import pandas as pd
+import talib
+
 from sklearn.preprocessing import normalize
 from termcolor import colored
 from keras.models import load_model
@@ -30,14 +32,21 @@ def format_price(n):
 def get_df(asset_name):
     asset = '{}-{}_{}_d{}_{}.csv'.format(todays_day, todays_month, asset_name, days, currency)	
     df = pd.read_csv('datasets/' + asset)
-    df['MA50'] = df['prices'].rolling(50).mean()
-    df['MA20'] = df['prices'].rolling(20).mean()
-    df['price_change'] = df['prices'].pct_change()
-    df['total_volumes_x10e-7'] = df['total_volumes']*0.0000001
-    df['market_caps_x10e-7'] = df['market_caps']*0.0000001
+    df.rename(index=str, columns={'prices': 'close'}, inplace=True)
+    close = np.array(df['close'])
+    df['open'] = df['close'].shift(1)
+    df['price_change'] = df['close'].pct_change()
+    df['SMA'] = talib.SMA(close)
+    df['MOM'] = talib.MOM(close, timeperiod=14)
+    df['CMO'] = talib.CMO(close, timeperiod=14)
+    df['macd'], df['macdsignal'], df['macdhist'] = talib.MACD(close, fastperiod=12, slowperiod=26, signalperiod=9)
+    df['SMA50'] = df['close'].rolling(50).mean()
+    df['SMA20'] = df['close'].rolling(20).mean()
+    df['volume_x10e-7'] = df['total_volumes']*0.0000001
+    df['mark_cap_x10e-7'] = df['market_caps']*0.0000001
     df.dropna(inplace=True)
     df.drop(['total_volumes', 'market_caps'], inplace=True, axis=1)
-    # print(df)
+    print(df.tail(10))
     return df
 #------------------------------------------------------------->
 # returns the sigmoid
@@ -68,16 +77,20 @@ def get_state():
 def operate(agent, asset_name, window_size, model_name=False):
     data = get_df(asset_name)
     data_market_first = data['date'].iloc[0]
-    market_first = data['prices'].iloc[0]
+    market_first = data['close'].iloc[0]
     data_market_last = data['date'].iloc[-1]
-    market_last = data['prices'].iloc[-1]
+    market_last = data['close'].iloc[-1]
     market_percentage = ((market_last - market_first) / ((market_last + market_first) / 2))*100
+
     l = len(data) - 1
     df_without_date = data.drop(['date'], axis=1)
+
     raw_state = df_without_date.iloc[0]
+    # print(raw_state)
     x = np.array(raw_state)
     state = normalize(x[:,np.newaxis], axis=0).ravel()
-
+    print(state)
+    quit()
     w = wallet
     agent.inventory = []
     place_order = 0
