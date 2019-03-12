@@ -100,7 +100,7 @@ class Agent:
 		if not self.is_eval and random.random() <= self.epsilon:
 			return random.randrange(self.action_size)
 
-		options = self.model.predict([state])
+		options = self.model.predict(state)
 
 		return np.argmax(options[0][0])
 
