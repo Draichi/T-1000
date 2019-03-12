@@ -121,4 +121,3 @@ class Agent:
 		
 		if self.epsilon > self.epsilon_min:
 			self.epsilon *= self.epsilon_decay 
-
