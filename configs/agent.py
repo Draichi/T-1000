@@ -122,10 +122,3 @@ class Agent:
 		if self.epsilon > self.epsilon_min:
 			self.epsilon *= self.epsilon_decay 
 
-		# opt = tf.keras.optimizers.Adam(lr=0.001, decay=1e-6)
-		# model.compile(optimizer=opt,loss='sparse_categorical_crossentropy',metrics=['accuracy'])
-		# tensorboard = TensorBoard(log_dir=f'logs/{NAME}')
-		# filepath = 'RNN-{epoch:02d}-{val_acc:.3f}'
-		# checkpoint = ModelCheckpoint('models/{}.model'.format(filepath, monitor='val_acc',verbose=1,save_best_only=True,mode='max'))
-		# history = model.fit(x_train,y_train,batch_size=BATCH_SIZE,epochs=EPOCHS,validation_data=(x_test,y_test),callbacks=[tensorboard,checkpoint])
-
