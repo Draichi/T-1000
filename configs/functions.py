@@ -10,6 +10,12 @@ from keras.models import load_model
 from configs.agent import Agent
 from configs.vars import days, currency, todays_day, todays_month, terminal_width, batch_size, wallet, fees, n_orders
 colorama.init()
+
+# TODO  
+#   - tranformar isso aqui no enviroment.py 
+#   - correlation methods: {pearson, kendall, spearman} 
+#   - correlation or covariance?
+#   - Dirichlet distribution.
 #------------------------------------------------------------->
 def div():
     print(colored("-"*terminal_width,'white'))

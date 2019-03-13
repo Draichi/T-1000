@@ -7,6 +7,11 @@ import numpy as np
 from collections import deque
 from configs.vars import gamma, epsilon, epsilon_min, epsilon_decay, epochs, n_features
 
+
+# TODO 
+#   - tornar o shape dinamico
+#   - usar uma dense layer mesmo para estimar o state action values com plain tensorlfow
+
 class Agent:
 	def __init__(self, state_size, is_eval=False, model_name=""):
 		self.state_size = state_size # normalized previous days

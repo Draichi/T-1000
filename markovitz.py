@@ -10,6 +10,12 @@ from scipy.optimize import minimize
 import ad, random
 # import fbprophet
 
+# TODO:
+#   - fazer com que a correlation seja gerada qnd morkovitza for instanciado
+#   - documentar as funcoes
+#   - plotar com o plotly 
+#   - tunning dos hyperparams
+
 def calc_exp_returns(avg_return, weigths):
     exp_returns = avg_return.dot(weigths.T)
     return exp_returns
@@ -26,7 +32,6 @@ def optimize():
     # exp_return_constraint = [ 0.15, 0.14, 0.13, 0.12, 0.11, 0.10, 0.09, 0.08, 0.07, 0.06,0.05,0.04,0.03]
     results_comparison_dict = {}
     for i in range(len(exp_return_constraint)):
-        print(i, 'optimizeinz')
         res = minimize(
             # object function defined here
             lambda x: var_cov_matrix(df, x),
@@ -35,7 +40,7 @@ def optimize():
             # jacobian using automatic differentiation
             jac=ad.gh(lambda x: var_cov_matrix(df, x))[0],
             bounds=bounds,
-            options={'disp': True, 'ftol': 1e-20, 'maxiter': 500},
+            options={'disp': True, 'ftol': 1e-20, 'maxiter': 1000},
             constraints=[{'type': 'eq', 'fun': lambda x: sum(x) -1.0},
                          {'type': 'eq', 'fun': lambda x: calc_exp_returns(returns, x) - exp_return_constraint[i]}])
         return_key = round(exp_return_constraint[i]*100, 2)
@@ -70,7 +75,7 @@ def plot_weights_per_asset(comparisson):
     plt.show()
 
 if __name__ == '__main__':
-    np.random.seed(123)
+    np.random.seed(11123)
     weigths = np.random.dirichlet(alpha=np.ones(len(coins)), size=1) # makes sure that weights sums upto 1.
     # print(weigths)
     # quit()
