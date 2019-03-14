@@ -6,7 +6,7 @@ import colorama
 colorama.init()
 #------------------------------------------------------------->
 def fetch_url(coin):
-    if not (os.path.exists('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day, todays_month, coin, days, currency))):
+    if not (os.path.exists('datasets/{}-{}_{}_{}_{}.csv'.format(todays_day, todays_month, coin, days, currency))):
         cprint('> downloading {}/{}, {} days dataset, this will take a while'.format(coin, currency,days), 'yellow', attrs=['bold'])
         url = "https://api.coingecko.com/api/v3/coins/{}/market_chart?vs_currency={}&days={}".format(coin, currency, days)
         headers = {'User-Agent': 'Mozilla/5.0'}
@@ -22,7 +22,7 @@ def fetch_url(coin):
                 df.loc[i, 'date'] = dt
                 df.loc[i, key] = value
         df.set_index('date', inplace=True)
-        df.to_csv('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day, todays_month, coin, days, currency))
+        df.to_csv('datasets/{}-{}_{}_{}_{}.csv'.format(todays_day, todays_month, coin, days, currency))
         #------------------------------------------------------------->        
         cprint("> {} fetched and cached".format(coin), 'green', attrs=['bold'])
     else:
