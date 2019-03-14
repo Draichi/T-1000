@@ -36,3 +36,7 @@ keys = ['prices', 'market_caps', 'total_volumes'] # if change this, change confi
 todays_month = datetime.datetime.now().month
 todays_day = datetime.datetime.now().day
 terminal_width = os.get_terminal_size().columns
+
+PATH_TO_CORRELATION_FILE = 'datasets/'+str(todays_day)+'-'+str(todays_month)+'_correlation_'+str(days)+'_'+currency+'.csv'
+PATH_TO_PCT_CORRELATION_FILE = 'datasets/'+str(todays_day)+'-'+str(todays_month)+'_pct_correlation_'+str(days)+'_'+currency+'.csv'
+PATH_TO_COIN_FILE = ['datasets/'+str(todays_day)+'-'+str(todays_month)+'_'+coin+'_'+str(days)+'_'+currency+'.csv' for coin in coins]
