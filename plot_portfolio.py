@@ -9,8 +9,9 @@ Run:
 import configs.get_datasets
 import pandas as pd
 import numpy as np
-from configs.vars import coins, days, todays_day, todays_month, currency, PATH_TO_COIN_FILE, PATH_TO_CORRELATION_FILE, PATH_TO_PCT_CORRELATION_FILE
-from configs.functions import print_dollar
+from configs.vars import coins, days, todays_day, todays_month, currency, PATH_TO_COIN_FILE, \
+    PATH_TO_CORRELATION_FILE, PATH_TO_PCT_CORRELATION_FILE, PATH_TO_WEIGHTS_FILE
+# from configs.functions import print_dollar
 import plotly.graph_objs as go
 import plotly.offline as offline
 import fbprophet
@@ -19,10 +20,13 @@ import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 import ad 
 import random
+from plotly import tools
+import pickle
 np.random.seed(10)
 weigths = np.random.dirichlet(alpha=np.ones(len(coins)), size=1) # makes sure that weights sums upto 1.
+exp_return_constraint = [ 0.007, 0.006, 0.005, 0.004, 0.003, 0.002, 0.001, 0.0009, 0.0008, 0.0007, 0.0006, 0.0005,  0.0004, 0.0003, 0.0002, 0.0001]
 #---------------------------------------------------------------------------------->
-def _build_layout(title, y_axis_title=None, y_axis_type=None):
+def _build_layout(title, x_axis_title=None, y_axis_title=None, y_axis_type=None):
     """[summary]
     
     Arguments:
@@ -37,9 +41,10 @@ def _build_layout(title, y_axis_title=None, y_axis_type=None):
     layout = go.Layout(plot_bgcolor='#2d2929',
                        paper_bgcolor='#2d2929',
                        title=title,
-                       font=dict(color='rgb(255, 255, 255)'),
+                       font=dict(color='rgb(255, 255, 255)', size=17),
                        legend=dict(orientation="h"),
-                       yaxis=dict(title=y_axis_title, type=y_axis_type))
+                       yaxis=dict(title=y_axis_title, type=y_axis_type),
+                       xaxis=dict(title=x_axis_title))
     return layout
 #---------------------------------------------------------------------------------->
 def _build_data(pct_change=False):
@@ -105,7 +110,6 @@ def optimize():
 
     bounds = ((0.0, 1.),) * len(coins) # bounds of the problem
     # [0.7%, 0.6% , 0.5% ... 0.1%] returns
-    exp_return_constraint = [ 0.007, 0.006, 0.005, 0.004, 0.003, 0.002, 0.001, 0.0009, 0.0008, 0.0007, 0.0006, 0.0005,  0.0004, 0.0003, 0.0002, 0.0001]
     # exp_return_constraint = [ 0.15, 0.14, 0.13, 0.12, 0.11, 0.10, 0.09, 0.08, 0.07, 0.06,0.05,0.04,0.03]
     results_comparison_dict = {}
     for i in range(len(exp_return_constraint)):
@@ -128,32 +132,28 @@ def optimize():
 def plot_efficient_frontier(comparison):
     z = [[x, comparison[x][0]*100] for x in comparison]
     objects, risk_vals = list(zip(*z))
-    t_pos = np.arange(len(objects))
-    plt.scatter(risk_vals, objects)
-    plt.xlabel('Risk %')
-    plt.ylabel('Expected returns %')
-    plt.title('Risk associated with different levels of returns')
-    plt.show()
+    # t_pos = np.arange(len(objects))
+    data = go.Scatter(x=risk_vals, y=objects, mode='markers', marker=dict(size=20))
+    plot(data=[data],
+         layout=_build_layout(title='Risk associated with different levels of returns',
+                            y_axis_title='Expected returns %',
+                            x_axis_title='Risk %'),
+             file_name='efficient_frontier')
 #---------------------------------------------------------------------------------->
-
 def plot_weights_per_asset(comparisson):
-    y_pos = np.arange(len(coins))
-    keys = list(sorted(list(comparisson.keys())))
-    colors = ['red', 'b', 'g', 'k', 'm', 'y', 'c', 'coral']
+    keys = sorted(list(comparisson.keys()))
     index = 0
-    plt.figure(0)
-    for i in range(4):
-        for j in range(4):
-            if (index == len(keys)): break
-            ax = plt.subplot2grid((4,4), (i,j))
-            ax.bar(y_pos, comparisson[keys[index]][1], align='center', alpha=0.5, color=random.choice(colors))
-            ax.set_xticklabels(['']+coins)
-            ax.tick_params(axis='x', labelsize=8)
-            ax.legend([keys[index]])
+    fig = tools.make_subplots(rows=4, cols=4, subplot_titles=(keys))
+    for i in range(1,5):
+        for j in range(1,5):
+            trace = go.Bar(x=coins, y=comparisson[keys[index]][1], name=keys[index])
+            fig.append_trace(trace, i, j)
             index += 1
-    plt.show()
-
-
+    fig['layout'].update(title='Weights per asset at different expected returns (%)',
+                         font=dict(color='rgb(255, 255, 255)'),
+                         paper_bgcolor='#2d2929',
+                         plot_bgcolor='#2d2929')
+    offline.plot(fig, filename='weights.html')
 #---------------------------------------------------------------------------------->
 def plot(data, layout, file_name):
     """Plot the data according to data and layout functions.
@@ -172,7 +172,7 @@ def plot(data, layout, file_name):
                  filename=file_name + '-' + str(todays_day) + '_' + str(todays_month) + '-' + currency + '.html')
 #---------------------------------------------------------------------------------->
 def main():
-    """[summary]
+    """Run each code with respect to each flag
     """
     if FLAGS.change:
         plot(data=_build_data(pct_change=True),
@@ -231,10 +231,15 @@ def main():
              file_name='correlation')
 #---------------------------------------------------------------------------------->
     if FLAGS.efficient_frontier:
-                
-        # PORTFOLIO OPTIMIZATION AND RESULTS
-        res, comparison = optimize()
+        if not (os.path.exists(PATH_TO_WEIGHTS_FILE)):
 
+        # PORTFOLIO OPTIMIZATION AND RESULTS
+            res, comparison = optimize()
+            with open(PATH_TO_WEIGHTS_FILE, "wb") as fp:
+                pickle.dump(comparison, fp)
+        else:
+            with open(PATH_TO_WEIGHTS_FILE, "rb") as fp:
+                comparison = pickle.load(fp)
         plot_efficient_frontier(comparison)
         plot_weights_per_asset(comparison)
 
@@ -252,4 +257,4 @@ if __name__ == '__main__':
     parser.add_argument('--forecast_scale', '-fs', type=float, default=0.1, help='Changepoint priot scale [0.1 ~ 0.9]')
     FLAGS = parser.parse_args()
     main()
-    print_dollar()
+    # print_dollar()

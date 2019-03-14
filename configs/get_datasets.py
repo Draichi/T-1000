@@ -28,7 +28,6 @@ def fetch_url(coin):
     else:
         cprint('> loading {} from cache'.format(coin), 'blue', attrs=['bold'])
 #------------------------------------------------------------->
-print(chr(27) + "[2J")
 threads = [threading.Thread(target=fetch_url, args=(coin,)) for coin in coins]
 for thread in threads:
     thread.start()

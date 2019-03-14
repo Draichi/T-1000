@@ -13,7 +13,7 @@ colorama.init()
 
 # TODO  
 #   - tranformar isso aqui no enviroment.py 
-#   - correlation methods: {pearson, kendall, spearman} 
+#   X correlation methods: {pearson, kendall, spearman} 
 #   - correlation or covariance?
 #   - Dirichlet distribution.
 #------------------------------------------------------------->

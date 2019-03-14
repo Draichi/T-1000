@@ -11,10 +11,10 @@ import ad, random
 # import fbprophet
 
 # TODO:
-#   - fazer com que a correlation seja gerada qnd morkovitza for instanciado
+#   X fazer com que a correlation seja gerada qnd morkovitza for instanciado
 #   - documentar as funcoes
-#   - plotar com o plotly 
-#   - tunning dos hyperparams
+#   X plotar com o plotly 
+#   - tornnar o tamanho do plot dinamico em relaçao a quantidade de exp_return_constants
 
 def calc_exp_returns(avg_return, weigths):
     exp_returns = avg_return.dot(weigths.T)
