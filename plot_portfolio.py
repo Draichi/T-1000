@@ -4,40 +4,114 @@ Plot diffrent portfolio informations
 
 Run:
     python plot_portfolio.py --help
-"""
 
-import configs.get_datasets
-import pandas as pd
-import numpy as np
-from configs.vars import coins, days, todays_day, todays_month, currency, PATH_TO_COIN_FILE, \
-    PATH_TO_CORRELATION_FILE, PATH_TO_PCT_CORRELATION_FILE, PATH_TO_WEIGHTS_FILE
-# from configs.functions import print_dollar
-import plotly.graph_objs as go
-import plotly.offline as offline
-import fbprophet
-import os
-import matplotlib.pyplot as plt
-from scipy.optimize import minimize
-import ad 
-import random
-from plotly import tools
-import pickle
-np.random.seed(10)
-weigths = np.random.dirichlet(alpha=np.ones(len(coins)), size=1) # makes sure that weights sums upto 1.
-exp_return_constraint = [ 0.007, 0.006, 0.005, 0.004, 0.003, 0.002, 0.001, 0.0009, 0.0008, 0.0007, 0.0006, 0.0005,  0.0004, 0.0003, 0.0002, 0.0001]
+Written in 2018 - Lucas Draichi
+"""
+# TODO:
+# - decorators
+#  X fazer com que a correlation seja gerada qnd morkovitza for instanciado
+#   - documentar as funcoes
+#   X plotar com o plotly 
+#   - tornnar o tamanho do plot dinamico em relaçao a quantidade de exp_return_constants
+# correlation methods: {pearson, kendall, spearman} 
+#- correlation or covariance?
+#- Dirichlet distribution.
+#- from sklearn.preprocessing import normalize
+#  normalizing an array:
+#    >>> x = np.array([1.0, -1.0, 5, 10])
+#    >>> array([ 1., -1.,  5., 10.])
+#    >>> norm = normalize(x[:,np.newaxis], axis=0).ravel()
+#    >>> array([ 0.08873565, -0.08873565,  0.44367825,  0.88735651])
+
+#
+def main():
+    """Run each code with respect to each flag"""
+    if FLAGS.portfolio_change:
+        plot(data=_build_data(pct_change=True),
+             layout=_build_layout(title='Portfolio Change in {} Days'.format(days),
+                                  y_axis_title='Change (%)'),
+             file_name='pct_change')
+#----------------------------------------------------------------------------------------------------------------->
+    if FLAGS.portfolio_linear or FLAGS.portfolio_log:
+        plot(data=_build_data(),
+             layout=_build_layout(title='Portfolio {} in {} Days'.format('Linear' if FLAGS.portfolio_linear 
+                                                                         else 'Log Scale', days),
+                                  y_axis_title='Price ({})'.format(currency.upper()),
+                                  y_axis_type='linear' if FLAGS.portfolio_linear else 'log'),
+             file_name='linear' if FLAGS.portfolio_linear else 'log')
+#----------------------------------------------------------------------------------------------------------------->
+    if FLAGS.fc and FLAGS.fd and FLAGS.fs:
+        df = pd.read_csv('datasets/{}-{}_{}_{}_{}.csv'.format(todays_day, todays_month, FLAGS.fc, days, currency))
+        df_prophet = fbprophet.Prophet(changepoint_prior_scale=FLAGS.fs)
+        df.rename(index=str, columns={'date': 'ds', 'prices': 'y'}, inplace=True)
+        df_prophet.fit(df[['ds', 'y']])
+        df_forecast = df_prophet.make_future_dataframe(periods=int(FLAGS.fd))
+        df_forecast = df_prophet.predict(df_forecast)
+        data = [go.Scatter(x=df['ds'],
+                           y=df['y'],
+                           name='Price',
+                           line=dict(color='#94B7F5')),
+                go.Scatter(x=df_forecast['ds'], y=df_forecast['yhat'], name='yhat'),
+                go.Scatter(x=df_forecast['ds'],
+                           y=df_forecast['yhat_upper'],
+                           fill='tonexty',
+                           mode='none',
+                           name='yhat_upper',
+                           fillcolor='rgba(0,201,253,.21)'),
+                go.Scatter(x=df_forecast['ds'],
+                           y=df_forecast['yhat_lower'],
+                           fill='tonexty',
+                           mode='none',
+                           name='yhat_lower',
+                           fillcolor='rgba(252,201,5,.05)'),]
+        plot(data=data,
+             file_name='forecast',
+             layout=_build_layout(title='{} Days of {} Forecast'.format(FLAGS.fd,FLAGS.fc).title(),
+                                  y_axis_title='Price ({})'.format(currency.upper())))
+#---------------------------------------------------------------------------------->
+    if FLAGS.correlation:
+        base_df = _build_correlation_df()
+        heatmap = go.Heatmap(z=base_df.pct_change().corr(method=FLAGS.correlation_method).values,
+                             x=base_df.pct_change().columns,
+                             y=base_df.pct_change().columns,
+                             colorbar=dict(title='Pearson Coefficient'),
+                             colorscale=[[0, 'rgb(255,0,0)'], [1, 'rgb(0,255,0)']],
+                             zmin=-1.0,
+                             zmax=1.0)
+        plot(data=[heatmap],
+             layout=_build_layout(title='{} Correlation Heatmap - {} days'.format(FLAGS.correlation_method, days).title()),
+             file_name='correlation')
+#---------------------------------------------------------------------------------->
+    if FLAGS.efficient_frontier or FLAGS.portfolio_weights:
+        if not (os.path.exists(PATH_TO_WEIGHTS_FILE)):
+            res, comparison = _optimize_weights()
+            with open(PATH_TO_WEIGHTS_FILE, "wb") as fp:
+                pickle.dump(comparison, fp)
+        else:
+            with open(PATH_TO_WEIGHTS_FILE, "rb") as fp:
+                comparison = pickle.load(fp)
+        _plot_efficient_frontier(comparison) if FLAGS.efficient_frontier else _plot_weights_per_asset(comparison)
+
 #---------------------------------------------------------------------------------->
 def _build_layout(title, x_axis_title=None, y_axis_title=None, y_axis_type=None):
-    """[summary]
+    """Call plotly.go.Layout
     
     Arguments:
-        title {[type]} -- [description]
-        y_axis_title {[type]} -- [description]
+        title {[str]} -- [Title of the graph]
     
     Keyword Arguments:
+        x_axis_title {[type]} -- [description] (default: {None})
+        y_axis_title {[type]} -- [description] (default: {None})
         y_axis_type {[type]} -- [description] (default: {None})
     
     Returns:
-        [type] -- [description]"""
+        [Class Layout()] -- [Plotly layout object]
+
+        >>> go.Layout()
+        >>> Layout()
+        >>> type(go.Layout())
+        >>> <class 'plotly.graph_objs._layout.Layout'> 
+    """
     layout = go.Layout(plot_bgcolor='#2d2929',
                        paper_bgcolor='#2d2929',
                        title=title,
@@ -94,29 +168,49 @@ def _build_correlation_df(pct_change=False):
 #---------------------------------------------------------------------------------->
 
 def calc_exp_returns(avg_return, weigths):
+    """[summary]
+    
+    Arguments:
+        avg_return {[type]} -- [description]
+        weigths {[type]} -- [description]
+    
+    Returns:
+        [type] -- [description]
+    """
     exp_returns = avg_return.dot(weigths.T)
     return exp_returns
 #---------------------------------------------------------------------------------->
 
 def var_cov_matrix(df, weigths):
+    """[summary]
+    
+    Arguments:
+        df {[type]} -- [description]
+        weigths {[type]} -- [description]
+    
+    Returns:
+        [type] -- [description]
+    """
+
     sigma = np.cov(np.array(df).T, ddof=0) # covariance
     var = (np.array(weigths) * sigma * np.array(weigths).T).sum()
     return var
 #---------------------------------------------------------------------------------->
 
-def optimize():
+def _optimize_weights():
+    """[summary]
+    
+    Returns:
+        [type] -- [description]
+    """
     df = _build_correlation_df(pct_change=True)
     returns = df.mean()
-
-    bounds = ((0.0, 1.),) * len(coins) # bounds of the problem
-    # [0.7%, 0.6% , 0.5% ... 0.1%] returns
-    # exp_return_constraint = [ 0.15, 0.14, 0.13, 0.12, 0.11, 0.10, 0.09, 0.08, 0.07, 0.06,0.05,0.04,0.03]
     results_comparison_dict = {}
     for i in range(len(exp_return_constraint)):
         res = minimize(
             # object function defined here
-            lambda x: var_cov_matrix(df, x),
-            weigths,
+            fun=lambda x: var_cov_matrix(df, x),
+            x0=weigths,
             method='SLSQP',
             # jacobian using automatic differentiation
             jac=ad.gh(lambda x: var_cov_matrix(df, x))[0],
@@ -129,7 +223,7 @@ def optimize():
     return res, results_comparison_dict
 #---------------------------------------------------------------------------------->
 
-def plot_efficient_frontier(comparison):
+def _plot_efficient_frontier(comparison):
     z = [[x, comparison[x][0]*100] for x in comparison]
     objects, risk_vals = list(zip(*z))
     # t_pos = np.arange(len(objects))
@@ -140,20 +234,20 @@ def plot_efficient_frontier(comparison):
                             x_axis_title='Risk %'),
              file_name='efficient_frontier')
 #---------------------------------------------------------------------------------->
-def plot_weights_per_asset(comparisson):
+def _plot_weights_per_asset(comparisson):
     keys = sorted(list(comparisson.keys()))
     index = 0
     fig = tools.make_subplots(rows=4, cols=4, subplot_titles=(keys))
     for i in range(1,5):
         for j in range(1,5):
-            trace = go.Bar(x=coins, y=comparisson[keys[index]][1], name=keys[index])
-            fig.append_trace(trace, i, j)
+            trace = go.Bar(x=coins, y=comparisson[keys[index]][1], name='{} %'.format(keys[index]))
+            fig.add_trace(trace, row=i, col=j)
             index += 1
     fig['layout'].update(title='Weights per asset at different expected returns (%)',
-                         font=dict(color='rgb(255, 255, 255)'),
+                         font=dict(color='rgb(255, 255, 255)', size=14),
                          paper_bgcolor='#2d2929',
                          plot_bgcolor='#2d2929')
-    offline.plot(fig, filename='weights.html')
+    offline.plot(fig, filename='weights-{}_{}-{}.html'.format(todays_day, todays_month, currency))
 #---------------------------------------------------------------------------------->
 def plot(data, layout, file_name):
     """Plot the data according to data and layout functions.
@@ -171,90 +265,43 @@ def plot(data, layout, file_name):
                  'layout': layout},
                  filename=file_name + '-' + str(todays_day) + '_' + str(todays_month) + '-' + currency + '.html')
 #---------------------------------------------------------------------------------->
-def main():
-    """Run each code with respect to each flag
-    """
-    if FLAGS.change:
-        plot(data=_build_data(pct_change=True),
-             layout=_build_layout(title='Portfolio Change in {} Days'.format(days),
-                                  y_axis_title='Change (%)'),
-             file_name='pct_change')
-#---------------------------------------------------------------------------------->
-    if FLAGS.linear or FLAGS.log:
-        plot(data=_build_data(),
-             layout=_build_layout(title='Portfolio {} in {} Days'.format('Linear' if FLAGS.linear 
-                                                                         else 'Log Scale', days),
-                                  y_axis_title='Price ({})'.format(currency.upper()),
-                                  y_axis_type='linear' if FLAGS.linear else 'log'),
-             file_name='linear' if FLAGS.linear else 'log')
-#---------------------------------------------------------------------------------->
-    if FLAGS.forecast_coin and FLAGS.forecast_days and FLAGS.forecast_scale:
-        df = pd.read_csv('datasets/{}-{}_{}_d{}_{}.csv'.format(todays_day,
-                                                               todays_month,
-                                                               FLAGS.forecast_coin,
-                                                               days,
-                                                               currency))
-        df['ds'] = df['date']
-        df['y'] = df['prices']
-        df = df[['ds', 'y']]
-        df_prophet = fbprophet.Prophet(changepoint_prior_scale=FLAGS.forecast_scale)
-        df_prophet.fit(df)
-        df_forecast = df_prophet.make_future_dataframe(periods=int(FLAGS.forecast_days))
-        df_forecast = df_prophet.predict(df_forecast)
-        data = [
-            go.Scatter(x=df['ds'], y=df['y'], name='Price', line=dict(color='#94B7F5')),
-            go.Scatter(x=df_forecast['ds'], y=df_forecast['yhat'], name='yhat'),
-            go.Scatter(x=df_forecast['ds'], y=df_forecast['yhat_upper'], fill='tonexty',
-                       mode='none', name='yhat_upper', fillcolor='rgba(0,201,253,.21)'),
-            go.Scatter(x=df_forecast['ds'], y=df_forecast['yhat_lower'], fill='tonexty',
-                       mode='none', name='yhat_lower', fillcolor='rgba(252,201,5,.05)'),
-        ]
-        plot(data=data,
-             layout=_build_layout(title='{} Days of {} Forecast'.format(FLAGS.forecast_days,
-                                                                        currency.upper()),
-                                  y_axis_title='Price ({})'.format(currency.upper())),
-             file_name='forecast')
-#---------------------------------------------------------------------------------->
-    if FLAGS.correlation:
-        base_df = _build_correlation_df()
-        heatmap = go.Heatmap(
-            z=base_df.pct_change().corr(method=FLAGS.correlation_method).values,
-            x=base_df.pct_change().columns,
-            y=base_df.pct_change().columns,
-            colorbar=dict(title='Pearson Coefficient'),
-            colorscale=[[0, 'rgb(255,0,0)'], [1, 'rgb(0,255,0)']],
-            zmin=-1.0,
-            zmax=1.0
-        )
-        plot(data=[heatmap],
-             layout=_build_layout(title='{} Correlation Heatmap - {} days'.format(FLAGS.correlation, days).title()),
-             file_name='correlation')
-#---------------------------------------------------------------------------------->
-    if FLAGS.efficient_frontier:
-        if not (os.path.exists(PATH_TO_WEIGHTS_FILE)):
-
-        # PORTFOLIO OPTIMIZATION AND RESULTS
-            res, comparison = optimize()
-            with open(PATH_TO_WEIGHTS_FILE, "wb") as fp:
-                pickle.dump(comparison, fp)
-        else:
-            with open(PATH_TO_WEIGHTS_FILE, "rb") as fp:
-                comparison = pickle.load(fp)
-        plot_efficient_frontier(comparison)
-        plot_weights_per_asset(comparison)
 
 if __name__ == '__main__':
     import argparse
-    parser = argparse.ArgumentParser(description='Deep analysis of cryptocurrencies')
-    parser.add_argument('--correlation_method', type=str, const='pearson', nargs='?', default='pearson', help='Choose the method {pearson, kendall, spearman}')
-    parser.add_argument('--correlation', action='store_true', help='Plot correlation heatmap')
+    parser = argparse.ArgumentParser(description='\nDeep analysis of cryptocurrencies')
     parser.add_argument('--efficient_frontier', action='store_true', help='Plot portfolio efficient frontier')
-    parser.add_argument('--change', action='store_true', help='Plot portfolio percent change')
-    parser.add_argument('--linear', action='store_true', help='plot portfolio linear prices')
-    parser.add_argument('--log', action='store_true', help='Plot portfolio log prices')
-    parser.add_argument('--forecast_coin', '-fc', type=str, help='Coin name')
-    parser.add_argument('--forecast_days', '-fd', type=int, default=5, help='How many days to forecast')
-    parser.add_argument('--forecast_scale', '-fs', type=float, default=0.1, help='Changepoint priot scale [0.1 ~ 0.9]')
+    parser.add_argument('--portfolio_weights', action='store_true', help='Plot portfolio efficient frontier')
+    parser.add_argument('--portfolio_change', action='store_true', help='Plot portfolio percent change')
+    parser.add_argument('--portfolio_linear', action='store_true', help='plot portfolio linear prices')
+    parser.add_argument('--portfolio_log', action='store_true', help='Plot portfolio log prices')
+    parser.add_argument('--fc', type=str, help='Coin name to forecast')
+    parser.add_argument('--fd', type=int, default=5, help='How many days to forecast')
+    parser.add_argument('--fs', type=float, default=0.1, help='Changepoint priot scale [0.1 ~ 0.9]')
+    parser.add_argument('--correlation', action='store_true', help='Plot correlation heatmap')
+    parser.add_argument('--correlation_method',
+                        type=str, 
+                        const='pearson',
+                        nargs='?', default='pearson', help='Choose the method {pearson, kendall, spearman}')
     FLAGS = parser.parse_args()
+    import configs.get_datasets
+    import pandas as pd
+    import numpy as np
+    from configs.vars import coins, days, todays_day, todays_month, currency, PATH_TO_COIN_FILE, \
+        PATH_TO_CORRELATION_FILE, PATH_TO_PCT_CORRELATION_FILE, PATH_TO_WEIGHTS_FILE
+    # from configs.functions import print_dollar
+    import plotly.graph_objs as go
+    import plotly.offline as offline
+    import fbprophet
+    import os
+    import matplotlib.pyplot as plt
+    from scipy.optimize import minimize
+    #https://docs.scipy.org/doc/scipy-0.13.0/reference/generated/scipy.optimize.minimize.html
+    import ad 
+    import random
+    from plotly import tools
+    import pickle
+    weigths = np.random.dirichlet(alpha=np.ones(len(coins)), size=1) # makes sure that weights sums upto 1.
+    exp_return_constraint = [ 0.007, 0.006, 0.005, 0.004, 0.003, 0.002, 0.001, 0.0009, 0.0008, 0.0007, 0.0006, 0.0005,  0.0004, 0.0003, 0.0002, 0.0001]
+    bounds = ((0.0, 1.),) * len(coins) # bounds of the problem
     main()
     # print_dollar()
