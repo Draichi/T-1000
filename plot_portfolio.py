@@ -32,11 +32,30 @@ def main():
                                   y_axis_title='Change (%)'),
              file_name='pct_change')
 #----------------------------------------------------------------------------------------------------------------->
+    if FLAGS.plot_coin:
+        df = pd.read_csv('datasets/{}_{}_{}_{}.csv'.format(FLAGS.plot_coin.upper(), TIME_INTERVAL, FROM_DATE, TO_DATE))
+        fig = tools.make_subplots(rows=2, cols=1)
+
+        for key in FIELDS_PLOT_1:
+            trace1 = go.Scatter(x=df.Date,
+                                y=df[key],
+                                name = str(key))
+            fig.append_trace(trace1, 1, 1)
+
+        for key in FIELDS_PLOT_2:
+            trace2 = go.Scatter(x=df.Date,
+                                y=df[key],
+                                name = str(key))
+            fig.append_trace(trace2, 2, 1)
+
+        offline.plot(fig, filename='docs/teste.html')
+
+#----------------------------------------------------------------------------------------------------------------->
     if FLAGS.portfolio_linear or FLAGS.portfolio_log:
         plot(data=_build_data(),
-             layout=_build_layout(title='Portfolio {} in {} Days'.format('Linear' if FLAGS.portfolio_linear 
-                                                                         else 'Log Scale', days),
-                                  y_axis_title='Price ({})'.format(currency.upper()),
+             layout=_build_layout(title='Portfolio {}'.format('Linear' if FLAGS.portfolio_linear 
+                                                                         else 'Log Scale'),
+                                  y_axis_title='Price ({})'.format(TIME_INTERVAL.upper()),
                                   y_axis_type='linear' if FLAGS.portfolio_linear else 'log'),
              file_name='linear' if FLAGS.portfolio_linear else 'log')
 #----------------------------------------------------------------------------------------------------------------->
@@ -130,10 +149,10 @@ def _build_data(pct_change=False):
     Returns:
         [type] -- [description]"""
     data = []
-    for i, coin in enumerate(coins):
+    for i, coin in enumerate(PORTFOLIO_SYMBOLS):
         df = pd.read_csv(PATH_TO_COIN_FILE[i])
-        trace = go.Scatter(x=df.date,
-                           y=df['prices'].pct_change()*100 if pct_change else df['prices'],
+        trace = go.Scatter(x=df.Date,
+                           y=df['coinmarketcap.coin_btc.price_btc'].pct_change()*100 if pct_change else df['coinmarketcap.coin_btc.price_btc'],
                            name = str(coin).upper())
         data.append(trace)
     return data
@@ -263,7 +282,7 @@ def plot(data, layout, file_name):
     """
     offline.plot({'data': data,
                  'layout': layout},
-                 filename=file_name + '-' + str(todays_day) + '_' + str(todays_month) + '-' + currency + '.html')
+                 filename='docs/' + file_name + '.html')
 #---------------------------------------------------------------------------------->
 
 if __name__ == '__main__':
@@ -282,12 +301,14 @@ if __name__ == '__main__':
                         type=str, 
                         const='pearson',
                         nargs='?', default='pearson', help='Choose the method {pearson, kendall, spearman}')
+    parser.add_argument('--plot_coin',
+                        type=str, 
+                        help='Choose coin to plot')
     FLAGS = parser.parse_args()
-    import configs.get_datasets
+    # import configs.get_datasets
     import pandas as pd
     import numpy as np
-    from configs.vars import coins, days, todays_day, todays_month, currency, PATH_TO_COIN_FILE, \
-        PATH_TO_CORRELATION_FILE, PATH_TO_PCT_CORRELATION_FILE, PATH_TO_WEIGHTS_FILE
+    from configs.vars import *
     # from configs.functions import print_dollar
     import plotly.graph_objs as go
     import plotly.offline as offline
@@ -300,8 +321,8 @@ if __name__ == '__main__':
     import random
     from plotly import tools
     import pickle
-    weigths = np.random.dirichlet(alpha=np.ones(len(coins)), size=1) # makes sure that weights sums upto 1.
+    weigths = np.random.dirichlet(alpha=np.ones(len(PORTFOLIO_SYMBOLS)), size=1) # makes sure that weights sums upto 1.
     exp_return_constraint = [ 0.007, 0.006, 0.005, 0.004, 0.003, 0.002, 0.001, 0.0009, 0.0008, 0.0007, 0.0006, 0.0005,  0.0004, 0.0003, 0.0002, 0.0001]
-    bounds = ((0.0, 1.),) * len(coins) # bounds of the problem
+    bounds = ((0.0, 1.),) * len(PORTFOLIO_SYMBOLS) # bounds of the problem
     main()
     # print_dollar()

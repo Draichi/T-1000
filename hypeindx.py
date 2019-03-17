@@ -38,32 +38,3 @@ for symbol in PORTFOLIO_SYMBOLS:
     else:
         cprint('> loading {} from cache'.format(symbol.upper()), 'blue', attrs=['bold'])
 #------------------------------------------------------------->
-
-
-
-
-
-
-
-# def get_df(asset_name):
-#     asset = '{}-{}_{}_{}_{}.csv'.format(todays_day, todays_month, asset_name, days, currency)	
-#     df = pd.read_csv('datasets/' + asset)
-#     df.rename(index=str, columns={'prices': 'close'}, inplace=True)
-#     close = np.array(df['close'])
-#     df['open'] = df['close'].shift(1)
-#     df['price_change'] = df['close'].pct_change()
-#     df['SMA'] = talib.SMA(close)
-#     df['MOM'] = talib.MOM(close, timeperiod=14)
-#     df['CMO'] = talib.CMO(close, timeperiod=14)
-#     df['macd'], df['macdsignal'], df['macdhist'] = talib.MACD(close, fastperiod=12, slowperiod=26, signalperiod=9)
-#     df['SMA50'] = df['close'].rolling(50).mean()
-#     df['SMA20'] = df['close'].rolling(20).mean()
-#     df['volume_x10e-7'] = df['total_volumes']*0.0000001
-#     df['mark_cap_x10e-7'] = df['market_caps']*0.0000001
-#     df.dropna(inplace=True)
-#     df.drop(['total_volumes', 'market_caps'], inplace=True, axis=1)
-#     df.set_index('date', inplace=True)
-#     print(df.iloc[0])
-#     return df
-
-# get_df('ethereum')
