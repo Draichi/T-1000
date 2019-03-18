@@ -114,36 +114,6 @@ def main():
                             showlegend=False)
         offline.plot(fig, filename='docs/dashboard_{}_prophet.html'.format(FLAGS.plot_coin.upper()))
 
-#----------------------------------------------------------------------------------------------------------------->
-    # if FLAGS.fc and FLAGS.fd and FLAGS.fs:
-    #     df = pd.read_csv('datasets/{}_{}_{}_{}.csv'.format(FLAGS.fc.upper(), TIME_INTERVAL, FROM_DATE, TO_DATE))
-
-    #     df_prophet = fbprophet.Prophet(changepoint_prior_scale=FLAGS.fs)
-    #     df.rename(index=str, columns={'Date': 'ds', 'Price $': 'y'}, inplace=True)
-    #     df_prophet.fit(df[['ds', 'y']])
-    #     df_forecast = df_prophet.make_future_dataframe(periods=int(FLAGS.fd))
-    #     df_forecast = df_prophet.predict(df_forecast)
-    #     data = [go.Scatter(x=df['ds'],
-    #                        y=df['y'],
-    #                        name='Price',
-    #                        line=dict(color='#94B7F5')),
-    #             go.Scatter(x=df_forecast['ds'], y=df_forecast['yhat'], name='yhat'),
-    #             go.Scatter(x=df_forecast['ds'],
-    #                        y=df_forecast['yhat_upper'],
-    #                        fill='tonexty',
-    #                        mode='none',
-    #                        name='yhat_upper',
-    #                        fillcolor='rgba(0,201,253,.21)'),
-    #             go.Scatter(x=df_forecast['ds'],
-    #                        y=df_forecast['yhat_lower'],
-    #                        fill='tonexty',
-    #                        mode='none',
-    #                        name='yhat_lower',
-    #                        fillcolor='rgba(252,201,5,.05)'),]
-    #     plot(data=data,
-    #          file_name='forecast',
-    #          layout=_build_layout(title='Forecasting {} {} Days in'.format(FLAGS.fc.upper(),FLAGS.fd),
-    #                               y_axis_title='Price ($)'))
 #---------------------------------------------------------------------------------->
     if FLAGS.correlation:
         base_df = _build_correlation_df()
@@ -305,7 +275,7 @@ def var_cov_matrix(df, weigths):
 #---------------------------------------------------------------------------------->
 
 def _optimize_weights():
-    """[summary]
+    """[https://docs.scipy.org/doc/scipy-0.13.0/reference/generated/scipy.optimize.minimize.html]
     
     Returns:
         [type] -- [description]
@@ -383,15 +353,9 @@ if __name__ == '__main__':
     parser.add_argument('--efficient_frontier', action='store_true', help='Plot portfolio efficient frontier')
     parser.add_argument('--portfolio_weights', action='store_true', help='Plot portfolio efficient frontier')
     parser.add_argument('--portfolio_change', action='store_true', help='Plot portfolio percent change')
-    # parser.add_argument('--fc', type=str, help='Coin name to forecast')
-    # parser.add_argument('--fd', type=int, default=5, help='How many days to forecast')
-    # parser.add_argument('--fs', type=float, default=0.1, help='Changepoint priot scale [0.1 ~ 0.9]')
     parser.add_argument('--correlation', action='store_true', help='Plot correlation heatmap')
-    parser.add_argument('--plot_coin',
-                        type=str, 
-                        help='Choose coin to plot')
+    parser.add_argument('--plot_coin', type=str, help='Choose coin to plot')
     FLAGS = parser.parse_args()
-    # import configs.get_datasets
     import hypeindx
     import pandas as pd
     import numpy as np
@@ -403,14 +367,9 @@ if __name__ == '__main__':
     import os
     import matplotlib.pyplot as plt
     from scipy.optimize import minimize
-    #https://docs.scipy.org/doc/scipy-0.13.0/reference/generated/scipy.optimize.minimize.html
     import ad 
     import random
     from plotly import tools
     import pickle
-    # x2 to compute asset per dollar and per btc
-    # weigths = np.random.dirichlet(alpha=np.ones(len(PORTFOLIO_SYMBOLS*2)), size=1) # makes sure that weights sums upto 1.
-    # exp_return_constraint = [ 0.007, 0.006, 0.005, 0.004, 0.003, 0.002, 0.001, 0.0009, 0.0008, 0.0007, 0.0006, 0.0005,  0.0004, 0.0003, 0.0002, 0.0001]
-    # bounds = ((0.0, 1.),) * len(PORTFOLIO_SYMBOLS*2) # bounds of the problem
     main()
     # print_dollar()
