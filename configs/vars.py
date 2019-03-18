@@ -1,4 +1,6 @@
-import datetime, os
+import datetime
+import os
+import numpy as np
 #---------------------------------------------------------------------------------->
 ####### PORTFOLIO: #########
 PORTFOLIO_SYMBOLS = [
@@ -135,12 +137,16 @@ FIELDS_PLOT_6 = [
 ]
 
 STR_PORTFOLIO_SYMBOLS = ','.join(PORTFOLIO_SYMBOLS)
-n_features = 3 # price, caps, vol
-keys = ['prices', 'market_caps', 'total_volumes'] # if change this, change configs/function.py:22
-todays_month = datetime.datetime.now().month
-todays_day = datetime.datetime.now().day
-terminal_width = os.get_terminal_size().columns
-# PATH_TO_CORRELATION_FILE = 'datasets/' + str(todays_day) + '-' + str(todays_month) + '_correlation_' + str(days) + '_' + currency + '.csv'
-# PATH_TO_WEIGHTS_FILE = 'datasets/' + str(todays_day) + '-' + str(todays_month) + '_weighs_' + str(days) + '_' + currency + '.csv'
-# PATH_TO_PCT_CORRELATION_FILE = 'datasets/' + str(todays_day) + '-' + str(todays_month) + '_pct_correlation_' + str(days) + '_' + currency + '.csv'
+TODAYS_MONTH = datetime.datetime.now().month
+TODAYS_DAY = datetime.datetime.now().day
+TERMINAL_WIDTH = os.get_terminal_size().columns
+
+# x2 because we need each asset in BTC and $
+weigths = np.random.dirichlet(alpha=np.ones(len(PORTFOLIO_SYMBOLS*2)), size=1) # makes sure that weights sums upto 1.
+EXP_RETURN_CONSTRAINT = [ 0.007, 0.006, 0.005, 0.004, 0.003, 0.002, 0.001, 0.0009, 0.0008, 0.0007, 0.0006, 0.0005,  0.0004, 0.0003, 0.0002, 0.0001]
+BOUNDS = ((0.0, 1.),) * len(PORTFOLIO_SYMBOLS*2) # bounds of the problem
+
+PATH_TO_CORRELATION_FILE = 'datasets/correlation_' + TIME_INTERVAL + '_' + FROM_DATE + TO_DATE + '.csv'
+PATH_TO_PCT_CORRELATION_FILE = 'datasets/pct_correlation_' + TIME_INTERVAL + '_' + FROM_DATE + TO_DATE + '.csv'
+PATH_TO_WEIGHTS_FILE = 'datasets/weights_' + TIME_INTERVAL + '_' + FROM_DATE + TO_DATE + '.csv'
 PATH_TO_COIN_FILE = ['datasets/' + symbol.upper() + '_' + TIME_INTERVAL + '_' + FROM_DATE + '_' + TO_DATE + '.csv' for symbol in PORTFOLIO_SYMBOLS]

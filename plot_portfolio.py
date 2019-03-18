@@ -35,7 +35,7 @@ def main():
     if FLAGS.plot_coin:
         df = pd.read_csv('datasets/{}_{}_{}_{}.csv'.format(FLAGS.plot_coin.upper(), TIME_INTERVAL, FROM_DATE, TO_DATE))
         
-        # part 1
+        # DASHBOARD MOMENTUM
         fig = tools.make_subplots(rows=3, cols=2, subplot_titles=['Price (Altcoins)', 'Price (BTC)', 'Price Change 24h', 'Price Change 7d', 'MACD', 'Momentum'])
         cols_axis_x = [col for col in df.columns if col not in ['Date', 'Coin']]
         for key in df[cols_axis_x]:
@@ -68,7 +68,7 @@ def main():
                             plot_bgcolor='#2d2929')
         offline.plot(fig, filename='docs/dashboard_{}_momentum.html'.format(FLAGS.plot_coin))
 
-        # part 2
+        # DASHBOARD HYPE
         fig = tools.make_subplots(rows=3, cols=2, subplot_titles=['Marketcap / Telegram hype', 'Marketcap / Twitter hype', 'Telegram Hype', 'Telegram Mood (average value by one message)', 'Twitter Hype 24h', 'Wikipedia views 30d'])
         cols_axis_x = [col for col in df.columns if col not in ['Date', 'Coin']]
         for key in df[cols_axis_x]:
@@ -97,9 +97,8 @@ def main():
                             plot_bgcolor='#2d2929')
         offline.plot(fig, filename='docs/dashboard_{}_hype.html'.format(FLAGS.plot_coin))
 
-        # part 3
+        # DASHBOARD PROPHET
         fig = tools.make_subplots(rows=3, cols=2, subplot_titles=['Price $ Prophet 0.05', 'Price $ Prophet 0.15', 'Price +/- 24h $ Prophet 0.05', 'Price +/- 24h $ Prophet 0.15', 'Price BTC Prophet 0.05', 'Price BTC Prophet 0.15'])
-
         for i, scale in enumerate([0.05, 0.15]):
             for ii, column in enumerate(['Price $', 'Price +/- 24h $', 'Price BTC']):
                 column_name = df.rename(index=str, columns={'Date': 'ds', column: 'y'})
@@ -108,8 +107,6 @@ def main():
                 fig.append_trace(yhat, ii+1 , i+1)
                 fig.append_trace(yhat_upper, ii+1 , i+1)
                 fig.append_trace(yhat_lower, ii+1 , i+1)
-
-
         fig['layout'].update(title='Dashboard: Prophet - {}'.format(FLAGS.plot_coin.upper()),
                             font=dict(color='rgb(255, 255, 255)', size=16),
                             paper_bgcolor='#2d2929',
@@ -118,48 +115,48 @@ def main():
         offline.plot(fig, filename='docs/dashboard_{}_prophet.html'.format(FLAGS.plot_coin.upper()))
 
 #----------------------------------------------------------------------------------------------------------------->
-    if FLAGS.fc and FLAGS.fd and FLAGS.fs:
-        df = pd.read_csv('datasets/{}_{}_{}_{}.csv'.format(FLAGS.fc.upper(), TIME_INTERVAL, FROM_DATE, TO_DATE))
+    # if FLAGS.fc and FLAGS.fd and FLAGS.fs:
+    #     df = pd.read_csv('datasets/{}_{}_{}_{}.csv'.format(FLAGS.fc.upper(), TIME_INTERVAL, FROM_DATE, TO_DATE))
 
-        df_prophet = fbprophet.Prophet(changepoint_prior_scale=FLAGS.fs)
-        df.rename(index=str, columns={'Date': 'ds', 'Price $': 'y'}, inplace=True)
-        df_prophet.fit(df[['ds', 'y']])
-        df_forecast = df_prophet.make_future_dataframe(periods=int(FLAGS.fd))
-        df_forecast = df_prophet.predict(df_forecast)
-        data = [go.Scatter(x=df['ds'],
-                           y=df['y'],
-                           name='Price',
-                           line=dict(color='#94B7F5')),
-                go.Scatter(x=df_forecast['ds'], y=df_forecast['yhat'], name='yhat'),
-                go.Scatter(x=df_forecast['ds'],
-                           y=df_forecast['yhat_upper'],
-                           fill='tonexty',
-                           mode='none',
-                           name='yhat_upper',
-                           fillcolor='rgba(0,201,253,.21)'),
-                go.Scatter(x=df_forecast['ds'],
-                           y=df_forecast['yhat_lower'],
-                           fill='tonexty',
-                           mode='none',
-                           name='yhat_lower',
-                           fillcolor='rgba(252,201,5,.05)'),]
-        plot(data=data,
-             file_name='forecast',
-             layout=_build_layout(title='Forecasting {} {} Days in'.format(FLAGS.fc.upper(),FLAGS.fd),
-                                  y_axis_title='Price ($)'))
+    #     df_prophet = fbprophet.Prophet(changepoint_prior_scale=FLAGS.fs)
+    #     df.rename(index=str, columns={'Date': 'ds', 'Price $': 'y'}, inplace=True)
+    #     df_prophet.fit(df[['ds', 'y']])
+    #     df_forecast = df_prophet.make_future_dataframe(periods=int(FLAGS.fd))
+    #     df_forecast = df_prophet.predict(df_forecast)
+    #     data = [go.Scatter(x=df['ds'],
+    #                        y=df['y'],
+    #                        name='Price',
+    #                        line=dict(color='#94B7F5')),
+    #             go.Scatter(x=df_forecast['ds'], y=df_forecast['yhat'], name='yhat'),
+    #             go.Scatter(x=df_forecast['ds'],
+    #                        y=df_forecast['yhat_upper'],
+    #                        fill='tonexty',
+    #                        mode='none',
+    #                        name='yhat_upper',
+    #                        fillcolor='rgba(0,201,253,.21)'),
+    #             go.Scatter(x=df_forecast['ds'],
+    #                        y=df_forecast['yhat_lower'],
+    #                        fill='tonexty',
+    #                        mode='none',
+    #                        name='yhat_lower',
+    #                        fillcolor='rgba(252,201,5,.05)'),]
+    #     plot(data=data,
+    #          file_name='forecast',
+    #          layout=_build_layout(title='Forecasting {} {} Days in'.format(FLAGS.fc.upper(),FLAGS.fd),
+    #                               y_axis_title='Price ($)'))
 #---------------------------------------------------------------------------------->
     if FLAGS.correlation:
         base_df = _build_correlation_df()
-        heatmap = go.Heatmap(z=base_df.pct_change().corr(method=FLAGS.correlation_method).values,
-                             x=base_df.pct_change().columns,
-                             y=base_df.pct_change().columns,
-                             colorbar=dict(title='Pearson Coefficient'),
-                             colorscale=[[0, 'rgb(255,0,0)'], [1, 'rgb(0,255,0)']],
-                             zmin=-1.0,
-                             zmax=1.0)
-        plot(data=[heatmap],
-             layout=_build_layout(title='{} Correlation Heatmap - {} days'.format(FLAGS.correlation_method, days).title()),
-             file_name='correlation')
+        for cor in ['pearson', 'kendall', 'spearman']:
+            heatmap = go.Heatmap(z=base_df.pct_change().corr(method=cor).values,
+                                x=base_df.pct_change().columns,
+                                y=base_df.pct_change().columns,
+                                colorscale=[[0, 'rgb(255,0,0)'], [1, 'rgb(0,255,0)']],
+                                zmin=-1.0,
+                                zmax=1.0)
+            plot(data=[heatmap],
+                layout=_build_layout(title='{} Correlation Heatmap'.format(cor).title()),
+                file_name='{}_correlation'.format(cor))
 #---------------------------------------------------------------------------------->
     if FLAGS.efficient_frontier or FLAGS.portfolio_weights:
         if not (os.path.exists(PATH_TO_WEIGHTS_FILE)):
@@ -250,15 +247,18 @@ def _build_correlation_df(pct_change=False):
     if not pct_change:
         if not (os.path.exists(PATH_TO_CORRELATION_FILE)):
             base_df = pd.read_csv(PATH_TO_COIN_FILE[0])
-            for i, coin in enumerate(coins):
+            base_df = base_df[['Date','Price $']]
+
+            for i, coin in enumerate(PORTFOLIO_SYMBOLS):
                 df = pd.read_csv(PATH_TO_COIN_FILE[i])
-                base_df[coin] = df['prices']
-            base_df.set_index('date', inplace=True)
-            base_df.drop(['market_caps','prices','total_volumes'], 1, inplace=True)
+                base_df[coin.upper() + '_BTC'] = df['Price BTC']
+                base_df[coin.upper() + '_$'] = df['Price $']
+            base_df.set_index('Date', inplace=True)
+            base_df.drop('Price $', 1, inplace=True)
             base_df.to_csv(PATH_TO_CORRELATION_FILE)
         else:
             base_df = pd.read_csv(PATH_TO_CORRELATION_FILE)
-            base_df.set_index('date', inplace=True)
+            base_df.set_index('Date', inplace=True)
         return base_df
 
     else:
@@ -270,7 +270,7 @@ def _build_correlation_df(pct_change=False):
             df.to_csv(PATH_TO_PCT_CORRELATION_FILE)
         else:
             df = pd.read_csv(PATH_TO_PCT_CORRELATION_FILE)
-            df = df.set_index('date')
+            df = df.set_index('Date')
         return df 
 #---------------------------------------------------------------------------------->
 
@@ -313,7 +313,7 @@ def _optimize_weights():
     df = _build_correlation_df(pct_change=True)
     returns = df.mean()
     results_comparison_dict = {}
-    for i in range(len(exp_return_constraint)):
+    for i in range(len(EXP_RETURN_CONSTRAINT)):
         res = minimize(
             # object function defined here
             fun=lambda x: var_cov_matrix(df, x),
@@ -321,11 +321,11 @@ def _optimize_weights():
             method='SLSQP',
             # jacobian using automatic differentiation
             jac=ad.gh(lambda x: var_cov_matrix(df, x))[0],
-            bounds=bounds,
+            bounds=BOUNDS,
             options={'disp': True, 'ftol': 1e-20, 'maxiter': 1000},
             constraints=[{'type': 'eq', 'fun': lambda x: sum(x) -1.0},
-                        {'type': 'eq', 'fun': lambda x: calc_exp_returns(returns, x) - exp_return_constraint[i]}])
-        return_key = round(exp_return_constraint[i]*100, 2)
+                        {'type': 'eq', 'fun': lambda x: calc_exp_returns(returns, x) - EXP_RETURN_CONSTRAINT[i]}])
+        return_key = round(EXP_RETURN_CONSTRAINT[i]*100, 2)
         results_comparison_dict.update({return_key: [res.fun, res.x]})
     return res, results_comparison_dict
 #---------------------------------------------------------------------------------->
@@ -344,17 +344,21 @@ def _plot_efficient_frontier(comparison):
 def _plot_weights_per_asset(comparisson):
     keys = sorted(list(comparisson.keys()))
     index = 0
+    df = pd.read_csv(PATH_TO_PCT_CORRELATION_FILE)
+    x_itemns = list(df.columns)
+    x_itemns.remove('Date')
+
     fig = tools.make_subplots(rows=4, cols=4, subplot_titles=(keys))
     for i in range(1,5):
         for j in range(1,5):
-            trace = go.Bar(x=coins, y=comparisson[keys[index]][1], name='{} %'.format(keys[index]))
+            trace = go.Bar(x=x_itemns, y=comparisson[keys[index]][1], name='{} %'.format(keys[index]))
             fig.add_trace(trace, row=i, col=j)
             index += 1
     fig['layout'].update(title='Weights per asset at different expected returns (%)',
                          font=dict(color='rgb(255, 255, 255)', size=14),
                          paper_bgcolor='#2d2929',
                          plot_bgcolor='#2d2929')
-    offline.plot(fig, filename='weights-{}_{}-{}.html'.format(todays_day, todays_month, currency))
+    offline.plot(fig, filename='docs/weights.html')
 #---------------------------------------------------------------------------------->
 def plot(data, layout, file_name):
     """Plot the data according to data and layout functions.
@@ -379,14 +383,10 @@ if __name__ == '__main__':
     parser.add_argument('--efficient_frontier', action='store_true', help='Plot portfolio efficient frontier')
     parser.add_argument('--portfolio_weights', action='store_true', help='Plot portfolio efficient frontier')
     parser.add_argument('--portfolio_change', action='store_true', help='Plot portfolio percent change')
-    parser.add_argument('--fc', type=str, help='Coin name to forecast')
-    parser.add_argument('--fd', type=int, default=5, help='How many days to forecast')
-    parser.add_argument('--fs', type=float, default=0.1, help='Changepoint priot scale [0.1 ~ 0.9]')
+    # parser.add_argument('--fc', type=str, help='Coin name to forecast')
+    # parser.add_argument('--fd', type=int, default=5, help='How many days to forecast')
+    # parser.add_argument('--fs', type=float, default=0.1, help='Changepoint priot scale [0.1 ~ 0.9]')
     parser.add_argument('--correlation', action='store_true', help='Plot correlation heatmap')
-    parser.add_argument('--correlation_method',
-                        type=str, 
-                        const='pearson',
-                        nargs='?', default='pearson', help='Choose the method {pearson, kendall, spearman}')
     parser.add_argument('--plot_coin',
                         type=str, 
                         help='Choose coin to plot')
@@ -408,8 +408,9 @@ if __name__ == '__main__':
     import random
     from plotly import tools
     import pickle
-    weigths = np.random.dirichlet(alpha=np.ones(len(PORTFOLIO_SYMBOLS)), size=1) # makes sure that weights sums upto 1.
-    exp_return_constraint = [ 0.007, 0.006, 0.005, 0.004, 0.003, 0.002, 0.001, 0.0009, 0.0008, 0.0007, 0.0006, 0.0005,  0.0004, 0.0003, 0.0002, 0.0001]
-    bounds = ((0.0, 1.),) * len(PORTFOLIO_SYMBOLS) # bounds of the problem
+    # x2 to compute asset per dollar and per btc
+    # weigths = np.random.dirichlet(alpha=np.ones(len(PORTFOLIO_SYMBOLS*2)), size=1) # makes sure that weights sums upto 1.
+    # exp_return_constraint = [ 0.007, 0.006, 0.005, 0.004, 0.003, 0.002, 0.001, 0.0009, 0.0008, 0.0007, 0.0006, 0.0005,  0.0004, 0.0003, 0.0002, 0.0001]
+    # bounds = ((0.0, 1.),) * len(PORTFOLIO_SYMBOLS*2) # bounds of the problem
     main()
     # print_dollar()
