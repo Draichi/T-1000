@@ -25,6 +25,50 @@ epsilon_min = 0.01
 epsilon_decay = 0.995
 #---------------------------------------------------------------------------------->
 ####### CONSTANTS (DO NOT CHANGE) #########
+PRICE_GROUP_1 = [
+    'Price $',
+    # 'SMA_USD',
+    'Price EOS',
+    'Price XRP'
+]
+PRICE_GROUP_2= [
+    'Price BTC',
+    # 'Marketcap / Twitter hype',
+
+]
+PRICE_CHANGE_24 = [
+    'Price +/- 24h $',
+    'Price +/- BTC'
+]
+PRICE_CHANGE_1D = [
+    'Price +/- 1h $',
+    'Price +/-  1h BTC',
+]
+PRICE_CHANGE_7D = [
+    'Price +/- 7d $',
+    'Price +/- 7d  BTC',
+]
+MOMENTUM_IND = [
+    'CMO_USD'
+]
+MACD = [
+    'macdsignal_USD',
+    'macdhist_USD',
+    'macd_USD'
+]
+HYPE_GROUP_1 = [
+    'Telegram Hype +/- 24h',
+    'Usage index by DataLight',
+    'Metcalf usage',
+    'Telegram Hype',
+    'Telegram Mood (average value by one message)',
+    'Telegram Mood (total value for all messages)',
+    'Twitter Hype 24h',
+    'Wikipedia views 30d',
+    'Marketcap / Telegram hype',
+    'Marketcap / Twitter hype',
+    'Marketcap / Usage index by DataLight',
+]
 FIELDS_PLOT_1 = [
     # price in different currencies
     'Price $',
@@ -35,7 +79,6 @@ FIELDS_PLOT_1 = [
 ]
 FIELDS_PLOT_2 = [
     # social index
-    'Price +/- 24h $',
     'Telegram Hype +/- 24h',
     'Usage index by DataLight',
     'Metcalf usage',

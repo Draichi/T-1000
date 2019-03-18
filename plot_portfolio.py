@@ -34,59 +34,95 @@ def main():
 #----------------------------------------------------------------------------------------------------------------->
     if FLAGS.plot_coin:
         df = pd.read_csv('datasets/{}_{}_{}_{}.csv'.format(FLAGS.plot_coin.upper(), TIME_INTERVAL, FROM_DATE, TO_DATE))
-        fig = tools.make_subplots(rows=3, cols=2, subplot_titles=['Price', 'Price Change', 'Hype', 'Volume', 'Indicators', 'Marketcap'])
-
+        
+        # part 1
+        fig = tools.make_subplots(rows=3, cols=2, subplot_titles=['Price (Altcoins)', 'Price (BTC)', 'Price Change 24h', 'Price Change 7d', 'MACD', 'Momentum'])
         cols_axis_x = [col for col in df.columns if col not in ['Date', 'Coin']]
         for key in df[cols_axis_x]:
-            if key in FIELDS_PLOT_1:
-                trace = go.Scatter(x=df.Date,
-                                    y=df[key],
-                                    name = str(key[:25]))
+            name = str(key[:25])
+            if key in PRICE_GROUP_1:
+                trace = go.Scatter(x=df.Date, y=df[key], name=name, fill='tozeroy')
                 fig.append_trace(trace, 1, 1)
-            if key in FIELDS_PLOT_2:
-                trace = go.Scatter(x=df.Date,
-                                    y=df[key],
-                                    name = str(key[:25]))
-                fig.append_trace(trace, 2, 1)
-            if key in FIELDS_PLOT_3:
-                trace = go.Scatter(x=df.Date,
-                                    y=df[key],
-                                    name = str(key[:25]))
-                fig.append_trace(trace, 3, 1)
-            if key in FIELDS_PLOT_4:
-                trace = go.Scatter(x=df.Date,
-                                    y=df[key],
-                                    name = str(key[:25]))
+            if key in PRICE_GROUP_2:
+                trace = go.Scatter(x=df.Date, y=df[key], name=name, fill='tozeroy')
                 fig.append_trace(trace, 1, 2)
-            if key in FIELDS_PLOT_5:
-                trace = go.Bar(x=df.Date,
-                                    y=df[key],
-                                    name = str(key[:25]))
+            if key in PRICE_CHANGE_24:
+                trace = go.Bar(x=df.Date, y=df[key], name=name)
+                fig.append_trace(trace, 2, 1)
+            if key in PRICE_CHANGE_7D:
+                trace = go.Bar(x=df.Date, y=df[key], name=name)
                 fig.append_trace(trace, 2, 2)
-            if key in FIELDS_PLOT_6:
-                trace = go.Bar(x=df.Date,
-                                    y=df[key],
-                                    name = str(key[:25]))
+            if key in MACD:
+                if key == 'macdhist_USD':
+                    trace = go.Bar(x=df.Date, y=df[key], name=name)
+                    fig.append_trace(trace, 3, 1)
+                if key == 'macdsignal_USD' or key == 'macd_USD':
+                    trace = go.Scatter(x=df.Date, y=df[key], name=name)
+                    fig.append_trace(trace, 3, 1)
+            if key in MOMENTUM_IND:
+                trace = go.Bar(x=df.Date, y=df[key], name=name)
                 fig.append_trace(trace, 3, 2)
-        fig['layout'].update(title=FLAGS.plot_coin.upper(),
-                            font=dict(color='rgb(255, 255, 255)', size=14),
+        fig['layout'].update(title='Dashboard: Momentum - {}'.format(FLAGS.plot_coin.upper()),
+                            font=dict(color='rgb(255, 255, 255)', size=16),
                             paper_bgcolor='#2d2929',
                             plot_bgcolor='#2d2929')
-        offline.plot(fig, filename='docs/teste.html')
+        offline.plot(fig, filename='docs/dashboard_{}_momentum.html'.format(FLAGS.plot_coin))
+
+        # part 2
+        fig = tools.make_subplots(rows=3, cols=2, subplot_titles=['Marketcap / Telegram hype', 'Marketcap / Twitter hype', 'Telegram Hype', 'Telegram Mood (average value by one message)', 'Twitter Hype 24h', 'Wikipedia views 30d'])
+        cols_axis_x = [col for col in df.columns if col not in ['Date', 'Coin']]
+        for key in df[cols_axis_x]:
+            name = str(key[:25])
+            if key == 'Marketcap / Telegram hype':
+                trace = go.Bar(x=df.Date, y=df[key], name=name)
+                fig.append_trace(trace, 1, 1)
+            if key == 'Marketcap / Twitter hype':
+                trace = go.Bar(x=df.Date, y=df[key], name=name)
+                fig.append_trace(trace, 1, 2)
+            if key == 'Telegram Hype':
+                trace = go.Bar(x=df.Date, y=df[key], name=name)
+                fig.append_trace(trace, 2, 1)
+            if key == 'Telegram Mood (average value by one message)':
+                trace = go.Bar(x=df.Date, y=df[key], name=name)
+                fig.append_trace(trace, 2, 2)
+            if key == 'Twitter Hype 24h':
+                trace = go.Bar(x=df.Date, y=df[key], name=name)
+                fig.append_trace(trace, 3, 1)
+            if key == 'Wikipedia views 30d':
+                trace = go.Bar(x=df.Date, y=df[key], name=name)
+                fig.append_trace(trace, 3, 2)
+        fig['layout'].update(title='Dashboard: Hype - {}'.format(FLAGS.plot_coin.upper()),
+                            font=dict(color='rgb(255, 255, 255)', size=16),
+                            paper_bgcolor='#2d2929',
+                            plot_bgcolor='#2d2929')
+        offline.plot(fig, filename='docs/dashboard_{}_hype.html'.format(FLAGS.plot_coin))
+
+        # part 3
+        fig = tools.make_subplots(rows=3, cols=2, subplot_titles=['Price $ Prophet 0.05', 'Price $ Prophet 0.15', 'Price +/- 24h $ Prophet 0.05', 'Price +/- 24h $ Prophet 0.15', 'Price BTC Prophet 0.05', 'Price BTC Prophet 0.15'])
+
+        for i, scale in enumerate([0.05, 0.15]):
+            for ii, column in enumerate(['Price $', 'Price +/- 24h $', 'Price BTC']):
+                column_name = df.rename(index=str, columns={'Date': 'ds', column: 'y'})
+                y, yhat, yhat_upper, yhat_lower = make_prophecy(scale, column_name[['ds', 'y']], 15, column)
+                fig.append_trace(y, ii+1 , i+1)
+                fig.append_trace(yhat, ii+1 , i+1)
+                fig.append_trace(yhat_upper, ii+1 , i+1)
+                fig.append_trace(yhat_lower, ii+1 , i+1)
+
+
+        fig['layout'].update(title='Dashboard: Prophet - {}'.format(FLAGS.plot_coin.upper()),
+                            font=dict(color='rgb(255, 255, 255)', size=16),
+                            paper_bgcolor='#2d2929',
+                            plot_bgcolor='#2d2929',
+                            showlegend=False)
+        offline.plot(fig, filename='docs/dashboard_{}_prophet.html'.format(FLAGS.plot_coin.upper()))
 
 #----------------------------------------------------------------------------------------------------------------->
-    if FLAGS.portfolio_linear or FLAGS.portfolio_log:
-        plot(data=_build_data(),
-             layout=_build_layout(title='Portfolio {}'.format('Linear' if FLAGS.portfolio_linear 
-                                                                         else 'Log Scale'),
-                                  y_axis_title='Price ({})'.format(TIME_INTERVAL.upper()),
-                                  y_axis_type='linear' if FLAGS.portfolio_linear else 'log'),
-             file_name='linear' if FLAGS.portfolio_linear else 'log')
-#----------------------------------------------------------------------------------------------------------------->
     if FLAGS.fc and FLAGS.fd and FLAGS.fs:
-        df = pd.read_csv('datasets/{}-{}_{}_{}_{}.csv'.format(todays_day, todays_month, FLAGS.fc, days, currency))
+        df = pd.read_csv('datasets/{}_{}_{}_{}.csv'.format(FLAGS.fc.upper(), TIME_INTERVAL, FROM_DATE, TO_DATE))
+
         df_prophet = fbprophet.Prophet(changepoint_prior_scale=FLAGS.fs)
-        df.rename(index=str, columns={'date': 'ds', 'prices': 'y'}, inplace=True)
+        df.rename(index=str, columns={'Date': 'ds', 'Price $': 'y'}, inplace=True)
         df_prophet.fit(df[['ds', 'y']])
         df_forecast = df_prophet.make_future_dataframe(periods=int(FLAGS.fd))
         df_forecast = df_prophet.predict(df_forecast)
@@ -109,8 +145,8 @@ def main():
                            fillcolor='rgba(252,201,5,.05)'),]
         plot(data=data,
              file_name='forecast',
-             layout=_build_layout(title='{} Days of {} Forecast'.format(FLAGS.fd,FLAGS.fc).title(),
-                                  y_axis_title='Price ({})'.format(currency.upper())))
+             layout=_build_layout(title='Forecasting {} {} Days in'.format(FLAGS.fc.upper(),FLAGS.fd),
+                                  y_axis_title='Price ($)'))
 #---------------------------------------------------------------------------------->
     if FLAGS.correlation:
         base_df = _build_correlation_df()
@@ -181,6 +217,34 @@ def _build_data(pct_change=False):
         data.append(trace)
     return data
 #---------------------------------------------------------------------------------->
+
+def make_prophecy(changepoint_prior_scale, column_to_prophet, periods, y_name):
+    df_prophet = fbprophet.Prophet(changepoint_prior_scale=changepoint_prior_scale)
+    df_prophet.fit(column_to_prophet)
+    # df_prophet.fit(df_dollar[['ds', 'y']])
+    df_forecast = df_prophet.make_future_dataframe(periods=periods)
+    df_forecast = df_prophet.predict(df_forecast)
+    y = go.Scatter(x=column_to_prophet['ds'],
+                    y=column_to_prophet['y'],
+                    name=y_name+str(changepoint_prior_scale),
+                    line=dict(color='#94B7F5'))
+    yhat = go.Scatter(x=df_forecast['ds'], y=df_forecast['yhat'], name='{} yhat {}'.format(y_name, str(changepoint_prior_scale)))
+    yhat_upper = go.Scatter(x=df_forecast['ds'],
+                    y=df_forecast['yhat_upper'],
+                    fill='tonexty',
+                    mode='none',
+                    name='{} yhat_upper {}'.format(y_name, str(changepoint_prior_scale)),
+                    fillcolor='rgba(0,201,253,.21)')
+    yhat_lower = go.Scatter(x=df_forecast['ds'],
+                    y=df_forecast['yhat_lower'],
+                    fill='tonexty',
+                    mode='none',
+                    name='{} yhat_lower {}'.format(y_name, str(changepoint_prior_scale)),
+                    fillcolor='rgba(252,201,5,.05)')
+    return y,yhat, yhat_upper, yhat_lower
+#---------------------------------------------------------------------------------->
+
+
 
 def _build_correlation_df(pct_change=False):
     if not pct_change:
@@ -315,8 +379,6 @@ if __name__ == '__main__':
     parser.add_argument('--efficient_frontier', action='store_true', help='Plot portfolio efficient frontier')
     parser.add_argument('--portfolio_weights', action='store_true', help='Plot portfolio efficient frontier')
     parser.add_argument('--portfolio_change', action='store_true', help='Plot portfolio percent change')
-    parser.add_argument('--portfolio_linear', action='store_true', help='plot portfolio linear prices')
-    parser.add_argument('--portfolio_log', action='store_true', help='Plot portfolio log prices')
     parser.add_argument('--fc', type=str, help='Coin name to forecast')
     parser.add_argument('--fd', type=int, default=5, help='How many days to forecast')
     parser.add_argument('--fs', type=float, default=0.1, help='Changepoint priot scale [0.1 ~ 0.9]')
