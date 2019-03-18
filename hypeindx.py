@@ -43,25 +43,30 @@ for symbol in PORTFOLIO_SYMBOLS:
             not_null_cols = [col for col in df.columns if df.loc[:, col].notna().any()]
             df = df[not_null_cols]
 
-            # renamed_columns = {field: title for field, title in ids, titles}
-            # renamed_columns = {field: field.split('.')[-1] for field in ids}
             df.rename(index=str, columns=ids_and_titles, inplace=True)
-
             
             price_btc = np.array(df['Price BTC'])
             price_usd = np.array(df['Price $'])
 
             df.loc[:, 'SMA_USD'] = talib.SMA(price_usd)
-            # df['SMA_USD'] = talib.SMA(price_usd)
-
-            # df['MOM_USD'] = talib.MOM(price_usd, timeperiod=14)
+            df.loc[:, 'SMA_BTC'] = talib.SMA(price_btc)
             df.loc[:, 'MOM_USD'] = talib.MOM(price_usd, timeperiod=14)
-
+            df.loc[:, 'MOM_BTC'] = talib.MOM(price_btc, timeperiod=14)
             df.loc[:, 'CMO_USD'] = talib.CMO(price_usd, timeperiod=14)
-            # df['CMO_USD'] = talib.CMO(price_usd, timeperiod=14)
+            df.loc[:, 'CMO_BTC'] = talib.CMO(price_btc, timeperiod=14)
+            df.loc[:, 'PPO_USD'] = talib.PPO(price_usd, fastperiod=12, slowperiod=26, matype=0)
+            df.loc[:, 'PPO_BTC'] = talib.PPO(price_btc, fastperiod=12, slowperiod=26, matype=0)
+            df.loc[:, 'ROC_USD'] = talib.ROC(price_usd, timeperiod=10)
+            df.loc[:, 'ROC_BTC'] = talib.ROC(price_btc, timeperiod=10)
+            df.loc[:, 'RSI_USD'] = talib.RSI(price_usd, timeperiod=14)
+            df.loc[:, 'RSI_BTC'] = talib.RSI(price_btc, timeperiod=14)
+            df.loc[:, 'STOCHRSI_USD_K'], df.loc[:, 'STOCHRSI_USD_D'] = talib.STOCHRSI(price_usd, timeperiod=14, fastk_period=5, fastd_period=3, fastd_matype=0)
+            df.loc[:, 'STOCHRSI_BTC_K'], df.loc[:, 'STOCHRSI_BTC_D'] = talib.STOCHRSI(price_btc, timeperiod=14, fastk_period=5, fastd_period=3, fastd_matype=0)
             df['macd_USD'], df['macdsignal_USD'], df['macdhist_USD'] = talib.MACD(price_usd, fastperiod=12, slowperiod=26, signalperiod=9)
+            df['macd_BTC'], df['macdsignal_BTC'], df['macdhist_BTC'] = talib.MACD(price_btc, fastperiod=12, slowperiod=26, signalperiod=9)
+            df.drop(['Max Supply', 'Rank'], axis=1, inplace=True)            
+            df.fillna(df.mean(), inplace=True)
             df.to_csv('datasets/{}_{}_{}_{}.csv'.format(name, TIME_INTERVAL, FROM_DATE, TO_DATE))
-            print(df.tail())
     #------------------------------------------------------------->        
     else:
         cprint('> loading {} from cache'.format(symbol.upper()), 'blue', attrs=['bold'])

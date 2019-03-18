@@ -32,6 +32,14 @@ def main():
                                   y_axis_title='Change (%)'),
              file_name='pct_change')
 #----------------------------------------------------------------------------------------------------------------->
+    # if FLAGS.portfolio_linear or FLAGS.portfolio_log:	
+    #     plot(data=_build_data(),	
+    #          layout=_build_layout(title='Portfolio {}'.format('Linear' if FLAGS.portfolio_linear 	
+    #                                                                      else 'Log Scale'),	
+    #                               y_axis_title='Price ({})'.format(TIME_INTERVAL.upper()),	
+    #                               y_axis_type='linear' if FLAGS.portfolio_linear else 'log'),	
+    #          file_name='linear' if FLAGS.portfolio_linear else 'log')
+#----------------------------------------------------------------------------------------------------------------->
     if FLAGS.plot_coin:
         df = pd.read_csv('datasets/{}_{}_{}_{}.csv'.format(FLAGS.plot_coin.upper(), TIME_INTERVAL, FROM_DATE, TO_DATE))
         
