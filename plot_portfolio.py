@@ -34,20 +34,44 @@ def main():
 #----------------------------------------------------------------------------------------------------------------->
     if FLAGS.plot_coin:
         df = pd.read_csv('datasets/{}_{}_{}_{}.csv'.format(FLAGS.plot_coin.upper(), TIME_INTERVAL, FROM_DATE, TO_DATE))
-        fig = tools.make_subplots(rows=2, cols=1)
+        fig = tools.make_subplots(rows=3, cols=2, subplot_titles=['Price', 'Price Change', 'Hype', 'Volume', 'Indicators', 'Marketcap'])
 
-        for key in FIELDS_PLOT_1:
-            trace1 = go.Scatter(x=df.Date,
-                                y=df[key],
-                                name = str(key))
-            fig.append_trace(trace1, 1, 1)
-
-        for key in FIELDS_PLOT_2:
-            trace2 = go.Scatter(x=df.Date,
-                                y=df[key],
-                                name = str(key))
-            fig.append_trace(trace2, 2, 1)
-
+        cols_axis_x = [col for col in df.columns if col not in ['Date', 'Coin']]
+        for key in df[cols_axis_x]:
+            if key in FIELDS_PLOT_1:
+                trace = go.Scatter(x=df.Date,
+                                    y=df[key],
+                                    name = str(key[:25]))
+                fig.append_trace(trace, 1, 1)
+            if key in FIELDS_PLOT_2:
+                trace = go.Scatter(x=df.Date,
+                                    y=df[key],
+                                    name = str(key[:25]))
+                fig.append_trace(trace, 2, 1)
+            if key in FIELDS_PLOT_3:
+                trace = go.Scatter(x=df.Date,
+                                    y=df[key],
+                                    name = str(key[:25]))
+                fig.append_trace(trace, 3, 1)
+            if key in FIELDS_PLOT_4:
+                trace = go.Scatter(x=df.Date,
+                                    y=df[key],
+                                    name = str(key[:25]))
+                fig.append_trace(trace, 1, 2)
+            if key in FIELDS_PLOT_5:
+                trace = go.Bar(x=df.Date,
+                                    y=df[key],
+                                    name = str(key[:25]))
+                fig.append_trace(trace, 2, 2)
+            if key in FIELDS_PLOT_6:
+                trace = go.Bar(x=df.Date,
+                                    y=df[key],
+                                    name = str(key[:25]))
+                fig.append_trace(trace, 3, 2)
+        fig['layout'].update(title=FLAGS.plot_coin.upper(),
+                            font=dict(color='rgb(255, 255, 255)', size=14),
+                            paper_bgcolor='#2d2929',
+                            plot_bgcolor='#2d2929')
         offline.plot(fig, filename='docs/teste.html')
 
 #----------------------------------------------------------------------------------------------------------------->
@@ -306,6 +330,7 @@ if __name__ == '__main__':
                         help='Choose coin to plot')
     FLAGS = parser.parse_args()
     # import configs.get_datasets
+    import hypeindx
     import pandas as pd
     import numpy as np
     from configs.vars import *

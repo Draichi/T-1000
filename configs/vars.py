@@ -4,22 +4,8 @@ import datetime, os
 PORTFOLIO_SYMBOLS = [
     # 'btc',
     'eth',
-    'eos',
-    'ada'
-]
-
-# https://api.datalight.me/v1/object/
-FIELDS = [ 
-    'coinmarketcap.coin_btc.price_btc',
-    'telegram.coin_hype_mood_daily.mood',
-    'twitter.hype.twitter_hype',
-    'ethereum_go.transaction_stat_usd_24h.dl_block_ind',
-    'ethereum_go.transaction_calc.trxns_sum',
-    'current.coin.rate_yearly',
-    'ethereum_go.transaction_calc.trxns_count',
-    'coinmarketcap.coin_cvix_30d_1h.cvix',
-    'coinmarketcap.coin_calc.liquidity',
-    'coinmarketcap.coin.price_usd'
+    'xrp',
+    'ltc'
 ]
 TIME_INTERVAL = '1d'
 FROM_DATE = '2018-11-01'
@@ -40,24 +26,72 @@ epsilon_decay = 0.995
 #---------------------------------------------------------------------------------->
 ####### CONSTANTS (DO NOT CHANGE) #########
 FIELDS_PLOT_1 = [
-    'coinmarketcap.coin_btc.price_btc',
-    'telegram.coin_hype_mood_daily.mood',
-    'ethereum_go.transaction_stat_usd_24h.dl_block_ind',
-    'current.coin.rate_yearly',
-    'coinmarketcap.coin_cvix_30d_1h.cvix',
-    'coinmarketcap.coin_calc.liquidity',
-    
+    # price in different currencies
+    'Price $',
+    'Price BTC',
+    'Price BNB',
+    'Price EOS',
+    'Price XRP'
 ]
 FIELDS_PLOT_2 = [
-    'coinmarketcap.coin.price_usd',
-    'ethereum_go.transaction_calc.trxns_count',
-    'ethereum_go.transaction_calc.trxns_sum',
-    'twitter.hype.twitter_hype',
+    # social index
+    'Price +/- 24h $',
+    'Telegram Hype +/- 24h',
+    'Usage index by DataLight',
+    'Metcalf usage',
+    'Telegram Hype',
+    'Telegram Mood (average value by one message)',
+    'Telegram Mood (total value for all messages)',
+    'Twitter Hype 24h',
+    'Wikipedia views 30d'
+]
+FIELDS_PLOT_3 = [
+    # market cap index
+    'Available Supply', # ??
+    'Market Cap',
+    'Sending addresses count 24h',
+    'Max value of tx. 24h',
+    'Receiving addresses count 24h',
+    'Tx. count 24h',
+    'Tx. sum 24h',
+    'Avg. value of tx. 24h $',
+    'Max value of tx. in $ 24h',
+    'Avg. value of tx. 24h',
+    'Tx. sum in $ 24h'
+]
+FIELDS_PLOT_4 = [
+    # momentum index
+    'Price +/- 1h $',
+    'Price +/-  1h BTC',
+    'Price +/- 24h $',
+    'Price +/- BTC',
+    'Price +/- 7d $',
+    'Price +/- 7d  BTC',
+    'Liquidity',
+    'CVIX 30d',
+    'Sharpe Ratio 30d',
+    'NVT Ratio',
+    'Buy market 24h'
+]
+FIELDS_PLOT_5 = [
+    # volume
+    'Volume 24h $',
+    'CMO_USD',
     'SMA_USD',
+    'MOM_USD'
+    'macdsignal_USD',
+    'macdhist_USD',
+    'macd_USD'
+]
+FIELDS_PLOT_6 = [
+    # market cap per ...
+    'Marketcap / Telegram hype',
+    'Marketcap / Twitter hype',
+    'Marketcap / Usage index by DataLight',
 
 ]
+
 STR_PORTFOLIO_SYMBOLS = ','.join(PORTFOLIO_SYMBOLS)
-STR_FIELDS = ','.join(FIELDS)
 n_features = 3 # price, caps, vol
 keys = ['prices', 'market_caps', 'total_volumes'] # if change this, change configs/function.py:22
 todays_month = datetime.datetime.now().month
