@@ -4,6 +4,8 @@
 
 # Cryptocurrency prediction
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ebdf89dcba744a3c8aafdda210d3aeb6)](https://app.codacy.com/app/Draichi/cryptocurrency_prediction?utm_source=github.com&utm_medium=referral&utm_content=Draichi/cryptocurrency_prediction&utm_campaign=Badge_Grade_Dashboard)
+
 Deep tecnical analysis with [**ANY**](https://www.coingecko.com/en) cryptocurrency
 
 See also this live [demo](https://bud-fox.github.io/live/)
