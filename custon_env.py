@@ -106,7 +106,7 @@ class TradingEnv(gym.Env):
                 # print('An error occurred on line {} in statement {}'.format(line, text))
                 # exit(1)
 
-        row = self.df.iloc[self.index][2:]
+        # row = self.df.iloc[self.index][2:] # unnused
         price_btc_before_action = self.df.iloc[self.index][13]
         wallet_btc_before_action = self.wallet_btc
         wallet_btc_after_action = self.wallet_btc

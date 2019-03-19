@@ -137,13 +137,13 @@ def main():
 #---------------------------------------------------------------------------------->
     if FLAGS.efficient_frontier or FLAGS.portfolio_weights:
         if not (os.path.exists(PATH_TO_WEIGHTS_FILE)):
-            res, comparison = _optimize_weights()
+            _, comparison = _optimize_weights()
             with open(PATH_TO_WEIGHTS_FILE, "wb") as fp:
                 pickle.dump(comparison, fp)
         else:
             with open(PATH_TO_WEIGHTS_FILE, "rb") as fp:
                 comparison = pickle.load(fp)
-        plot_efficient_frontier(comparison) if FLAGS.efficient_frontier else plot_weights_per_asset(comparison)
+        _ = plot_efficient_frontier(comparison) if FLAGS.efficient_frontier else plot_weights_per_asset(comparison)
 
 #---------------------------------------------------------------------------------->
 def _build_layout(title, x_axis_title=None, y_axis_title=None, y_axis_type=None):
