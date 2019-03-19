@@ -33,7 +33,7 @@ def main():
              file_name='pct_change')
 #----------------------------------------------------------------------------------------------------------------->
     # if FLAGS.portfolio_linear or FLAGS.portfolio_log:	
-    #     plot(data=_build_data(),	
+    #     plot(data=_build_data(),
     #          layout=_build_layout(title='Portfolio {}'.format('Linear' if FLAGS.portfolio_linear 	
     #                                                                      else 'Log Scale'),	
     #                               y_axis_title='Price ({})'.format(TIME_INTERVAL.upper()),	
@@ -376,7 +376,6 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from scipy.optimize import minimize
     import ad 
-    import random
     from plotly import tools
     import pickle
     main()
