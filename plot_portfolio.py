@@ -375,7 +375,7 @@ if __name__ == '__main__':
     import os
     import matplotlib.pyplot as plt
     from scipy.optimize import minimize
-    import ad 
+    import ad
     from plotly import tools
     import pickle
     main()

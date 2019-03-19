@@ -18,42 +18,43 @@ from __future__ import print_function
 import numpy as np
 import pandas as pd
 import gym
+import traceback
+import sys
 from gym.spaces import Discrete, Box
 
 import ray
 from ray.tune import run_experiments, grid_search
-from ray.tune.registry import register_env
+# from ray.tune.registry import register_env
 
-# TODO 
-# learn more abou Box() 
-# how use it on my abservation space 
-# 
-# nesta pasta puxar o read_csv com a df certinha, e 
+# TODO
+# learn more abou Box()
+# how use it on my abservation space
+#
+# nesta pasta puxar o read_csv com a df certinha, e
 # implementar no step o que está hj no functions.py
-# 
-# pra calcular o reward, ter em mente que o objetivo 
-# é aumentar o valor da carteira, e para isso, todos 
-# os assets comprados tem que ter o preço convertido 
-# para a moeda e em seguida somados com o restante 
-# da carteira, o log da diferença entre carteira antes 
+#
+# pra calcular o reward, ter em mente que o objetivo
+# é aumentar o valor da carteira, e para isso, todos
+# os assets comprados tem que ter o preço convertido
+# para a moeda e em seguida somados com o restante
+# da carteira, o log da diferença entre carteira antes
 # e depois da ação é o reward
-# 
-# para criar uma dataframe com as linhas normalizadas e 
+#
+# para criar uma dataframe com as linhas normalizadas e
 # evitar normalizar a cada step, pode usar essa função:
-# https://stackoverflow.com/questions/50421196/apply-a-function-to-each-row-of-the-dataframe 
+# https://stackoverflow.com/questions/50421196/apply-a-function-to-each-row-of-the-dataframe
 # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.apply.html
 
 class SimpleCorridor(gym.Env):
     """Example of a custom env in which you have to walk down a corridor.
 
-     Observation: 
+     Observation:
         Type: Box(4)
         Num	Observation                 Min         Max
         0	open price                -4.8            4.8
         1	close price               -Inf            Inf
         2	Momentum                  -24 deg        24 deg
         3	Volume                    -Inf            Inf
-        
     Actions:
         Type: Discrete(3)
         Num	Action
@@ -88,7 +89,16 @@ class SimpleCorridor(gym.Env):
         return list(row) # return a row withou the 2 fist columns (date and coin name)
 
     def step(self, action):
-        assert action in [0, 1, 2], action
+        if action not in [0,1,2]:
+            raise AssertionError:
+                _, _, tb = sys.exc_info()
+                traceback.print_tb(tb) # Fixed format
+                tb_info = traceback.extract_tb(tb)
+                filename, line, func, text = tb_info[-1]
+
+                print('An error occurred on line {} in statement {}'.format(line, text))
+                exit(1)
+
         price_btc = self.df.iloc[self.index][13]
         actual_wallet_btc = self.wallet_btc
         actual_wallet_eth = self.wallet_eth
@@ -98,9 +108,8 @@ class SimpleCorridor(gym.Env):
         elif action == 1: # sell
             actual_wallet_eth -= price_btc
             actual_wallet_btc += price_btc
-        
         reward = self.wallet_btc - actual_wallet_btc
-        self.index += 1        
+        self.index += 1
         done = self.wallet_btc <= 0.0 or self.index >= self.df_columns-1 # number of rows
         row = self.df.iloc[self.index][2:]
         return list(row), reward, done, {}
