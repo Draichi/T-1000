@@ -21,6 +21,8 @@ import gym
 import traceback
 import sys
 from gym.spaces import Discrete, Box
+from sklearn.preprocessing import normalize
+
 
 import ray
 from ray.tune import run_experiments, grid_search
@@ -40,12 +42,15 @@ from ray.tune import run_experiments, grid_search
 # da carteira, o log da diferença entre carteira antes
 # e depois da ação é o reward
 #
+# transformar o df em uma list, fazer slice uma dataframe consome
+# muita memoria
+#
 # para criar uma dataframe com as linhas normalizadas e
 # evitar normalizar a cada step, pode usar essa função:
 # https://stackoverflow.com/questions/50421196/apply-a-function-to-each-row-of-the-dataframe
 # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.apply.html
 
-class SimpleCorridor(gym.Env):
+class TradingEnv(gym.Env):
     """Example of a custom env in which you have to walk down a corridor.
 
      Observation:
@@ -77,6 +82,7 @@ class SimpleCorridor(gym.Env):
         self.df_columns, self.df_rows = self.df.shape
         # self.cur_pos = 0
         self.index = 0
+        self.dicount_rate = 0.99 # works like the tx
         self.wallet_btc = 0.1
         self.wallet_eth = 0.0
         self.action_space = Discrete(3)
@@ -85,52 +91,70 @@ class SimpleCorridor(gym.Env):
 
     def reset(self):
         self.index = 0
-        row = self.df.iloc[self.index][2:]
-        return list(row) # return a row withou the 2 fist columns (date and coin name)
+        self.wallet_btc = 0.1
+        self.wallet_eth = 0.0
+        row = np.array(self.df.iloc[self.index][2:])
+        normalized_row = normalize(row[:,np.newaxis], axis=0).ravel()
+        return normalized_row # return a row withou the 2 fist columns (date and coin name)
 
     def step(self, action):
         if action not in [0,1,2]:
-            raise AssertionError:
-                _, _, tb = sys.exc_info()
-                traceback.print_tb(tb) # Fixed format
-                tb_info = traceback.extract_tb(tb)
-                filename, line, func, text = tb_info[-1]
+            raise AssertionError()
+                # _, _, tb = sys.exc_info()
+                # traceback.print_tb(tb) # Fixed format
+                # tb_info = traceback.extract_tb(tb)
+                # filename, line, func, text = tb_info[-1]
 
-                print('An error occurred on line {} in statement {}'.format(line, text))
-                exit(1)
+                # print('An error occurred on line {} in statement {}'.format(line, text))
+                # exit(1)
 
-        price_btc = self.df.iloc[self.index][13]
-        actual_wallet_btc = self.wallet_btc
-        actual_wallet_eth = self.wallet_eth
-        if action == 0: # buy
-            actual_wallet_btc -= price_btc
-            actual_wallet_eth += price_btc
-        elif action == 1: # sell
-            actual_wallet_eth -= price_btc
-            actual_wallet_btc += price_btc
-        reward = self.wallet_btc - actual_wallet_btc
-        self.index += 1
-        done = self.wallet_btc <= 0.0 or self.index >= self.df_columns-1 # number of rows
         row = self.df.iloc[self.index][2:]
-        return list(row), reward, done, {}
+        price_btc_before_action = self.df.iloc[self.index][13]
+        wallet_btc_before_action = self.wallet_btc
+        wallet_btc_after_action = self.wallet_btc
+        wallet_eth_before_action = self.wallet_eth
+        wallet_eth_after_action = self.wallet_eth
+        total_portfolio_value_before_action = wallet_btc_before_action * price_btc_before_action
+
+        if action == 0: # buy
+            # TODO
+            # manage wallets
+            # add tx
+            # add porfolio value on next_row list
+            wallet_btc_after_action -= price_btc_before_action
+            wallet_eth_after_action += price_btc_before_action
+        elif action == 1: # sell
+            wallet_eth_after_action -= price_btc_before_action
+            wallet_btc_after_action += price_btc_before_action
+
+        self.index += 1
+
+        price_btc_after_action = self.df.iloc[self.index][13]
+        total_portfolio_value_after_action = self.dicount_rate * (wallet_btc_after_action * price_btc_after_action)
+
+        reward = total_portfolio_value_after_action - total_portfolio_value_before_action
+        next_row = np.array(self.df.iloc[self.index][2:])
+        normalized_next_row = normalize(next_row[:,np.newaxis], axis=0).ravel()
+        done = self.wallet_btc <= 0.0 or self.index >= self.df_columns-1 # number of rows
+        return normalized_next_row, reward, done, {}
 
 
 if __name__ == "__main__":
     # Can also register the env creator function explicitly with:
-    # register_env("corridor", lambda config: SimpleCorridor(config))
+    # register_env("corridor", lambda config: TradingEnv(config))
     ray.init()
     run_experiments({
         "XRP_demo": {
             "run": "PPO",
-            "env": SimpleCorridor,  # or "corridor" if registered above
+            "env": TradingEnv,  # or "corridor" if registered above
             "stop": {
-                "timesteps_total": 10000,
+                "timesteps_total": 100000,
             },
             "config": {
                 "lr": grid_search([1e-2, 1e-4, 1e-6]),  # try different lrs
                 "num_workers": 1,  # parallelism
+                # 'observation_filter': 'MeanStdFilter',
                 "env_config": {
-                    "corridor_length": 10,
                     "df": pd.read_csv('datasets/XRP_1d_2018-11-01_2019-03-18.csv')
                 },
             },

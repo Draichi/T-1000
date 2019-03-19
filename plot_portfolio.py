@@ -367,7 +367,7 @@ if __name__ == '__main__':
     import pandas as pd
     import numpy as np
     from configs.vars import *
-    # from configs.functions import print_dollar
+    from configs.functions import print_dollar
     import plotly.graph_objs as go
     import plotly.offline as offline
     import fbprophet
@@ -378,4 +378,4 @@ if __name__ == '__main__':
     from plotly import tools
     import pickle
     main()
-    # print_dollar()
+    print_dollar()
