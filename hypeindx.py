@@ -44,6 +44,8 @@ for symbol in PORTFOLIO_SYMBOLS:
             df = df[not_null_cols]
 
             df.rename(index=str, columns=ids_and_titles, inplace=True)
+            df.drop(labels=['Total Supply','Max Supply', 'Rank', 'Available Supply', 'Website visits mo.'], axis=1, inplace=True)            
+            # df.drop(labels=['Max Supply', 'Rank', 'ATH Volume $', 'Available Supply', 'ATH Marketcap $', 'ATL Marketcap $','ATH Price $', 'ATL Price $', 'Website visits mo.'], axis=1, inplace=True)            
             
             price_btc = np.array(df['Price BTC'])
             price_usd = np.array(df['Price $'])
@@ -64,7 +66,6 @@ for symbol in PORTFOLIO_SYMBOLS:
             df.loc[:, 'STOCHRSI_BTC_K'], df.loc[:, 'STOCHRSI_BTC_D'] = talib.STOCHRSI(price_btc, timeperiod=14, fastk_period=5, fastd_period=3, fastd_matype=0)
             df['macd_USD'], df['macdsignal_USD'], df['macdhist_USD'] = talib.MACD(price_usd, fastperiod=12, slowperiod=26, signalperiod=9)
             df['macd_BTC'], df['macdsignal_BTC'], df['macdhist_BTC'] = talib.MACD(price_btc, fastperiod=12, slowperiod=26, signalperiod=9)
-            df.drop(['Max Supply', 'Rank'], axis=1, inplace=True)            
             df.fillna(df.mean(), inplace=True)
             df.to_csv('datasets/{}_{}_{}_{}.csv'.format(name, TIME_INTERVAL, FROM_DATE, TO_DATE))
     #------------------------------------------------------------->        

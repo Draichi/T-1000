@@ -16,6 +16,7 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
+import pandas as pd
 import gym
 from gym.spaces import Discrete, Box
 
@@ -67,31 +68,42 @@ class SimpleCorridor(gym.Env):
     """
 
     def __init__(self, config):
-        self.true_data, self.normalized_data = get_datasets('ethereum')
-        self.end_pos = config["corridor_length"]
-        self.cur_pos = 0
-        self.action_space = Discrete(2)
+        # self.df = pd.read_csv('datasets/XRP_1d_2018-11-01_2019-03-18.csv')
+        self.df = config['df']
+        # print('self.df.shape[1]')
+        # print(self.df.shape[1])
+        # self.end_pos = config["corridor_length"]
+        self.df_columns, self.df_rows = self.df.shape
+        # self.cur_pos = 0
+        self.index = 0
+        self.wallet_btc = 0.1
+        self.wallet_eth = 0.0
+        self.action_space = Discrete(3)
         self.observation_space = Box(
-            0.0, self.end_pos, shape=(1, ), dtype=np.float32)
-
-    def get_datasets(coin):
-        """Return the dataset for a given currency and the normalized one"""
-        df = 'PLACEHOLDER'
-        nomr_df = 'PLACEHOLDER'
-        return df, norm_df
+            low=-np.finfo(np.float32).max, high=np.finfo(np.float32).max, shape=(self.df_rows-2, ), dtype=np.float32) # shape=(number of columns,)
 
     def reset(self):
-        self.cur_pos = 0
-        return [self.cur_pos]
+        self.index = 0
+        row = self.df.iloc[self.index][2:]
+        return list(row) # return a row withou the 2 fist columns (date and coin name)
 
     def step(self, action):
-        assert action in [0, 1], action
-        if action == 0 and self.cur_pos > 0:
-            self.cur_pos -= 1
-        elif action == 1:
-            self.cur_pos += 1
-        done = self.cur_pos >= self.end_pos
-        return [self.cur_pos], 1 if done else 0, done, {}
+        assert action in [0, 1, 2], action
+        price_btc = self.df.iloc[self.index][13]
+        actual_wallet_btc = self.wallet_btc
+        actual_wallet_eth = self.wallet_eth
+        if action == 0: # buy
+            actual_wallet_btc -= price_btc
+            actual_wallet_eth += price_btc
+        elif action == 1: # sell
+            actual_wallet_eth -= price_btc
+            actual_wallet_btc += price_btc
+        
+        reward = self.wallet_btc - actual_wallet_btc
+        self.index += 1        
+        done = self.wallet_btc <= 0.0 or self.index >= self.df_columns-1 # number of rows
+        row = self.df.iloc[self.index][2:]
+        return list(row), reward, done, {}
 
 
 if __name__ == "__main__":
@@ -99,8 +111,8 @@ if __name__ == "__main__":
     # register_env("corridor", lambda config: SimpleCorridor(config))
     ray.init()
     run_experiments({
-        "demo": {
-            "run": "IMPALA",
+        "XRP_demo": {
+            "run": "PPO",
             "env": SimpleCorridor,  # or "corridor" if registered above
             "stop": {
                 "timesteps_total": 10000,
@@ -110,6 +122,7 @@ if __name__ == "__main__":
                 "num_workers": 1,  # parallelism
                 "env_config": {
                     "corridor_length": 10,
+                    "df": pd.read_csv('datasets/XRP_1d_2018-11-01_2019-03-18.csv')
                 },
             },
         },
