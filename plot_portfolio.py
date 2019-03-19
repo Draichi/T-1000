@@ -143,7 +143,7 @@ def main():
         else:
             with open(PATH_TO_WEIGHTS_FILE, "rb") as fp:
                 comparison = pickle.load(fp)
-        _plot_efficient_frontier(comparison) if FLAGS.efficient_frontier else _plot_weights_per_asset(comparison)
+        plot_efficient_frontier(comparison) if FLAGS.efficient_frontier else plot_weights_per_asset(comparison)
 
 #---------------------------------------------------------------------------------->
 def _build_layout(title, x_axis_title=None, y_axis_title=None, y_axis_type=None):
@@ -307,7 +307,7 @@ def _optimize_weights():
     return res, results_comparison_dict
 #---------------------------------------------------------------------------------->
 
-def _plot_efficient_frontier(comparison):
+def plot_efficient_frontier(comparison):
     z = [[x, comparison[x][0]*100] for x in comparison]
     objects, risk_vals = list(zip(*z))
     # t_pos = np.arange(len(objects))
@@ -318,7 +318,7 @@ def _plot_efficient_frontier(comparison):
                             x_axis_title='Risk %'),
              file_name='efficient_frontier')
 #---------------------------------------------------------------------------------->
-def _plot_weights_per_asset(comparisson):
+def plot_weights_per_asset(comparisson):
     keys = sorted(list(comparisson.keys()))
     index = 0
     df = pd.read_csv(PATH_TO_PCT_CORRELATION_FILE)
@@ -372,7 +372,6 @@ if __name__ == '__main__':
     import plotly.offline as offline
     import fbprophet
     import os
-    import matplotlib.pyplot as plt
     from scipy.optimize import minimize
     import ad
     from plotly import tools

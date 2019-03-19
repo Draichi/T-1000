@@ -18,8 +18,6 @@ from __future__ import print_function
 import numpy as np
 import pandas as pd
 import gym
-import traceback
-import sys
 from gym.spaces import Discrete, Box
 from sklearn.preprocessing import normalize
 
@@ -112,7 +110,7 @@ class TradingEnv(gym.Env):
         price_btc_before_action = self.df.iloc[self.index][13]
         wallet_btc_before_action = self.wallet_btc
         wallet_btc_after_action = self.wallet_btc
-        wallet_eth_before_action = self.wallet_eth
+        # wallet_eth_before_action = self.wallet_eth
         wallet_eth_after_action = self.wallet_eth
         total_portfolio_value_before_action = wallet_btc_before_action * price_btc_before_action
 

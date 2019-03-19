@@ -45,7 +45,7 @@ for symbol in PORTFOLIO_SYMBOLS:
 
             df.rename(index=str, columns=ids_and_titles, inplace=True)
             df.drop(labels=['Total Supply','Max Supply', 'Rank', 'Available Supply', 'Website visits mo.'], axis=1, inplace=True)
-            # df.drop(labels=['Max Supply', 'Rank', 'ATH Volume $', 'Available Supply', 'ATH Marketcap $', 'ATL Marketcap $','ATH Price $', 'ATL Price $', 'Website visits mo.'], axis=1, inplace=True)            
+            # df.drop(labels=['Max Supply', 'Rank', 'ATH Volume $', 'Available Supply', 'ATH Marketcap $', 'ATL Marketcap $','ATH Price $', 'ATL Price $', 'Website visits mo.'], axis=1, inplace=True)
             price_btc = np.array(df['Price BTC'])
             price_usd = np.array(df['Price $'])
 
