@@ -19,9 +19,14 @@ See also this live [demo](https://bud-fox.github.io/live/)
 Go to `configs/vars` and edit these lines:
 
 ```python
-coins = ['bitcoin','nano','binancecoin','steem']
-days = 90
-currency = 'usd'
+PORTFOLIO_SYMBOLS = [
+    'eth',
+    'xrp',
+    'ltc'
+]
+TIME_INTERVAL = '1d'
+FROM_DATE = '2018-11-01'
+TO_DATE = '2019-03-18'
 ```
 
 * * *
@@ -53,31 +58,25 @@ conda env create -f MAC_CPU.yml
 * * *
 
 ```sh
-python forecast.py [asset] [how_many_days]
-# e.g.: python3 forecast.py bitcoin 5
+python plot_portfolio.py --plot_coin [COIN_NAME]
+# e.g.: python plot_portfolio.py --plot_coin eth
 # open the /path/to/crytocurrency_prediction/temp-plot.html file
 ```
 
-<div>
-    <a href="https://plot.ly/~randy_marsh/19/" target="_blank" title="24-8 bitcoin 0.01" style="display: block; text-align: center;"><img src="https://plot.ly/~randy_marsh/19.png" alt="24-8 bitcoin 0.01" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
-</div>
+![imgs/dashboard_demo.gif ](imgs/dashboard_demo.gif )
 
-```sh
-python scatter.py log
-# log/linear = layout type
-```
+## Live demos
 
-![10-8-2018](imgs/log_520.png "10-8-2018")
+-   [Dashboard LTC Momentum](https://draichi.github.io/cryptocurrency_prediction/dashboard_ltc_momentum.html)
+-   [Dashboard LTC Hype](https://draichi.github.io/cryptocurrency_prediction/dashboard_ltc_hype.html)
+-   [Dashboard LTC Prophet](https://draichi.github.io/cryptocurrency_prediction/dashboard_LTC_prophet.html)
+-   [Portfolio Weigths](https://draichi.github.io/cryptocurrency_prediction/weights.html)
+-   [Kendall Correlation](https://draichi.github.io/cryptocurrency_prediction/kendall_correlation.html)
+-   [efficient_frontier](https://draichi.github.io/cryptocurrency_prediction/efficient_frontier.html)
 
-```sh
-python correlation_heatmap.py
-```
 
-<div>
-    <a href="https://plot.ly/~randy_marsh/47/?share_key=KiwLmIfF01AgF7CqocfQbR" target="_blank" title="correlation heatmap" style="display: block; text-align: center;"><img src="https://plot.ly/~randy_marsh/47.png?share_key=KiwLmIfF01AgF7CqocfQbR" alt="correlation heatmap" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /></a>
-</div>
 
-* * *
+<!-- * * *
 
 ## DQN
 
@@ -97,7 +96,7 @@ python evaluate.py [asset] [model]
 
 ![evaluate](imgs/evaluating.gif)
 
-Price in: blue = buy, yellow = sell, white = hold
+Price in: blue = buy, yellow = sell, white = hold -->
 
 * * *
 
