@@ -44,9 +44,8 @@ for symbol in PORTFOLIO_SYMBOLS:
             df = df[not_null_cols]
 
             df.rename(index=str, columns=ids_and_titles, inplace=True)
-            df.drop(labels=['Total Supply','Max Supply', 'Rank', 'Available Supply', 'Website visits mo.'], axis=1, inplace=True)            
+            df.drop(labels=['Total Supply','Max Supply', 'Rank', 'Available Supply', 'Website visits mo.'], axis=1, inplace=True)
             # df.drop(labels=['Max Supply', 'Rank', 'ATH Volume $', 'Available Supply', 'ATH Marketcap $', 'ATL Marketcap $','ATH Price $', 'ATL Price $', 'Website visits mo.'], axis=1, inplace=True)            
-            
             price_btc = np.array(df['Price BTC'])
             price_usd = np.array(df['Price $'])
 
@@ -68,7 +67,7 @@ for symbol in PORTFOLIO_SYMBOLS:
             df['macd_BTC'], df['macdsignal_BTC'], df['macdhist_BTC'] = talib.MACD(price_btc, fastperiod=12, slowperiod=26, signalperiod=9)
             df.fillna(df.mean(), inplace=True)
             df.to_csv('datasets/{}_{}_{}_{}.csv'.format(name, TIME_INTERVAL, FROM_DATE, TO_DATE))
-    #------------------------------------------------------------->        
+    #------------------------------------------------------------->
     else:
         cprint('> loading {} from cache'.format(symbol.upper()), 'blue', attrs=['bold'])
 #------------------------------------------------------------->

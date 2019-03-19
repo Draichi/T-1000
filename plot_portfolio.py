@@ -11,9 +11,9 @@ Written in 2018 - Lucas Draichi
 # - decorators
 #  X fazer com que a correlation seja gerada qnd morkovitza for instanciado
 #   - documentar as funcoes
-#   X plotar com o plotly 
+#   X plotar com o plotly
 #   - tornnar o tamanho do plot dinamico em relaçao a quantidade de exp_return_constants
-# correlation methods: {pearson, kendall, spearman} 
+# correlation methods: {pearson, kendall, spearman}
 #- correlation or covariance?
 #- Dirichlet distribution.
 #- from sklearn.preprocessing import normalize
@@ -32,17 +32,16 @@ def main():
                                   y_axis_title='Change (%)'),
              file_name='pct_change')
 #----------------------------------------------------------------------------------------------------------------->
-    # if FLAGS.portfolio_linear or FLAGS.portfolio_log:	
+    # if FLAGS.portfolio_linear or FLAGS.portfolio_log:
     #     plot(data=_build_data(),
-    #          layout=_build_layout(title='Portfolio {}'.format('Linear' if FLAGS.portfolio_linear 	
-    #                                                                      else 'Log Scale'),	
-    #                               y_axis_title='Price ({})'.format(TIME_INTERVAL.upper()),	
-    #                               y_axis_type='linear' if FLAGS.portfolio_linear else 'log'),	
+    #          layout=_build_layout(title='Portfolio {}'.format('Linear' if FLAGS.portfolio_linear
+    #                                                                      else 'Log Scale'),
+    #                               y_axis_title='Price ({})'.format(TIME_INTERVAL.upper()),
+    #                               y_axis_type='linear' if FLAGS.portfolio_linear else 'log'),
     #          file_name='linear' if FLAGS.portfolio_linear else 'log')
 #----------------------------------------------------------------------------------------------------------------->
     if FLAGS.plot_coin:
         df = pd.read_csv('datasets/{}_{}_{}_{}.csv'.format(FLAGS.plot_coin.upper(), TIME_INTERVAL, FROM_DATE, TO_DATE))
-        
         # DASHBOARD MOMENTUM
         fig = tools.make_subplots(rows=3, cols=2, subplot_titles=['Price (Altcoins)', 'Price (BTC)', 'Price Change 24h', 'Price Change 7d', 'MACD', 'Momentum'])
         cols_axis_x = [col for col in df.columns if col not in ['Date', 'Coin']]
@@ -149,22 +148,22 @@ def main():
 #---------------------------------------------------------------------------------->
 def _build_layout(title, x_axis_title=None, y_axis_title=None, y_axis_type=None):
     """Call plotly.go.Layout
-    
+
     Arguments:
         title {[str]} -- [Title of the graph]
-    
+
     Keyword Arguments:
         x_axis_title {[type]} -- [description] (default: {None})
         y_axis_title {[type]} -- [description] (default: {None})
         y_axis_type {[type]} -- [description] (default: {None})
-    
+
     Returns:
         [Class Layout()] -- [Plotly layout object]
 
         >>> go.Layout()
         >>> Layout()
         >>> type(go.Layout())
-        >>> <class 'plotly.graph_objs._layout.Layout'> 
+        >>> <class 'plotly.graph_objs._layout.Layout'>
     """
     layout = go.Layout(plot_bgcolor='#2d2929',
                        paper_bgcolor='#2d2929',
@@ -177,10 +176,10 @@ def _build_layout(title, x_axis_title=None, y_axis_title=None, y_axis_type=None)
 #---------------------------------------------------------------------------------->
 def _build_data(pct_change=False):
     """[summary]
-    
+
     Keyword Arguments:
         pct_change {bool} -- [description] (default: {False})
-    
+
     Returns:
         [type] -- [description]"""
     data = []
@@ -249,16 +248,16 @@ def _build_correlation_df(pct_change=False):
         else:
             df = pd.read_csv(PATH_TO_PCT_CORRELATION_FILE)
             df = df.set_index('Date')
-        return df 
+        return df
 #---------------------------------------------------------------------------------->
 
 def calc_exp_returns(avg_return, weigths):
     """[summary]
-    
+
     Arguments:
         avg_return {[type]} -- [description]
         weigths {[type]} -- [description]
-    
+
     Returns:
         [type] -- [description]
     """
@@ -268,11 +267,11 @@ def calc_exp_returns(avg_return, weigths):
 
 def var_cov_matrix(df, weigths):
     """[summary]
-    
+
     Arguments:
         df {[type]} -- [description]
         weigths {[type]} -- [description]
-    
+
     Returns:
         [type] -- [description]
     """
@@ -284,7 +283,7 @@ def var_cov_matrix(df, weigths):
 
 def _optimize_weights():
     """[https://docs.scipy.org/doc/scipy-0.13.0/reference/generated/scipy.optimize.minimize.html]
-    
+
     Returns:
         [type] -- [description]
     """
@@ -340,15 +339,15 @@ def _plot_weights_per_asset(comparisson):
 #---------------------------------------------------------------------------------->
 def plot(data, layout, file_name):
     """Plot the data according to data and layout functions.
-    
+
     Arguments:
         title {str} -- Graph title
         y_axis_title {str} -- Y axis title
-    
+
     Keyword Arguments:
         pct_change {bool} -- Price is shown in percent of change (default: {False})
         y_axis_type {str} -- Scale is linear or log (default: {None})
-    
+
     """
     offline.plot({'data': data,
                  'layout': layout},
