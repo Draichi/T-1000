@@ -72,7 +72,7 @@ python plot_portfolio.py --plot_coin [COIN_NAME]
 -   [Dashboard LTC Prophet](https://draichi.github.io/cryptocurrency_prediction/dashboard_LTC_prophet.html)
 -   [Portfolio Weigths](https://draichi.github.io/cryptocurrency_prediction/weights.html)
 -   [Kendall Correlation](https://draichi.github.io/cryptocurrency_prediction/kendall_correlation.html)
--   [efficient_frontier](https://draichi.github.io/cryptocurrency_prediction/efficient_frontier.html)
+-   [Efficient Frontier](https://draichi.github.io/cryptocurrency_prediction/efficient_frontier.html)
 
 
 
@@ -102,5 +102,6 @@ Price in: blue = buy, yellow = sell, white = hold -->
 
 ## Credits
 
--   Analyzing cryptocurrency markets using python: [article](https://blog.patricktriest.com/analyzing-cryptocurrencies-python/)
--   Q-trader: [repo](https://github.com/edwardhdlu/q-trader)
+-   [Papers](https://github.com/Draichi/Portfolio-Management-list/blob/master/README.md)
+-   [Analyzing cryptocurrency markets using python](https://blog.patricktriest.com/analyzing-cryptocurrencies-python/)
+-   [Q-trader](https://github.com/edwardhdlu/q-trader)
