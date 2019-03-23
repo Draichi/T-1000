@@ -34,7 +34,7 @@ TO_DATE = '2019-03-18'
 ### Ubuntu
 
 ```sh
-sudo apt-get install gcc g++ build-essential python-dev python3-dev
+sudo apt-get install gcc g++ build-essential python-dev python3-dev htop
 # make sure you have these installed
 conda env create -f UBUNTU_CPU.yml
 # create env
@@ -75,28 +75,27 @@ python plot_portfolio.py --plot_coin [COIN_NAME]
 -   [Efficient Frontier](https://draichi.github.io/cryptocurrency_prediction/efficient_frontier.html)
 
 
+* * *
 
-<!-- * * *
-
-## DQN
-
-```sh
-python train.py [asset] [window_size] [how_many_episodes]
-# e.g.: python3 train.py bitcoin 10 1000
-```
-
-![trainning](imgs/trainning.gif)
-
-Use historical data to train a model and evaluate with fresh data
+## Algotrading
 
 ```sh
-python evaluate.py [asset] [model]
-# e.g.: python3 evaluate.py bitcoin 10-8_bitcoin_d90_e20_w12_c50_usd
+python run_agent.py --symbol ltc --algo IMPALA
 ```
 
-![evaluate](imgs/evaluating.gif)
+![algorithms](imgs/algorithms.png)
 
-Price in: blue = buy, yellow = sell, white = hold -->
+> Different algorithms compared (mean reward in BTC)
+
+```sh
+# to keep monitoring while the algo is trainning you can
+# run one of these lines in different terminal windows
+tensorboard --logdir=~/ray_results
+gpustat -i
+htop
+```
+
+![terminal_monitoring](imgs/terminal_monitoring.png)
 
 * * *
 
