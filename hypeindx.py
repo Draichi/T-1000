@@ -12,11 +12,12 @@ colorama.init()
 for symbol in PORTFOLIO_SYMBOLS:
     if not (os.path.exists('datasets/{}_{}_{}_{}.csv'.format(symbol.upper(), TIME_INTERVAL, FROM_DATE, TO_DATE))):
         cprint('> downloading', 'yellow', attrs=['bold'])
-        headers = {'User-Agent': 'Mozilla/5.0'}
+        headers = {'User-Agent': 'Mozilla/5.0', 'authorization': '6UVE1SBTB7NU2VUASY2EAZBGKA35DMXQWOP52LCA5WG9CW384ZUVDSCXRMOJ34KL:9FADWSM7AYKY7OQ7DBZL8I29DUCFX2FNIR9I3JKKV6U51WIGN0N6DGR7R1C6T41HWQL6AD47H4KT4SL5XMXOUTPETRTS6YP7PI0QJPMBJ53F242RYO2YHXIM5C72156F'}
         # fetch https://api.datalight.me/v1/object/ to get all objects.id
         objects_url = 'https://api.datalight.me/v1/object/'
         objects_response = requests.get(objects_url, headers=headers)
         objects_response_json = objects_response.json()
+        print(objects_response_json)
         ids = [object_id['id'] for object_id in objects_response_json['result']]
         ids_and_titles = {object_id['id']: object_id['title'] for object_id in objects_response_json['result']}
         str_ids = ','.join(ids)
