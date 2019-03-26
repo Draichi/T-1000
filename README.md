@@ -79,8 +79,34 @@ python plot_portfolio.py --plot_coin [COIN_NAME]
 
 ## Algotrading
 
-```sh
+<!-- ```sh
 python run_agent.py --symbol ltc --algo IMPALA
+``` -->
+
+## registering Env
+
+Add this to `~/miniconda3/envs/crypto_prediction/lib/python3.5/site-packages/gym/envs/__init__.py`:
+
+```python
+# Custon Env
+# ----------------------------------------
+register(
+    id='Trading-v0',
+    entry_point='gym.envs.trading_gym:TradingEnv',
+    reward_threshold=2.0,
+
+)
+```
+and paste the `trading_gym` folder inside `~/miniconda3/envs/crypto_prediction/lib/python3.5/site-packages/gym/envs/`
+
+## Run
+
+```sh
+rllib train --run PPO --env Trading-v0 --stop '{"timesteps_total": 180000}' --checkpoint-freq 10 --config '{"lr": 1e-5, "num_workers": 2, "observation_filter": "MeanStdFilter"}'
+```
+
+```sh
+rllib rollout /home/lucas/ray_results/default/PPO_Trading-v0_0_2019-03-26_09-40-05q0q7h143/checkpoint_20/checkpoint-20 --run PPO --env Trading-v0 --steps 1000
 ```
 
 ![algorithms](imgs/algorithms.png)
