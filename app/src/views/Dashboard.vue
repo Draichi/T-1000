@@ -4,7 +4,7 @@
     fluid
     grid-list-xl
   >
-    <v-layout wrap>
+    <v-layout wrap v-if="!loading">
       <v-flex
         md12
         sm12
@@ -71,7 +71,7 @@
         lg4
       >
         <material-chart-card
-          :data="dataCompletedTasksChart.data"
+          :data="dataCompletedTasksChartGraph.data"
           :options="dataCompletedTasksChart.options"
           color="green"
           type="Line"
@@ -360,15 +360,15 @@
 </template>
 
 <script>
+// import axios from 'axios'
+
 export default {
   data () {
     return {
       dailySalesChart: {
         data: {
-          labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-          series: [
-            [12, 17, 7, 17, 23, 18, 38]
-          ]
+          labels: this.$store.state.dailySalesChart.data.labels,
+          series: this.$store.state.dailySalesChart.data.series
         },
         options: {
           lineSmooth: this.$chartist.Interpolation.cardinal({
@@ -385,12 +385,13 @@ export default {
         }
       },
       dataCompletedTasksChart: {
-        data: {
-          labels: ['12am', '3pm', '6pm', '9pm', '12pm', '3am', '6am', '9am'],
-          series: [
-            [230, 750, 450, 300, 280, 240, 200, 190]
-          ]
-        },
+        // data: {
+        //   labels: ['12am', '3pm', '6pm', '9pm', '12pm', '3am', '6am', '9am'],
+        //   series: [
+        //     [230, 750, 450, 300, 280, 240, 200, 190],
+        //     [130, 550, 350, 200, 380, 140, 300, 90],
+        //   ]
+        // },
         options: {
           lineSmooth: this.$chartist.Interpolation.cardinal({
             tension: 0
@@ -410,7 +411,6 @@ export default {
           labels: ['Ja', 'Fe', 'Ma', 'Ap', 'Mai', 'Ju', 'Jul', 'Au', 'Se', 'Oc', 'No', 'De'],
           series: [
             [542, 443, 320, 780, 553, 453, 326, 434, 568, 610, 756, 895]
-
           ]
         },
         options: {
@@ -502,6 +502,21 @@ export default {
         1: false,
         2: false
       }
+    }
+  },
+  // beforeCreate () {
+  //   console.log(this.$store.state.dailySalesChart.data)
+  // },
+  // mounted () {
+  //   console.log('data')
+  //   console.log(this.$store.state.dailySalesChart.data)
+  // },
+  computed: {
+    loading () {
+      return this.$store.getters.loading
+    },
+    dataCompletedTasksChartGraph () {
+      return this.$store.getters.dataCompletedTasksChart
     }
   },
   methods: {

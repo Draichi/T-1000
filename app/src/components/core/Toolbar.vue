@@ -4,7 +4,7 @@
 
     flat
     prominent
-    style="background: #eee;"
+    :color="this.$store.state.app.color"
   >
     <div class="v-toolbar-title">
       <v-toolbar-title
