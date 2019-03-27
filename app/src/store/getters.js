@@ -6,5 +6,11 @@ export default {
   },
   dataCompletedTasksChart (state) {
     return state.dataCompletedTasksChart
+  },
+  dailySalesChart (state) {
+    return state.dailySalesChart
+  },
+  emailsSubscriptionChartGraph (state) {
+    return state.emailsSubscriptionChart
   }
 }

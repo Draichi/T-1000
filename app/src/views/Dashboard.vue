@@ -4,19 +4,22 @@
     fluid
     grid-list-xl
   >
-    <v-layout wrap v-if="!loading">
+    <v-layout
+      v-if="!loading"
+      wrap
+    >
       <v-flex
         md12
         sm12
         lg4
       >
         <material-chart-card
-          :data="dailySalesChart.data"
+          :data="dailySalesChartGraph.data"
           :options="dailySalesChart.options"
           color="info"
           type="Line"
         >
-          <h4 class="title font-weight-light">Daily Sales</h4>
+          <h4 class="title font-weight-light">Bitcoin Price{{dailySalesChartGraph}}</h4>
           <p class="category d-inline-flex font-weight-light">
             <v-icon
               color="green"
@@ -45,13 +48,13 @@
         lg4
       >
         <material-chart-card
-          :data="emailsSubscriptionChart.data"
+          :data="emailsSubscriptionChartGraph.data"
           :options="emailsSubscriptionChart.options"
           :responsive-options="emailsSubscriptionChart.responsiveOptions"
           color="red"
           type="Bar"
         >
-          <h4 class="title font-weight-light">Email Subscription</h4>
+          <h4 class="title font-weight-light">Email Subscription{{emailsSubscriptionChartGraph}}</h4>
           <p class="category d-inline-flex font-weight-light">Last Campaign Performance</p>
 
           <template slot="actions">
@@ -366,32 +369,21 @@ export default {
   data () {
     return {
       dailySalesChart: {
-        data: {
-          labels: this.$store.state.dailySalesChart.data.labels,
-          series: this.$store.state.dailySalesChart.data.series
-        },
         options: {
           lineSmooth: this.$chartist.Interpolation.cardinal({
             tension: 0
           }),
-          low: 0,
-          high: 50, // creative tim: we recommend you to set the high sa the biggest value + something for a better look
-          chartPadding: {
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0
-          }
+          // low: 3500,
+          // high: 5000, // creative tim: we recommend you to set the high sa the biggest value + something for a better look
+          // chartPadding: {
+          //   top: 0,
+          //   right: 0,
+          //   bottom: 0,
+          //   left: 0
+          // }
         }
       },
       dataCompletedTasksChart: {
-        // data: {
-        //   labels: ['12am', '3pm', '6pm', '9pm', '12pm', '3am', '6am', '9am'],
-        //   series: [
-        //     [230, 750, 450, 300, 280, 240, 200, 190],
-        //     [130, 550, 350, 200, 380, 140, 300, 90],
-        //   ]
-        // },
         options: {
           lineSmooth: this.$chartist.Interpolation.cardinal({
             tension: 0
@@ -517,6 +509,12 @@ export default {
     },
     dataCompletedTasksChartGraph () {
       return this.$store.getters.dataCompletedTasksChart
+    },
+    dailySalesChartGraph () {
+      return this.$store.getters.dailySalesChart
+    },
+    emailsSubscriptionChartGraph () {
+      return this.$store.getters.emailsSubscriptionChartGraph
     }
   },
   methods: {

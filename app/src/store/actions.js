@@ -11,13 +11,12 @@ export default {
         const series = []
         const obj = res.data.Data
         for (let key in obj) {
-          labels.push(key)
+          let date = new Date(obj[key].time * 1000)
+          labels.push(date.getHours() + 'h')
           series.push(obj[key].close)
         }
         commit('setDashboardDataLabels', labels)
         commit('setDashboardDataSeries', series)
-        // console.log('data actions')
-        // console.log(data)
         commit('setLoading', false)
       })
   }

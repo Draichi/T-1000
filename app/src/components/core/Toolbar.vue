@@ -1,10 +1,9 @@
 <template>
   <v-toolbar
     id="core-toolbar"
-
+    :color="this.$store.state.app.color"
     flat
     prominent
-    :color="this.$store.state.app.color"
   >
     <div class="v-toolbar-title">
       <v-toolbar-title

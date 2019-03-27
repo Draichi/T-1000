@@ -27,8 +27,8 @@ new Vue({
   i18n,
   router,
   store,
-  render: h => h(App),
   beforeCreate () {
     this.$store.dispatch('loadDashboadData')
   },
+  render: h => h(App)
 }).$mount('#app')
