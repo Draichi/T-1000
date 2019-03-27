@@ -25,6 +25,16 @@ export default {
       series: [
         [542, 443, 320, 780, 553, 453, 326, 434, 568, 610, 756, 895]
       ]
-    }
+    },
+    responsiveOptions: [
+      ['screen and (max-width: 640px)', {
+        seriesBarDistance: 5,
+        axisX: {
+          labelInterpolationFnc: function (value) {
+            return value[0]
+          }
+        }
+      }]
+    ]
   }
 }

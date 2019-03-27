@@ -19,18 +19,10 @@
         column
       >
         <v-list-tile avatar>
-          <v-list-tile-avatar
-            color="white"
-          >
-            <v-img
-              :src="logo"
-              height="34"
-              contain
-            />
+          <v-list-tile-avatar color="white">
+            <v-img :src="logo"/>
           </v-list-tile-avatar>
-          <v-list-tile-title class="title">
-            Vuetify MD
-          </v-list-tile-title>
+          <v-list-tile-title class="title">Crypto Prediction</v-list-tile-title>
         </v-list-tile>
         <v-divider/>
         <v-list-tile
@@ -84,7 +76,7 @@ import {
 
 export default {
   data: () => ({
-    logo: './img/vuetifylogo.png',
+    logo: './img/logo.png',
     links: [
       {
         to: '/dashboard',
