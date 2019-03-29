@@ -65,6 +65,23 @@
         </material-chart-card>
       </v-flex>
       <div>
+        <v-flex>
+          <v-slider
+            v-model="forecastDays"
+            :max="5"
+            :min="1"
+            label="Forecast days"
+            thumb-label="always"
+          ></v-slider>
+        </v-flex>
+        <v-select
+          v-model="changepointPriorScale"
+          :items="changepointList"
+          outline
+          label="Changepoint to consider a trend"
+          return-object
+          single-line
+        ></v-select>
         <v-btn
           color="info"
           @click="btn">Info
@@ -229,6 +246,9 @@
 export default {
   data () {
     return {
+      forecastDays: 2,
+      changepointPriorScale: null,
+      changepointList: [0.01,0.02,0.03,0.04,0.05,0.06,0.08,0.10,0.15],
       ChartsOptions: {
         axisX: {
           showLabel: false,
