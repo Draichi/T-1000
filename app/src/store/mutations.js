@@ -4,10 +4,13 @@ export default {
   setLoading (state, payload) {
     state.loading = payload
   },
-  setBTCMinute (state, payload) {
-    state.BTCMinute.data = payload
+  setError (state, payload) {
+    state.error = payload
   },
-  setBTCHourly (state, payload) {
-    state.BTCHourly.data = payload
+  clearError (state) {
+    state.error = null
+  },
+  setETHBTC (state, payload) {
+    state.ETHBTCData = payload
   }
 }

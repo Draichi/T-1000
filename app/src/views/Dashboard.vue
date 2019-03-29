@@ -14,12 +14,12 @@
         lg4
       >
         <material-chart-card
-          :data="BTCHourly.data"
+          :data="ETHBTCData"
           :options="ChartsOptions"
           color="purple"
           type="Line"
         >
-          <h4 class="title font-weight-light">24h EOS</h4>
+          <h4 class="title font-weight-light">ETHBTCData</h4>
           <template slot="actions">
             <v-icon
               class="mr-2"
@@ -27,40 +27,7 @@
             >
               mdi-clock-outline
             </v-icon>
-            <span class="caption grey--text font-weight-light">hourly</span>
-          </template>
-        </material-chart-card>
-      </v-flex>
-      <v-flex
-        md12
-        sm12
-        lg4
-      >
-        <material-chart-card
-          :data="BTCMinute.data"
-          :options="ChartsOptions"
-          color="info"
-          type="Line"
-        >
-          <h4 class="title font-weight-light">24h Ethereum</h4>
-          <!-- <p class="category d-inline-flex font-weight-light">
-            <v-icon
-              color="green"
-              small
-            >
-              mdi-arrow-up
-            </v-icon>
-            <span class="green--text">{{ change }}%</span>&nbsp;
-            increase in today's sales
-          </p> -->
-          <template slot="actions">
-            <v-icon
-              class="mr-2"
-              small
-            >
-              mdi-clock-outline
-            </v-icon>
-            <span class="caption grey--text font-weight-light">hourly</span>
+            <span class="caption grey--text font-weight-light">ETHBTCData</span>
           </template>
         </material-chart-card>
       </v-flex>
@@ -72,7 +39,7 @@
             :min="1"
             label="Forecast days"
             thumb-label="always"
-          ></v-slider>
+          />
         </v-flex>
         <v-select
           v-model="changepointPriorScale"
@@ -81,7 +48,7 @@
           label="Changepoint to consider a trend"
           return-object
           single-line
-        ></v-select>
+        />
         <v-btn
           color="info"
           @click="btn">Info
@@ -248,7 +215,7 @@ export default {
     return {
       forecastDays: 2,
       changepointPriorScale: null,
-      changepointList: [0.01,0.02,0.03,0.04,0.05,0.06,0.08,0.10,0.15],
+      changepointList: [0.01, 0.02, 0.03],
       ChartsOptions: {
         axisX: {
           showLabel: false,
@@ -276,11 +243,8 @@ export default {
     loading () {
       return this.$store.getters.loading
     },
-    BTCMinute () {
-      return this.$store.getters.BTCMinute
-    },
-    BTCHourly () {
-      return this.$store.getters.BTCHourly
+    ETHBTCData () {
+      return this.$store.getters.ETHBTCData
     }
   },
   methods: {

@@ -28,8 +28,7 @@ new Vue({
   router,
   store,
   beforeCreate () {
-    this.$store.dispatch('getBTCMinute')
-    this.$store.dispatch('getBTCHourly')
+    this.$store.dispatch('getETHBTC')
   },
   // mounted () {
   //   this.$store.dispatch('sendProphetReq')
