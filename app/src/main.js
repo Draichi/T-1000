@@ -28,7 +28,11 @@ new Vue({
   router,
   store,
   beforeCreate () {
-    this.$store.dispatch('loadDashboadData')
+    this.$store.dispatch('getBTCMinute')
+    this.$store.dispatch('getBTCHourly')
   },
+  // mounted () {
+  //   this.$store.dispatch('sendProphetReq')
+  // },
   render: h => h(App)
 }).$mount('#app')

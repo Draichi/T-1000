@@ -14,7 +14,41 @@
         lg4
       >
         <material-chart-card
-          :data="dailySalesChartGraph.data"
+          :data="BTCHourly.data"
+          :options="BTCMinute.options"
+          color="info"
+          type="Line"
+        >
+          <h4 class="title font-weight-light">Bitcoin</h4>
+          <!-- <p class="category d-inline-flex font-weight-light">
+            <v-icon
+              color="green"
+              small
+            >
+              mdi-arrow-up
+            </v-icon>
+            <span class="green--text">{{ change }}%</span>&nbsp;
+            increase in today's sales
+          </p> -->
+          <template slot="actions">
+            <v-icon
+              class="mr-2"
+              small
+            >
+              mdi-clock-outline
+            </v-icon>
+            <span class="caption grey--text font-weight-light">hourly</span>
+          </template>
+        </material-chart-card>
+      </v-flex>
+      <v-flex
+        md12
+        sm12
+        lg4
+      >
+        <material-chart-card
+          :data="BTCMinute.data"
+          :options="BTCMinute.options"
           color="info"
           type="Line"
         >
@@ -64,6 +98,9 @@
           </template>
         </material-chart-card>
       </v-flex>
+      <div>
+        <v-btn color="info" @click="btn">Info</v-btn>
+      </div>
       <v-flex
         md12
         sm12
@@ -232,7 +269,17 @@
 </template>
 
 <script>
-// import axios from 'axios'
+// https://github.com/Bud-Fox/client
+// https://github.com/Bud-Fox/API
+
+// TODO:
+
+// - juntar tudo o que foi trabalhado
+// (wieths , efficiente frontier, prophet, hype)
+// no dash e calcular o portfolio sharpe ratio, alpha, beta, risk...
+
+// Pra isso vai ser necessario tranformar o plot_portfolio.py em um server
+
 
 export default {
   data () {
@@ -252,8 +299,11 @@ export default {
     dataCompletedTasksChartGraph () {
       return this.$store.getters.dataCompletedTasksChart
     },
-    dailySalesChartGraph () {
-      return this.$store.getters.dailySalesChart
+    BTCMinute () {
+      return this.$store.getters.BTCMinute
+    },
+    BTCHourly () {
+      return this.$store.getters.BTCHourly
     },
     emailsSubscriptionChartGraph () {
       return this.$store.getters.emailsSubscriptionChartGraph
@@ -262,6 +312,9 @@ export default {
   methods: {
     complete (index) {
       this.list[index] = !this.list[index]
+    },
+    btn () {
+      this.$store.dispatch('sendProphetReq')
     }
   }
 }

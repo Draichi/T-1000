@@ -4,10 +4,10 @@ export default {
   setLoading (state, payload) {
     state.loading = payload
   },
-  setDashboardDataLabels (state, payload) {
-    state.dailySalesChart.data.labels = payload
+  setBTCMinute (state, payload) {
+    state.BTCMinute.data = payload
   },
-  setDashboardDataSeries (state, payload) {
-    state.dailySalesChart.data.series[0] = payload
-  }
+  setBTCHourly (state, payload) {
+    state.BTCHourly.data = payload
+  },
 }
