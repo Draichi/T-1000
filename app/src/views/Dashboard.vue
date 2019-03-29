@@ -15,21 +15,11 @@
       >
         <material-chart-card
           :data="BTCHourly.data"
-          :options="BTCMinute.options"
-          color="info"
+          :options="ChartsOptions"
+          color="purple"
           type="Line"
         >
-          <h4 class="title font-weight-light">Bitcoin</h4>
-          <!-- <p class="category d-inline-flex font-weight-light">
-            <v-icon
-              color="green"
-              small
-            >
-              mdi-arrow-up
-            </v-icon>
-            <span class="green--text">{{ change }}%</span>&nbsp;
-            increase in today's sales
-          </p> -->
+          <h4 class="title font-weight-light">24h EOS</h4>
           <template slot="actions">
             <v-icon
               class="mr-2"
@@ -48,11 +38,11 @@
       >
         <material-chart-card
           :data="BTCMinute.data"
-          :options="BTCMinute.options"
+          :options="ChartsOptions"
           color="info"
           type="Line"
         >
-          <h4 class="title font-weight-light">Bitcoin</h4>
+          <h4 class="title font-weight-light">24h Ethereum</h4>
           <!-- <p class="category d-inline-flex font-weight-light">
             <v-icon
               color="green"
@@ -74,56 +64,12 @@
           </template>
         </material-chart-card>
       </v-flex>
-      <v-flex
-        md12
-        sm12
-        lg4
-      >
-        <material-chart-card
-          :data="emailsSubscriptionChartGraph.data"
-          :responsive-options="emailsSubscriptionChartGraph.responsiveOptions"
-          color="red"
-          type="Bar"
-        >
-          <h4 class="title font-weight-light">Ethereum</h4>
-          <!-- <p class="category d-inline-flex font-weight-light">Last Campaign Performance</p> -->
-          <template slot="actions">
-            <!-- <v-icon
-              class="mr-2"
-              small
-            >
-              mdi-clock-outline
-            </v-icon> -->
-            <span class="caption grey--text font-weight-light">hourly</span>
-          </template>
-        </material-chart-card>
-      </v-flex>
       <div>
-        <v-btn color="info" @click="btn">Info</v-btn>
+        <v-btn
+          color="info"
+          @click="btn">Info
+        </v-btn>
       </div>
-      <v-flex
-        md12
-        sm12
-        lg4
-      >
-        <material-chart-card
-          :data="dataCompletedTasksChartGraph.data"
-          color="green"
-          type="Line"
-        >
-          <h3 class="title font-weight-light">Bitcoin vs Ethereum</h3>
-          <!-- <p class="category d-inline-flex font-weight-light">Last Last Campaign Performance</p> -->
-          <template slot="actions">
-            <v-icon
-              class="mr-2"
-              small
-            >
-              mdi-clock-outline
-            </v-icon>
-            <span class="caption grey--text font-weight-light">hourly</span>
-          </template>
-        </material-chart-card>
-      </v-flex>
       <!-- ##### section 2 -->
       <v-flex
         sm6
@@ -280,10 +226,24 @@
 
 // Pra isso vai ser necessario tranformar o plot_portfolio.py em um server
 
-
 export default {
   data () {
     return {
+      ChartsOptions: {
+        axisX: {
+          showLabel: false,
+          showGrid: true
+        },
+        lineSmooth: true,
+        showPoint: false,
+        showArea: true,
+        chartPadding: {
+          top: 25,
+          right: 0,
+          bottom: 0,
+          left: 15
+        }
+      },
       tabs: 0,
       list: {
         0: true,
@@ -296,17 +256,11 @@ export default {
     loading () {
       return this.$store.getters.loading
     },
-    dataCompletedTasksChartGraph () {
-      return this.$store.getters.dataCompletedTasksChart
-    },
     BTCMinute () {
       return this.$store.getters.BTCMinute
     },
     BTCHourly () {
       return this.$store.getters.BTCHourly
-    },
-    emailsSubscriptionChartGraph () {
-      return this.$store.getters.emailsSubscriptionChartGraph
     }
   },
   methods: {

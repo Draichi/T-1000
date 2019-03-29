@@ -7,7 +7,7 @@ export default {
     commit('setLoading', true)
     try {
       let res = await axios.get(
-        'https://min-api.cryptocompare.com/data/histominute?fsym=BTC&tsym=USD&e=Coinbase&limit=20',
+        'https://min-api.cryptocompare.com/data/histohour?fsym=ETH&tsym=BTC&e=Coinbase&limit=24',
         {headers: {
           authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
         }}
@@ -29,7 +29,7 @@ export default {
     commit('setLoading', true)
     try {
       let res = await axios.get(
-        'https://min-api.cryptocompare.com/data/histohour?fsym=BTC&tsym=USD&e=Coinbase&limit=20',
+        'https://min-api.cryptocompare.com/data/histohour?fsym=EOS&tsym=BTC&e=Binance&limit=24',
         {headers: {
           authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
         }}

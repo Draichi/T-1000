@@ -9,5 +9,5 @@ export default {
   },
   setBTCHourly (state, payload) {
     state.BTCHourly.data = payload
-  },
+  }
 }
