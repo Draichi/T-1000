@@ -6,5 +6,17 @@ export default {
   ETHBTCData: {
     labels: [],
     series: [[]]
+  },
+  XRPBTCData: {
+    labels: [],
+    series: [[]]
+  },
+  EOSBTCData: {
+    labels: [],
+    series: [[]]
+  },
+  LTCBTCData: {
+    labels: [],
+    series: [[]]
   }
 }

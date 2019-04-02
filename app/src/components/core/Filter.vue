@@ -123,6 +123,10 @@ import {
 export default {
   data: () => ({
     colors: [
+      'secondary',
+      'tertiary',
+      'accent',
+      'error',
       'primary',
       'info',
       'success',

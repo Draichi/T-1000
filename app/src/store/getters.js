@@ -6,5 +6,14 @@ export default {
   },
   ETHBTCData (state) {
     return state.ETHBTCData
-  }
+  },
+  XRPBTCData (state) {
+    return state.XRPBTCData
+  },
+  EOSBTCData (state) {
+    return state.EOSBTCData
+  },
+  LTCBTCData (state) {
+    return state.EOSBTCData
+  },
 }

@@ -16,7 +16,7 @@ function axiosGet (commit, period, fsym, tsym, e, limit, seriesIdx, mutation) {
       var obj = res.data.Data
       for (let key in obj) {
         let date = new Date(obj[key].time * 1000)
-        response.labels.push(date.getMinutes())
+        response.labels.push(date)
         response.series[seriesIdx].push(obj[key].close)
       }
       commit(mutation, response)
@@ -32,13 +32,49 @@ export default {
   getETHBTC ({commit}) {
     axiosGet(
       commit,
-      'histohour',
+      'histoday',
       'ETH',
       'BTC',
       'Binance',
-      '24',
+      '200',
       0,
       'setETHBTC'
+    )
+  },
+  getXRPBTC ({commit}) {
+    axiosGet(
+      commit,
+      'histoday',
+      'XRP',
+      'BTC',
+      'Binance',
+      '200',
+      0,
+      'setXRPBTC'
+    )
+  },
+  getEOSBTC ({commit}) {
+    axiosGet(
+      commit,
+      'histoday',
+      'EOS',
+      'BTC',
+      'Binance',
+      '200',
+      0,
+      'setEOSBTC'
+    )
+  },
+  getLTCBTC ({commit}) {
+    axiosGet(
+      commit,
+      'histoday',
+      'LTC',
+      'BTC',
+      'Binance',
+      '200',
+      0,
+      'setLTCBTC'
     )
   },
   sendProphetReq ({commit}) {

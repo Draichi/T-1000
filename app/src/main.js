@@ -29,6 +29,9 @@ new Vue({
   store,
   beforeCreate () {
     this.$store.dispatch('getETHBTC')
+    this.$store.dispatch('getXRPBTC')
+    this.$store.dispatch('getEOSBTC')
+    this.$store.dispatch('getLTCBTC')
   },
   // mounted () {
   //   this.$store.dispatch('sendProphetReq')
