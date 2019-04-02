@@ -6,7 +6,7 @@ import gzip
 from io import StringIO
 from urllib.parse import urlparse
 import numpy as np
-
+import datetime
 import plotly.graph_objs as go
 import plotly.offline as offline
 
@@ -34,8 +34,8 @@ def returns():
         data.append(trace)
     offline.plot({'data': data,
                  'layout': layout},
-                 filename='docs/retuns.html')
-    return 'Open /docs/returns.html', 201
+                 filename='docs/returns_{}.html'.format(datetime.datetime.now().date()))
+    return 'Open /docs/returns_{}.html'.format(datetime.datetime.now().date()), 201
 
 @app.route('/prophet', methods = ['POST'])
 def prophet():
@@ -72,10 +72,11 @@ def prophet():
                     fillcolor='rgba(252,201,5,.05)')
     offline.plot({'data': [y, yhat, yhat_lower, yhat_upper],
                  'layout': layout},
-                 filename='docs/prophet.html')
+                 filename='docs/prophet_{}.html'.format(datetime.datetime.now().date()))
     if ds is None:
         return "Error: routes.py:17, ds is None", 400
-    return 'Open /docs/prophet.html', 201
+    return 'Open /docs/prophet_{}.html'.format(datetime.datetime.now().date()), 201
+
 if __name__ == "__main__":
     app.debug = True
     app.run(host='localhost', port=3030)
