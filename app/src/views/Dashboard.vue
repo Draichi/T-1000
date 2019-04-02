@@ -100,29 +100,6 @@
           </template>
         </material-chart-card>
       </v-flex>
-      <!-- <v-flex
-        md12
-        sm12
-        lg4
-      >
-        <material-chart-card
-          :data="ETHBTCData"
-          :options="ChartsOptions"
-          color="purple"
-          type="Line"
-        >
-          <h4 class="title font-weight-light">historical EOS</h4>
-          <template slot="actions">
-            <v-icon
-              class="mr-2"
-              small
-            >
-              mdi-clock-outline
-            </v-icon>
-            <span class="caption grey--text font-weight-light">from {{ ETHBTCData.label[0] }} to {{ ETHBTCData.label[label.length - 1] }} </span>
-          </template>
-        </material-chart-card>
-      </v-flex> -->
       <div>
         <v-flex>
           <v-slider
@@ -210,88 +187,35 @@
       <!-- ###### section 3 -->
       <v-flex
         md12
-        lg6
       >
         <material-card
-          class="card-tabs"
-          color="green">
-          <v-flex
-            slot="header"
+          color="green"
+          title="Top 24h Volume"
+          text="Volume in BTC"
+        >
+          <v-data-table
+            :headers="headers"
+            :items="topVolCoins"
+            hide-actions
           >
-            <v-tabs
-              v-model="tabs"
-              color="transparent"
-              slider-color="white"
+            <template
+              slot="headerCell"
+              slot-scope="{ header }"
             >
               <span
-                class="subheading font-weight-light mr-3"
-                style="align-self: center"
-              >Tasks:</span>
-              <v-tab class="mr-3">
-                <v-icon class="mr-2">mdi-bug</v-icon>
-                Bugs
-              </v-tab>
-              <v-tab class="mr-3">
-                <v-icon class="mr-2">mdi-code-tags</v-icon>
-                Website
-              </v-tab>
-              <v-tab>
-                <v-icon class="mr-2">mdi-cloud</v-icon>
-                Server
-              </v-tab>
-            </v-tabs>
-          </v-flex>
-
-          <v-tabs-items v-model="tabs">
-            <v-tab-item
-              v-for="n in 3"
-              :key="n"
+                class="subheading font-weight-light text-success text--darken-3"
+                v-text="header.text"
+              />
+            </template>
+            <template
+              slot="items"
+              slot-scope="{ item }"
             >
-              <v-list three-line>
-                <v-list-tile @click="complete(0)">
-                  <v-list-tile-action>
-                    <v-checkbox
-                      :value="list[0]"
-                      color="green"
-                    />
-                  </v-list-tile-action>
-                  <v-list-tile-title>
-                    Fazer dash perfil
-                  </v-list-tile-title>
-                  <div class="d-flex">
-                    <v-tooltip
-                      top
-                      content-class="top">
-                      <v-btn
-                        slot="activator"
-                        class="v-btn--simple"
-                        color="success"
-                        icon
-                      >
-                        <v-icon color="primary">mdi-pencil</v-icon>
-                      </v-btn>
-                      <span>Edit</span>
-                    </v-tooltip>
-                    <v-tooltip
-                      top
-                      content-class="top">
-                      <v-btn
-                        slot="activator"
-                        class="v-btn--simple"
-                        color="danger"
-                        icon
-                      >
-                        <v-icon color="error">mdi-close</v-icon>
-                      </v-btn>
-                      <span>Close</span>
-                    </v-tooltip>
-
-                  </div>
-                </v-list-tile>
-                <v-divider/>
-              </v-list>
-            </v-tab-item>
-          </v-tabs-items>
+              <td>{{ item.NAME }}</td>
+              <td>{{ item.SYMBOL }}</td>
+              <td>{{ item.VOLUME24HOURTO }}</td>
+            </template>
+          </v-data-table>
         </material-card>
       </v-flex>
     </v-layout>
@@ -301,14 +225,6 @@
 <script>
 // https://github.com/Bud-Fox/client
 // https://github.com/Bud-Fox/API
-
-// TODO:
-
-// - juntar tudo o que foi trabalhado
-// (wieths , efficiente frontier, prophet, hype)
-// no dash e calcular o portfolio sharpe ratio, alpha, beta, risk...
-
-// Pra isso vai ser necessario tranformar o plot_portfolio.py em um server
 
 export default {
   data () {
@@ -331,12 +247,23 @@ export default {
           left: 15
         }
       },
-      tabs: 0,
-      list: {
-        0: true,
-        1: false,
-        2: false
-      }
+      headers: [
+        {
+          sortable: false,
+          text: 'Name',
+          value: 'NAME'
+        },
+        {
+          sortable: false,
+          text: 'Symbol',
+          value: 'SYMBOL'
+        },
+        {
+          sortable: false,
+          text: 'Volume',
+          value: 'VOLUME24HOURTO'
+        }
+      ]
     }
   },
   computed: {
@@ -354,6 +281,9 @@ export default {
     },
     LTCBTCData () {
       return this.$store.getters.LTCBTCData
+    },
+    topVolCoins () {
+      return this.$store.getters.topVolCoins
     }
   },
   methods: {

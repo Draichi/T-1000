@@ -4,6 +4,9 @@ export default {
   loading (state) {
     return state.loading
   },
+  topVolCoins (state) {
+    return state.topVolCoins
+  },
   ETHBTCData (state) {
     return state.ETHBTCData
   },

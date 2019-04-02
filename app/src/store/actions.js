@@ -29,6 +29,34 @@ function axiosGet (commit, period, fsym, tsym, e, limit, seriesIdx, mutation) {
 }
 
 export default {
+  getTopVolCoins ({commit}) {
+    commit('setLoading', true)
+    axios.get('https://min-api.cryptocompare.com/data/top/volumes?tsym=BTC&limit=10',
+      {
+        headers: {
+          authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
+        }
+      })
+      .then(res => {
+        // var response = []
+        var obj = res.data.Data
+        // for (let key in obj) {
+        //   response.push({
+        //     symbol: obj[key].symbol,
+        //     name: obj[key].name,
+        //     id: obj
+        //   })
+        //   response.labels.push(date)
+        //   response.series[seriesIdx].push(obj[key].close)
+        // }
+        commit('setTopVolCoins', obj)
+      })
+      .catch(e => {
+        commit('setError', e)
+        console.warn(e)
+      })
+    commit('setLoading', false)
+  },
   getETHBTC ({commit}) {
     axiosGet(
       commit,
@@ -81,7 +109,7 @@ export default {
     axios.post('http://localhost:3030/prophet',
       {
         // 'headers': {'Content-Encoding': 'gzip', 'Access-Control-Allow-Origin': '*'},
-        'dataset': {'ds': this.state.BTCHourly.data.labels, 'y': this.state.BTCHourly.data.series[0]},
+        'dataset': {'ds': this.state.ETHBTCData.labels, 'y': this.state.ETHBTCData.series[0]},
         'changepoint_prior_scale': 0.05,
         'forecast_days': 1
       })

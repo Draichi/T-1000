@@ -10,6 +10,9 @@ export default {
   clearError (state) {
     state.error = null
   },
+  setTopVolCoins (state, payload) {
+    state.topVolCoins = payload
+  },
   setETHBTC (state, payload) {
     state.ETHBTCData = payload
   },

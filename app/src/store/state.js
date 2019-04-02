@@ -3,6 +3,7 @@
 export default {
   loading: false,
   error: null,
+  topVolCoins: [],
   ETHBTCData: {
     labels: [],
     series: [[]]
