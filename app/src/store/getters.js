@@ -15,5 +15,5 @@ export default {
   },
   LTCBTCData (state) {
     return state.EOSBTCData
-  },
+  }
 }

@@ -100,5 +100,19 @@ export default {
         }
       })
       .then(res => console.log(res))
+  },
+  sendPortfolioCorrelationReq ({commit}) {
+    axios.post('http://localhost:3030/correlation',
+      {
+        // 'headers': {'Content-Encoding': 'gzip', 'Access-Control-Allow-Origin': '*'},
+        'timeseries': {
+          'date': this.state.ETHBTCData.labels,
+          'ETH': this.state.ETHBTCData.series[0],
+          'XRP': this.state.XRPBTCData.series[0],
+          'EOS': this.state.EOSBTCData.series[0],
+          'LTC': this.state.LTCBTCData.series[0]
+        }
+      })
+      .then(res => console.log(res))
   }
 }

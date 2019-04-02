@@ -20,6 +20,24 @@ layout = go.Layout(plot_bgcolor='#2d2929',
                        legend=dict(orientation="h"),
                        yaxis=dict(title='y_axis_title'))
 
+@app.route('/correlation', methods=['POST'])
+def correlation():
+    values = request.get_json()
+    timeseries = values.get('timeseries')
+    df = pd.DataFrame(timeseries)
+    df.set_index('date', inplace=True)
+    for cor in ['pearson', 'kendall', 'spearman']:
+        heatmap = go.Heatmap(z=df.pct_change().corr(method=cor).values,
+                            x=df.pct_change().columns,
+                            y=df.pct_change().columns,
+                            colorscale=[[0, 'rgb(255,0,0)'], [1, 'rgb(0,255,0)']],
+                            zmin=-1.0,
+                            zmax=1.0)
+        offline.plot({'data': [heatmap],
+            'layout': layout},
+            filename='docs/correlation_{}_{}.html'.format(cor, datetime.datetime.now().date()))
+    return 'Open /docs/correlation_{}.html'.format(datetime.datetime.now().date()), 201
+
 @app.route('/returns', methods=['POST'])
 def returns():
     values = request.get_json()

@@ -137,6 +137,10 @@
           color="info"
           @click="calcReturns">Calculate Portfolio Returns
         </v-btn>
+        <v-btn
+          color="info"
+          @click="calcCorrelation">Calculate Portfolio Correlation
+        </v-btn>
         <v-select
           v-model="changepointPriorScale"
           :items="changepointList"
@@ -361,6 +365,9 @@ export default {
     },
     calcReturns () {
       this.$store.dispatch('sendPortfolioRetunsReq')
+    },
+    calcCorrelation () {
+      this.$store.dispatch('sendPortfolioCorrelationReq')
     }
   }
 }
