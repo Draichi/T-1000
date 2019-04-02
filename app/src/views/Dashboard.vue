@@ -133,6 +133,10 @@
             thumb-label="always"
           />
         </v-flex>
+        <v-btn
+          color="info"
+          @click="calcReturns">Calculate Portfolio Returns
+        </v-btn>
         <v-select
           v-model="changepointPriorScale"
           :items="changepointList"
@@ -354,6 +358,9 @@ export default {
     },
     btn () {
       this.$store.dispatch('sendProphetReq')
+    },
+    calcReturns () {
+      this.$store.dispatch('sendPortfolioRetunsReq')
     }
   }
 }
