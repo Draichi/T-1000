@@ -1,14 +1,20 @@
 import pandas as pd
-import json, matplotlib, fbprophet, os
-from flask import Flask, jsonify, request
-from flask_cors import CORS
-import gzip
-from io import StringIO
-from urllib.parse import urlparse
 import numpy as np
-import datetime
 import plotly.graph_objs as go
 import plotly.offline as offline
+import json
+import matplotlib
+import fbprophet
+import os
+import ad
+import gzip
+import datetime
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+from io import StringIO
+from urllib.parse import urlparse
+from scipy.optimize import minimize
+from plotly import tools
 
 app = Flask(__name__)
 CORS(app)
@@ -19,6 +25,74 @@ layout = go.Layout(plot_bgcolor='#2d2929',
                        font=dict(color='rgb(255, 255, 255)', size=17),
                        legend=dict(orientation="h"),
                        yaxis=dict(title='y_axis_title'))
+
+def var_cov_matrix(df, weigths):
+    sigma = np.cov(np.array(df).T, ddof=0) # covariance
+    var = (np.array(weigths) * sigma * np.array(weigths).T).sum()
+    return var
+
+def calc_exp_returns(avg_return, weigths):
+    exp_returns = avg_return.dot(weigths.T)
+    return exp_returns
+
+@app.route('/efficient_frontier', methods=['POST'])
+def efficient_frontier():
+    values = request.get_json()
+    timeseries = values.get('timeseries')
+
+    potfolio_size = len(timeseries) - 1
+    weigths = np.random.dirichlet(alpha=np.ones(potfolio_size), size=1) # makes sure that weights sums upto 1.
+    EXP_RETURN_CONSTRAINT = [ 0.007, 0.006, 0.005, 0.004, 0.003, 0.002, 0.001, 0.0009, 0.0008, 0.0007, 0.0006, 0.0005,  0.0004, 0.0003, 0.0002, 0.0001]
+    BOUNDS = ((0.0, 1.),) * potfolio_size # bounds of the problem
+
+    df = pd.DataFrame(timeseries)
+    df.set_index('date', inplace=True)
+    df = df.pct_change()
+    df = df.replace([np.inf, -np.inf], np.nan)
+    df = df.dropna()
+
+    returns = df.mean()
+    results_comparison_dict = {}
+    for i in range(len(EXP_RETURN_CONSTRAINT)):
+        res = minimize(
+            # object function defined here
+            fun=lambda x: var_cov_matrix(df, x),
+            x0=weigths,
+            method='SLSQP',
+            # jacobian using automatic differentiation
+            jac=ad.gh(lambda x: var_cov_matrix(df, x))[0],
+            bounds=BOUNDS,
+            options={'disp': True, 'ftol': 1e-20, 'maxiter': 5000},
+            constraints=[{'type': 'eq', 'fun': lambda x: sum(x) -1.0},
+                        {'type': 'eq', 'fun': lambda x: calc_exp_returns(returns, x) - EXP_RETURN_CONSTRAINT[i]}])
+        return_key = round(EXP_RETURN_CONSTRAINT[i]*100, 2)
+        results_comparison_dict.update({return_key: [res.fun, res.x]})
+
+    z = [[x, results_comparison_dict[x][0]*100] for x in results_comparison_dict]
+    objects, risk_vals = list(zip(*z))
+    # t_pos = np.arange(len(objects))
+    data = go.Scatter(x=risk_vals, y=objects, mode='markers', marker=dict(size=20))
+    offline.plot({'data': [data],
+                'layout': layout},
+                filename='docs/efficient_frontier_{}.html'.format(datetime.datetime.now().date()))
+
+    keys = sorted(list(results_comparison_dict.keys()))
+    index = 0
+    x_itemns = list(df.columns)
+    # x_itemns.remove('date')
+
+    fig = tools.make_subplots(rows=4, cols=4, subplot_titles=(keys))
+    for i in range(1,5):
+        for j in range(1,5):
+            trace = go.Bar(x=x_itemns, y=results_comparison_dict[keys[index]][1], name='{} %'.format(keys[index]))
+            fig.add_trace(trace, row=i, col=j)
+            index += 1
+    fig['layout'].update(title='Weights per asset at different expected returns (%)',
+                         font=dict(color='rgb(255, 255, 255)', size=14),
+                         paper_bgcolor='#2d2929',
+                         plot_bgcolor='#2d2929')
+    offline.plot(fig, filename='docs/weights.html')
+    return 'Open /docs/', 201
 
 @app.route('/correlation', methods=['POST'])
 def correlation():

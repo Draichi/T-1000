@@ -101,6 +101,18 @@
         </material-chart-card>
       </v-flex>
       <div>
+        <v-btn
+          color="info"
+          @click="calcReturns">Calculate Portfolio Returns
+        </v-btn>
+        <v-btn
+          color="info"
+          @click="calcCorrelation">Calculate Portfolio Correlation
+        </v-btn>
+        <v-btn
+          color="info"
+          @click="calcEfficientFrontier">calcEfficientFrontier
+        </v-btn>
         <v-flex>
           <v-slider
             v-model="forecastDays"
@@ -110,14 +122,6 @@
             thumb-label="always"
           />
         </v-flex>
-        <v-btn
-          color="info"
-          @click="calcReturns">Calculate Portfolio Returns
-        </v-btn>
-        <v-btn
-          color="info"
-          @click="calcCorrelation">Calculate Portfolio Correlation
-        </v-btn>
         <v-select
           v-model="changepointPriorScale"
           :items="changepointList"
@@ -298,6 +302,9 @@ export default {
     },
     calcCorrelation () {
       this.$store.dispatch('sendPortfolioCorrelationReq')
+    },
+    calcEfficientFrontier () {
+      this.$store.dispatch('sendPortfolioEfficientFrontierReq')
     }
   }
 }
