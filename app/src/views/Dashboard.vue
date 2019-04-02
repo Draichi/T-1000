@@ -156,7 +156,7 @@
                     />
                   </v-list-tile-action>
                   <v-list-tile-title>
-                    Sign contract for "What are conference organized afraid of?"
+                    Fazer dash perfil
                   </v-list-tile-title>
                   <div class="d-flex">
                     <v-tooltip
