@@ -1,4 +1,5 @@
 // https://vuex.vuejs.org/en/mutations.html
+import axios from 'axios'
 
 export default {
   setLoading (state, payload) {
@@ -15,5 +16,20 @@ export default {
   },
   addSymbolData (state, payload) {
     state.symbolData.push(payload)
+  },
+  sendProphetReq (state, payload) {
+    var coins = state.symbolData
+    for (let key in coins) {
+      if (coins[key].coin === payload.symbol) {
+        axios.post('http://localhost:3030/prophet',
+          {
+            // 'headers': {'Content-Encoding': 'gzip', 'Access-Control-Allow-Origin': '*'},
+            'dataset': {'ds': coins[key].data.labels, 'y': coins[key].data.series[0]},
+            'changepoint_prior_scale': payload.changepoint,
+            'forecast_days': payload.forecast
+          })
+          .then(res => console.log(res))
+      }
+    }
   }
 }

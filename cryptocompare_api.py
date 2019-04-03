@@ -46,6 +46,7 @@ if not (os.path.exists('datasets/apagar.csv')):
     df.drop('time', axis=1, inplace=True)
     # df.set_index('Date', inplace=True)
 
+    # indicators
     close = np.array(df['close'])
     df.loc[:, 'SMA'] = talib.SMA(close)
     df.loc[:, 'MOM_USD'] = talib.MOM(close, timeperiod=14)

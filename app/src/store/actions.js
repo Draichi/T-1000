@@ -18,7 +18,7 @@ function getTimeseries (state) {
 }
 
 function getEachCoin (commit, symbol) {
-  axios.get(`https://min-api.cryptocompare.com/data/histoday?fsym=${symbol}&tsym=BTC&e=Binance&limit=24`,
+  axios.get(`https://min-api.cryptocompare.com/data/histoday?fsym=${symbol}&tsym=BTC&limit=200`,
     {
       headers: {
         authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
@@ -43,7 +43,7 @@ function getEachCoin (commit, symbol) {
 export default {
   getTopVolCoins ({commit}) {
     commit('setLoading', true)
-    axios.get('https://min-api.cryptocompare.com/data/top/volumes?tsym=BTC&limit=12',
+    axios.get('https://min-api.cryptocompare.com/data/top/volumes?tsym=BTC&limit=25',
       {
         headers: {
           authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
@@ -62,16 +62,6 @@ export default {
         console.warn(e)
       })
     commit('setLoading', false)
-  },
-  sendProphetReq ({commit}) {
-    axios.post('http://localhost:3030/prophet',
-      {
-        // 'headers': {'Content-Encoding': 'gzip', 'Access-Control-Allow-Origin': '*'},
-        'dataset': {'ds': this.state.ETHBTCData.labels, 'y': this.state.ETHBTCData.series[0]},
-        'changepoint_prior_scale': 0.05,
-        'forecast_days': 1
-      })
-      .then(res => console.log(res))
   },
   sendPortfolioRetunsReq ({commit, state}) {
     let timeseries = getTimeseries(state)

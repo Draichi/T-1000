@@ -105,20 +105,33 @@
         <v-flex>
           <v-slider
             v-model="forecastDays"
-            :max="5"
+            :max="60"
             :min="1"
             label="Forecast days"
             thumb-label="always"
           />
         </v-flex>
+        {{ forecastDays }}
+        {{ symbolToProphet }}
+        {{ changepointPriorScale }}
         <v-select
-          v-model="changepointPriorScale"
-          :items="changepointList"
+          v-model="symbolToProphet"
+          :items="itemsCoins"
           outline
-          label="Changepoint to consider a trend"
+          label="Select symbol"
           return-object
           single-line
         />
+        <v-flex>
+          <v-slider
+            v-model="changepointPriorScale"
+            :max="1"
+            :min="0.01"
+            step="0.02"
+            label="Changepoint to consider a trend"
+            thumb-label="always"
+          />
+        </v-flex>
         <v-btn
           color="info"
           @click="btn">Info
@@ -223,12 +236,9 @@
 export default {
   data () {
     return {
-      list: {
-        0: true
-      },
-      forecastDays: 2,
-      changepointPriorScale: null,
-      changepointList: [0.01, 0.02, 0.03],
+      forecastDays: 15,
+      changepointPriorScale: 0.49,
+      symbolToProphet: null,
       ChartsOptions: {
         axisX: {
           showLabel: false,
@@ -272,6 +282,13 @@ export default {
     },
     symbolData () {
       return this.$store.getters.symbolData
+    },
+    itemsCoins () {
+      var symbolList = []
+      this.topVolCoins.map(function (item) {
+        symbolList.push(item.SYMBOL)
+      })
+      return symbolList
     }
   },
   methods: {
@@ -279,7 +296,11 @@ export default {
       this.list[index] = !this.list[index]
     },
     btn () {
-      this.$store.dispatch('sendProphetReq')
+      this.$store.commit('sendProphetReq', {
+        forecast: this.forecastDays,
+        symbol: this.symbolToProphet,
+        changepoint: this.changepointPriorScale
+      })
     },
     calcReturns () {
       this.$store.dispatch('sendPortfolioRetunsReq')
