@@ -5,11 +5,6 @@
     grid-list-xl
   >
     <v-layout
-      v-if="loading"
-      wrap
-    >... loading
-    </v-layout>
-    <v-layout
       v-if="!loading"
       wrap
     >
@@ -32,7 +27,33 @@
             <v-checkbox
               v-model="symbol.checkbox"
               color="green"
+              :label="symbol.coin"
             />
+            <p
+              class="category d-inline-flex font-weight-light"
+              v-if="symbol.checkbox"
+            >
+              <v-icon
+                color="green"
+                small
+              >
+                mdi-account-check
+              </v-icon>
+              <span class="green--text">&nbsp;Added to portfolio</span>
+
+            </p>
+            <p
+              class="category d-inline-flex font-weight-light"
+              v-else
+            >
+              <v-icon
+                color="red"
+                small
+              >
+                mdi-account-plus
+              </v-icon>
+              <span class="red--text">&nbsp;Not in portfolio</span>
+            </p>
             <template slot="actions">
               <v-icon
                 class="mr-2"
@@ -191,6 +212,7 @@
         </material-card>
       </v-flex>
     </v-layout>
+    <v-layout v-else><h2>Loading</h2></v-layout>
   </v-container>
 </template>
 
