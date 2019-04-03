@@ -9,62 +9,59 @@
       wrap
     >
       <v-flex
+        md12
+        sm12
+        lg4
         v-for="symbol in symbolData"
         :key="symbol.coin"
       >
-        <v-flex
-          md12
-          sm12
-          lg4
+        <material-chart-card
+          :data="symbol.data"
+          :options="ChartsOptions"
+          color="green"
+          type="Line"
         >
-          <material-chart-card
-            :data="symbol.data"
-            :options="ChartsOptions"
+          <h4 class="title font-weight-light">{{ symbol.coin }}/BTC</h4>
+          <v-checkbox
+            :label="symbol.coin"
+            v-model="symbol.checkbox"
             color="green"
-            type="Line"
+          />
+          <p
+            v-if="symbol.checkbox"
+            class="category d-inline-flex font-weight-light"
           >
-            <h4 class="title font-weight-light">{{ symbol.coin }}/BTC</h4>
-            <v-checkbox
-              v-model="symbol.checkbox"
+            <v-icon
               color="green"
-              :label="symbol.coin"
-            />
-            <p
-              class="category d-inline-flex font-weight-light"
-              v-if="symbol.checkbox"
+              small
             >
-              <v-icon
-                color="green"
-                small
-              >
-                mdi-account-check
-              </v-icon>
-              <span class="green--text">&nbsp;Added to portfolio</span>
+              mdi-account-check
+            </v-icon>
+            <span class="green--text">&nbsp;Added to portfolio</span>
 
-            </p>
-            <p
-              class="category d-inline-flex font-weight-light"
-              v-else
+          </p>
+          <p
+            v-else
+            class="category d-inline-flex font-weight-light"
+          >
+            <v-icon
+              color="red"
+              small
             >
-              <v-icon
-                color="red"
-                small
-              >
-                mdi-account-plus
-              </v-icon>
-              <span class="red--text">&nbsp;Not in portfolio</span>
-            </p>
-            <template slot="actions">
-              <v-icon
-                class="mr-2"
-                small
-              >
-                mdi-clock-outline
-              </v-icon>
-              <span class="caption grey--text font-weight-light">from {{ symbol.data.labels[0] }} to {{ symbol.data.labels.slice(-1)[0] }}</span>
-            </template>
-          </material-chart-card>
-        </v-flex>
+              mdi-account-plus
+            </v-icon>
+            <span class="red--text">&nbsp;Not in portfolio</span>
+          </p>
+          <template slot="actions">
+            <v-icon
+              class="mr-2"
+              small
+            >
+              mdi-clock-outline
+            </v-icon>
+            <span class="caption grey--text font-weight-light">from {{ symbol.data.labels[0] }} to {{ symbol.data.labels.slice(-1)[0] }}</span>
+          </template>
+        </material-chart-card>
       </v-flex>
       <!-- <v-flex
         md12
@@ -89,7 +86,9 @@
           </template>
         </material-chart-card>
       </v-flex> -->
-      <div>
+      <v-flex
+        xs12
+      >
         <v-btn
           color="info"
           @click="calcReturns">Calculate Portfolio Returns
@@ -136,7 +135,7 @@
           color="info"
           @click="btn">Info
         </v-btn>
-      </div>
+      </v-flex>
       <!-- ##### section 2 -->
       <v-flex
         sm6
