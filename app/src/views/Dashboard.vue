@@ -8,6 +8,7 @@
       v-if="!loading"
       wrap
     >
+    <!-- {{ symbolData }} -->
       <v-flex
         md12
         sm12
@@ -288,6 +289,9 @@ export default {
     },
     topVolCoins () {
       return this.$store.getters.topVolCoins
+    },
+    symbolData () {
+      return this.$state.getters.symbolData
     }
   },
   methods: {

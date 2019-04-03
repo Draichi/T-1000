@@ -13,6 +13,9 @@ export default {
   setTopVolCoins (state, payload) {
     state.topVolCoins = payload
   },
+  addSymbolData (state, payload) {
+    state.symbolData.push(payload)
+  },
   setETHBTC (state, payload) {
     state.ETHBTCData = payload
   },

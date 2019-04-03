@@ -4,6 +4,7 @@ export default {
   loading: false,
   error: null,
   topVolCoins: [],
+  symbolData: [],
   ETHBTCData: {
     labels: [],
     series: [[]]

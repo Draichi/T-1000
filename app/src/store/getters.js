@@ -7,6 +7,9 @@ export default {
   topVolCoins (state) {
     return state.topVolCoins
   },
+  symbolData (state) {
+    return state.symbolData
+  },
   ETHBTCData (state) {
     return state.ETHBTCData
   },
