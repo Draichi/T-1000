@@ -28,7 +28,7 @@
             color="green"
             type="Line"
           >
-            <h4 class="title font-weight-light">{{symbol.coin}}/BTC</h4>
+            <h4 class="title font-weight-light">{{ symbol.coin }}/BTC</h4>
             <template slot="actions">
               <v-icon
                 class="mr-2"
@@ -61,75 +61,6 @@
               mdi-clock-outline
             </v-icon>
             <span class="caption grey--text font-weight-light">from {{ ETHBTCData.labels[0] }} to {{ ETHBTCData.labels.slice(-1)[0] }}</span>
-          </template>
-        </material-chart-card>
-      </v-flex>
-      <v-flex
-        md12
-        sm12
-        lg4
-      >
-        <material-chart-card
-          :data="EOSBTCData"
-          :options="ChartsOptions"
-          color="purple"
-          type="Line"
-        >
-          <h4 class="title font-weight-light">Historical EOS</h4>
-          <template slot="actions">
-            <v-icon
-              class="mr-2"
-              small
-            >
-              mdi-clock-outline
-            </v-icon>
-            <span class="caption grey--text font-weight-light">from {{ EOSBTCData.labels[0] }} to {{ EOSBTCData.labels.slice(-1)[0] }}</span>
-          </template>
-        </material-chart-card>
-      </v-flex>
-      <v-flex
-        md12
-        sm12
-        lg4
-      >
-        <material-chart-card
-          :data="XRPBTCData"
-          :options="ChartsOptions"
-          color="purple"
-          type="Line"
-        >
-          <h4 class="title font-weight-light">Historical XRP</h4>
-          <template slot="actions">
-            <v-icon
-              class="mr-2"
-              small
-            >
-              mdi-clock-outline
-            </v-icon>
-            <span class="caption grey--text font-weight-light">from {{ XRPBTCData.labels[0] }} to {{ XRPBTCData.labels.slice(-1)[0] }}</span>
-          </template>
-        </material-chart-card>
-      </v-flex>
-      <v-flex
-        md12
-        sm12
-        lg4
-      >
-        <material-chart-card
-          :data="LTCBTCData"
-          :options="ChartsOptions"
-          color="purple"
-          type="Line"
-        >
-          <h4 class="title font-weight-light">historical LTC</h4>
-          <template slot="actions">
-            <v-icon
-              class="mr-2"
-              small
-            >
-              mdi-clock-outline
-            </v-icon>
-            <span class="caption grey--text font-weight-light">from {{ LTCBTCData.labels[0] }} to {{ LTCBTCData.labels.slice(-1)[0] }}</span>
           </template>
         </material-chart-card>
       </v-flex> -->
@@ -306,18 +237,6 @@ export default {
   computed: {
     loading () {
       return this.$store.getters.loading
-    },
-    ETHBTCData () {
-      return this.$store.getters.ETHBTCData
-    },
-    XRPBTCData () {
-      return this.$store.getters.XRPBTCData
-    },
-    EOSBTCData () {
-      return this.$store.getters.EOSBTCData
-    },
-    LTCBTCData () {
-      return this.$store.getters.LTCBTCData
     },
     topVolCoins () {
       return this.$store.getters.topVolCoins

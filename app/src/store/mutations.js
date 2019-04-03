@@ -15,17 +15,5 @@ export default {
   },
   addSymbolData (state, payload) {
     state.symbolData.push(payload)
-  },
-  setETHBTC (state, payload) {
-    state.ETHBTCData = payload
-  },
-  setXRPBTC (state, payload) {
-    state.XRPBTCData = payload
-  },
-  setEOSBTC (state, payload) {
-    state.EOSBTCData = payload
-  },
-  setLTCBTC (state, payload) {
-    state.LTCBTCData = payload
   }
 }

@@ -9,17 +9,5 @@ export default {
   },
   symbolData (state) {
     return state.symbolData
-  },
-  ETHBTCData (state) {
-    return state.ETHBTCData
-  },
-  XRPBTCData (state) {
-    return state.XRPBTCData
-  },
-  EOSBTCData (state) {
-    return state.EOSBTCData
-  },
-  LTCBTCData (state) {
-    return state.EOSBTCData
   }
 }
