@@ -5,14 +5,18 @@ import axios from 'axios'
 function getTimeseries (state) {
   let timeseries = {}
   for (let key in state.symbolData) {
-    var obj = state.symbolData[key]
-    if (key == 0) {
+    if (state.symbolData[key].checkbox == true) {
+      var obj = state.symbolData[key]
+      // if (key == 0) {
+      //   var date = obj.data.labels
+      //   timeseries['date'] = date
+      // }
       var date = obj.data.labels
       timeseries['date'] = date
+      var coin = obj.coin
+      var price = obj.data.series[0]
+      timeseries[coin] = price
     }
-    var coin = obj.coin
-    var price = obj.data.series[0]
-    timeseries[coin] = price
   }
   return timeseries
 }
@@ -25,7 +29,7 @@ function getEachCoin (commit, symbol) {
       }
     })
     .then(res => {
-      var response = {coin: symbol, data: {labels: [], series: [[]]}}
+      var response = {coin: symbol, data: {labels: [], series: [[]]}, checkbox: false}
       var obj = res.data.Data
       for (let key in obj) {
         let date = new Date(obj[key].time * 1000)

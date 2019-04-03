@@ -29,6 +29,10 @@
             type="Line"
           >
             <h4 class="title font-weight-light">{{ symbol.coin }}/BTC</h4>
+            <v-checkbox
+              v-model="symbol.checkbox"
+              color="green"
+            />
             <template slot="actions">
               <v-icon
                 class="mr-2"
@@ -197,6 +201,9 @@
 export default {
   data () {
     return {
+      list: {
+        0: true
+      },
       forecastDays: 2,
       changepointPriorScale: null,
       changepointList: [0.01, 0.02, 0.03],
