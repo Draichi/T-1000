@@ -62,7 +62,7 @@ def efficient_frontier():
             # jacobian using automatic differentiation
             jac=ad.gh(lambda x: var_cov_matrix(df, x))[0],
             bounds=BOUNDS,
-            options={'disp': True, 'ftol': 1e-20, 'maxiter': 5000},
+            options={'disp': True, 'ftol': 1e-20, 'maxiter': 1000},
             constraints=[{'type': 'eq', 'fun': lambda x: sum(x) -1.0},
                         {'type': 'eq', 'fun': lambda x: calc_exp_returns(returns, x) - EXP_RETURN_CONSTRAINT[i]}])
         return_key = round(EXP_RETURN_CONSTRAINT[i]*100, 2)
@@ -91,8 +91,8 @@ def efficient_frontier():
                          font=dict(color='rgb(255, 255, 255)', size=14),
                          paper_bgcolor='#2d2929',
                          plot_bgcolor='#2d2929')
-    offline.plot(fig, filename='docs/weights.html')
-    return 'Open /docs/', 201
+    offline.plot(fig, filename='docs/weights_{}.html'.format(datetime.datetime.now().date()))
+    return 'docs/weights_{}.html'.format(datetime.datetime.now().date()), 201
 
 @app.route('/correlation', methods=['POST'])
 def correlation():

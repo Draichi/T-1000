@@ -5,12 +5,8 @@ import axios from 'axios'
 function getTimeseries (state) {
   let timeseries = {}
   for (let key in state.symbolData) {
-    if (state.symbolData[key].checkbox == true) {
+    if (state.symbolData[key].checkbox === true) {
       var obj = state.symbolData[key]
-      // if (key == 0) {
-      //   var date = obj.data.labels
-      //   timeseries['date'] = date
-      // }
       var date = obj.data.labels
       timeseries['date'] = date
       var coin = obj.coin
