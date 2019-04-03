@@ -28,28 +28,21 @@ function axiosGet (commit, period, fsym, tsym, e, limit, seriesIdx, mutation) {
   commit('setLoading', false)
 }
 
-function getEachCoin (symbol) {
-  axios.get(`https://min-api.cryptocompare.com/data/histoday?fsym=${symbol}&tsym=BTC&e=Binance&limit=3`,
+function getEachCoin (commit, symbol) {
+  axios.get(`https://min-api.cryptocompare.com/data/histoday?fsym=${symbol}&tsym=BTC&e=Binance&limit=24`,
     {
       headers: {
         authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
       }
     })
     .then(res => {
-      var response = []
+      var response = {coin: symbol, data: {labels: [], series: [[]]}}
       var obj = res.data.Data
       for (let key in obj) {
         let date = new Date(obj[key].time * 1000)
-        response.push({
-          symbol: {
-            'labels': date,
-            'series': obj[key].close
-          }
-        })
+        response.data.labels.push(date)
+        response.data.series[0].push(obj[key].close)
       }
-      console.log('obj:', obj)
-      console.log('response:', response)
-      console.log('symbol', symbol)
       commit('addSymbolData', response)
     })
     .catch(e => {
@@ -61,7 +54,7 @@ function getEachCoin (symbol) {
 export default {
   getTopVolCoins ({commit}) {
     commit('setLoading', true)
-    axios.get('https://min-api.cryptocompare.com/data/top/volumes?tsym=BTC&limit=10',
+    axios.get('https://min-api.cryptocompare.com/data/top/volumes?tsym=BTC&limit=12',
       {
         headers: {
           authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
@@ -72,7 +65,7 @@ export default {
         commit('setTopVolCoins', obj)
         for (let key in obj) {
           var symbol = obj[key].SYMBOL
-          console.log(symbol)
+          getEachCoin(commit, symbol)
         }
       })
       .catch(e => {

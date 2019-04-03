@@ -5,11 +5,43 @@
     grid-list-xl
   >
     <v-layout
+      v-if="loading"
+      wrap
+    >... loading
+    </v-layout>
+    <v-layout
       v-if="!loading"
       wrap
     >
-    <!-- {{ symbolData }} -->
       <v-flex
+        v-for="symbol in symbolData"
+        :key="symbol.coin"
+      >
+        <v-flex
+          md12
+          sm12
+          lg4
+        >
+          <material-chart-card
+            :data="symbol.data"
+            :options="ChartsOptions"
+            color="green"
+            type="Line"
+          >
+            <h4 class="title font-weight-light">{{symbol.coin}}/BTC</h4>
+            <template slot="actions">
+              <v-icon
+                class="mr-2"
+                small
+              >
+                mdi-clock-outline
+              </v-icon>
+              <span class="caption grey--text font-weight-light">from {{ symbol.data.labels[0] }} to {{ symbol.data.labels.slice(-1)[0] }}</span>
+            </template>
+          </material-chart-card>
+        </v-flex>
+      </v-flex>
+      <!-- <v-flex
         md12
         sm12
         lg4
@@ -100,7 +132,7 @@
             <span class="caption grey--text font-weight-light">from {{ LTCBTCData.labels[0] }} to {{ LTCBTCData.labels.slice(-1)[0] }}</span>
           </template>
         </material-chart-card>
-      </v-flex>
+      </v-flex> -->
       <div>
         <v-btn
           color="info"
@@ -291,7 +323,7 @@ export default {
       return this.$store.getters.topVolCoins
     },
     symbolData () {
-      return this.$state.getters.symbolData
+      return this.$store.getters.symbolData
     }
   },
   methods: {
