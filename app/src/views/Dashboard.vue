@@ -9,11 +9,11 @@
       wrap
     >
       <v-flex
+        v-for="symbol in symbolData"
+        :key="symbol.coin"
         md12
         sm12
         lg4
-        v-for="symbol in symbolData"
-        :key="symbol.coin"
       >
         <material-chart-card
           :data="symbol.data"
