@@ -17,8 +17,8 @@ from scipy.optimize import minimize
 from plotly import tools
 
 # TODO
-# - transformar os botoes em ações relativas aos symbols selecionados
-# - add + indicators no cryptocompare_api.py
+# X transformar os botoes em ações relativas aos symbols selecionados
+# X add + indicators no cryptocompare_api.py
 
 app = Flask(__name__)
 CORS(app)
