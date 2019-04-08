@@ -13,6 +13,7 @@ See also this live [demo](https://bud-fox.github.io/live/)
 ## Prerequisites
 
 -   [Miniconda](https://conda.io/docs/user-guide/install/index.html) or Anaconda
+-   [Node](https://nodejs.org/en/)
 
 ## Setup
 

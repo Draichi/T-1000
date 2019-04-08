@@ -8,7 +8,7 @@
       v-if="!loading"
       wrap
     >
-      <v-flex
+      <!-- <v-flex
         v-for="symbol in symbolData"
         :key="symbol.coin"
         md12
@@ -18,7 +18,7 @@
         <material-chart-card
           :data="symbol.data"
           :options="ChartsOptions"
-          color="green"
+          :color="colors"
           type="Line"
         >
           <h4 class="title font-weight-light">{{ symbol.coin }}/BTC</h4>
@@ -59,10 +59,12 @@
             >
               mdi-clock-outline
             </v-icon>
-            <span class="caption grey--text font-weight-light">from {{ symbol.data.labels[0] }} to {{ symbol.data.labels.slice(-1)[0] }}</span>
+            <span class="caption grey--text font-weight-light">since {{ symbol.data.labels[0] }}</span>
           </template>
         </material-chart-card>
-      </v-flex>
+      </v-flex> -->
+
+      
       <!-- <v-flex
         md12
         sm12
@@ -86,58 +88,93 @@
           </template>
         </material-chart-card>
       </v-flex> -->
-      <v-flex
-        xs12
-      >
-        <v-btn
-          color="info"
-          @click="calcReturns">Calculate Portfolio Returns
-        </v-btn>
-        <v-btn
-          color="info"
-          @click="calcCorrelation">Calculate Portfolio Correlation
-        </v-btn>
-        <v-btn
-          color="info"
-          @click="calcEfficientFrontier">calcEfficientFrontier
-        </v-btn>
-        <v-flex>
-          <v-slider
-            v-model="forecastDays"
-            :max="60"
-            :min="1"
-            label="Forecast days"
-            thumb-label="always"
-          />
-        </v-flex>
-        {{ forecastDays }}
-        {{ symbolToProphet }}
-        {{ changepointPriorScale }}
-        <v-select
-          v-model="symbolToProphet"
-          :items="itemsCoins"
-          outline
-          label="Select symbol"
-          return-object
-          single-line
-        />
-        <v-flex>
-          <v-slider
-            v-model="changepointPriorScale"
-            :max="1"
-            :min="0.01"
-            step="0.02"
-            label="Changepoint to consider a trend"
-            thumb-label="always"
-          />
-        </v-flex>
-        <v-btn
-          color="info"
-          @click="btn">Info
-        </v-btn>
-      </v-flex>
+      <v-container>
+        <v-layout>
+          <v-flex>
+            <v-layout justify-center>
+              <v-btn
+                color="info"
+                @click="calcReturns">Calculate Portfolio Returns
+              </v-btn>
+            </v-layout>
+            <v-layout justify-center>
+              <v-btn
+                color="info"
+                @click="calcCorrelation">Calculate Portfolio Correlation
+              </v-btn>
+            </v-layout>
+            <v-layout justify-center>
+              <v-btn
+                color="info"
+                @click="calcEfficientFrontier">calcEfficientFrontier
+              </v-btn>
+            </v-layout>
+          </v-flex>
+        </v-layout>
+      </v-container>
+
+      <v-container fluid>
+        <v-layout row>
+          <v-flex>
+            <v-layout justify-center>
+              <h2>Calculate prophet {{ forecastDays }} {{ symbolToProphet }} {{ changepointPriorScale }}</h2>
+            </v-layout>
+            <v-layout justify-center>
+              <v-flex xs12 md6>
+                <v-layout >
+                  <v-select
+                    v-model="symbolToProphet"
+                    :items="itemsCoins"
+                    outline
+                    label="Select symbol"
+                    return-object
+                    single-line
+                  />
+                </v-layout>
+              </v-flex>
+            </v-layout>
+            <v-layout justify-center>
+              <v-flex xs12 md6>
+                <v-layout>
+                  <v-slider
+                    v-model="forecastDays"
+                    :max="60"
+                    :min="1"
+                    label="Forecast days"
+                    thumb-label="always"
+                  />
+                </v-layout>
+              </v-flex>
+            </v-layout>
+            <v-layout justify-center>
+              <v-flex xs12 md6>
+                <v-layout >
+                  <v-slider
+                    v-model="changepointPriorScale"
+                    :max="1"
+                    :min="0.01"
+                    step="0.02"
+                    label="Changepoint to consider a trend"
+                    thumb-label="always"
+                  />
+                </v-layout>
+              </v-flex>
+            </v-layout>
+            <v-layout row>
+              <v-flex>
+                <v-layout justify-center>
+                  <v-btn
+                    :color="colors"
+                    @click="btn">Plot
+                  </v-btn>
+                </v-layout>
+              </v-flex>
+            </v-layout>
+          </v-flex>
+        </v-layout>
+      </v-container>
       <!-- ##### section 2 -->
-      <v-flex
+      <!-- <v-flex
         sm6
         xs12
         md6
@@ -188,7 +225,7 @@
           title="Risk"
           value="15%"
         />
-      </v-flex>
+      </v-flex> -->
       <!-- ###### section 3 -->
       <v-flex
         md12
@@ -224,7 +261,6 @@
         </material-card>
       </v-flex>
     </v-layout>
-    <v-layout v-else><h2>Loading</h2></v-layout>
   </v-container>
 </template>
 
@@ -288,6 +324,9 @@ export default {
         symbolList.push(item.SYMBOL)
       })
       return symbolList
+    },
+    colors () {
+      return this.$store.state.app.color
     }
   },
   methods: {
