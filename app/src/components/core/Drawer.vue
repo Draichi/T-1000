@@ -18,10 +18,11 @@
         tag="v-list"
         column
       >
-        <v-list-tile avatar>
+        <v-list-tile>
+        <!-- <v-list-tile avatar>
           <v-list-tile-avatar color="white">
             <v-img :src="logo"/>
-          </v-list-tile-avatar>
+          </v-list-tile-avatar> -->
           <v-list-tile-title class="title">Crypto Prediction</v-list-tile-title>
         </v-list-tile>
         <v-divider/>
@@ -49,6 +50,42 @@
             v-text="link.text"
           />
         </v-list-tile>
+        <a href="https://github.com/Draichi/cryptocurrency_prediction" target="_blank" rel="noopener noreferrer">
+          <v-list-tile
+            :active-class="color"
+            avatar
+            class="v-list-item"
+          >
+            <v-list-tile-action>
+              <v-icon>mdi-github-circle</v-icon>
+            </v-list-tile-action>
+            <v-list-tile-title><span class="white--text">Github</span></v-list-tile-title>
+          </v-list-tile>
+        </a>
+        <a href="https://bud-fox.github.io/live/" target="_blank" rel="noopener noreferrer">
+          <v-list-tile
+            :active-class="color"
+            avatar
+            class="v-list-item"
+          >
+            <v-list-tile-action>
+              <v-icon>mdi-finance</v-icon>
+            </v-list-tile-action>
+            <v-list-tile-title><span class="white--text">Budfox</span></v-list-tile-title>
+          </v-list-tile>
+        </a>
+        <a href="https://draichi.github.io/draichiboard/" target="_blank" rel="noopener noreferrer">
+          <v-list-tile
+            :active-class="color"
+            avatar
+            class="v-list-item"
+          >
+            <v-list-tile-action>
+              <v-icon>mdi-chart-areaspline</v-icon>
+            </v-list-tile-action>
+            <v-list-tile-title><span class="white--text">Draichiboard</span></v-list-tile-title>
+          </v-list-tile>
+        </a>
       </v-layout>
     </v-img>
   </v-navigation-drawer>
@@ -63,7 +100,7 @@ import {
 
 export default {
   data: () => ({
-    logo: './img/logo.png',
+    // logo: './img/logo.png',
     links: [
       {
         to: '/dashboard',
@@ -73,27 +110,7 @@ export default {
       {
         to: '/user-profile',
         icon: 'mdi-account',
-        text: 'User Profile'
-      },
-      {
-        to: '/table-list',
-        icon: 'mdi-clipboard-outline',
-        text: 'Table List'
-      },
-      {
-        to: '/typography',
-        icon: 'mdi-format-font',
-        text: 'Typography'
-      },
-      {
-        to: '/icons',
-        icon: 'mdi-chart-bubble',
-        text: 'Icons'
-      },
-      {
-        to: '/maps',
-        icon: 'mdi-map-marker',
-        text: 'Maps'
+        text: 'About the dev'
       },
       {
         to: '/notifications',
