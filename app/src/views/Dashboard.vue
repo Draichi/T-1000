@@ -8,7 +8,7 @@
       v-if="!loading"
       wrap
     >
-      <!-- <v-flex
+      <v-flex
         v-for="symbol in symbolData"
         :key="symbol.coin"
         md12
@@ -23,9 +23,9 @@
         >
           <h4 class="title font-weight-light">{{ symbol.coin }}/BTC</h4>
           <v-checkbox
-            :label="symbol.coin"
+            :label="`Last price: ${symbol.data.series[0].slice(-1)[0]} BTC`"
             v-model="symbol.checkbox"
-            color="green"
+            :color="colors"
           />
           <p
             v-if="symbol.checkbox"
@@ -62,51 +62,29 @@
             <span class="caption grey--text font-weight-light">since {{ symbol.data.labels[0] }}</span>
           </template>
         </material-chart-card>
-      </v-flex> -->
-
-      
-      <!-- <v-flex
-        md12
-        sm12
-        lg4
-      >
-        <material-chart-card
-          :data="ETHBTCData"
-          :options="ChartsOptions"
-          :color="this.$store.state.app.color"
-          type="Line"
-        >
-          <h4 class="title font-weight-light">Historical ETH</h4>
-          <template slot="actions">
-            <v-icon
-              class="mr-2"
-              small
-            >
-              mdi-clock-outline
-            </v-icon>
-            <span class="caption grey--text font-weight-light">from {{ ETHBTCData.labels[0] }} to {{ ETHBTCData.labels.slice(-1)[0] }}</span>
-          </template>
-        </material-chart-card>
-      </v-flex> -->
+      </v-flex>
       <v-container>
         <v-layout>
           <v-flex>
             <v-layout justify-center>
+              <h2>Calculate portfolio:</h2>
+            </v-layout>
+            <v-layout justify-center>
               <v-btn
-                color="info"
-                @click="calcReturns">Calculate Portfolio Returns
+                :color="colors"
+                @click="calcReturns">Returns
               </v-btn>
             </v-layout>
             <v-layout justify-center>
               <v-btn
-                color="info"
-                @click="calcCorrelation">Calculate Portfolio Correlation
+                :color="colors"
+                @click="calcCorrelation">Correlation
               </v-btn>
             </v-layout>
             <v-layout justify-center>
               <v-btn
-                color="info"
-                @click="calcEfficientFrontier">calcEfficientFrontier
+                :color="colors"
+                @click="calcEfficientFrontier">Efficient Frontier
               </v-btn>
             </v-layout>
           </v-flex>
@@ -117,14 +95,18 @@
         <v-layout row>
           <v-flex>
             <v-layout justify-center>
-              <h2>Calculate prophet {{ forecastDays }} {{ symbolToProphet }} {{ changepointPriorScale }}</h2>
+              <h2>Forecast {{ forecastDays }} days of {{ symbolToProphet }} with {{ changepointPriorScale }} prior scale</h2>
             </v-layout>
             <v-layout justify-center>
-              <v-flex xs12 md6>
+              <v-flex
+                xs12
+                md6
+              >
                 <v-layout >
                   <v-select
                     v-model="symbolToProphet"
                     :items="itemsCoins"
+                    :color="colors"
                     outline
                     label="Select symbol"
                     return-object
@@ -134,10 +116,14 @@
               </v-flex>
             </v-layout>
             <v-layout justify-center>
-              <v-flex xs12 md6>
+              <v-flex
+                xs12
+                md6
+              >
                 <v-layout>
                   <v-slider
                     v-model="forecastDays"
+                    :color="colors"
                     :max="60"
                     :min="1"
                     label="Forecast days"
@@ -147,10 +133,14 @@
               </v-flex>
             </v-layout>
             <v-layout justify-center>
-              <v-flex xs12 md6>
+              <v-flex
+                xs12
+                md6
+              >
                 <v-layout >
                   <v-slider
                     v-model="changepointPriorScale"
+                    :color="colors"
                     :max="1"
                     :min="0.01"
                     step="0.02"
@@ -273,7 +263,7 @@ export default {
     return {
       forecastDays: 15,
       changepointPriorScale: 0.49,
-      symbolToProphet: null,
+      symbolToProphet: 'ETH',
       ChartsOptions: {
         axisX: {
           showLabel: false,
