@@ -7,7 +7,7 @@
       justify-center
       wrap
     >
-      <v-flex
+      <!-- <v-flex
         xs12
         md8
       >
@@ -112,7 +112,7 @@
             </v-container>
           </v-form>
         </material-card>
-      </v-flex>
+      </v-flex> -->
       <v-flex
         xs12
         md4
@@ -124,13 +124,13 @@
             size="130"
           >
             <img
-              src="https://demos.creative-tim.com/vue-material-dashboard/img/marc.aba54d65.jpg"
+              src="https://avatars2.githubusercontent.com/u/19378148?s=460&v=4"
             >
           </v-avatar>
           <v-card-text class="text-xs-center">
-            <h6 class="category text-gray font-weight-thin mb-3">CEO / CO-FOUNDER</h6>
-            <h4 class="card-title font-weight-light">Alec Thompson</h4>
-            <p class="card-description font-weight-light">Don't be scared of the truth because we need to restart the human foundation in truth And I love you like Kanye loves Kanye I love Rick Owens’ bed design but the back is...</p>
+            <h6 class="category text-gray font-weight-thin mb-3">Fullstack Engineer</h6>
+            <h4 class="card-title font-weight-light">Lucas Draichi</h4>
+            <p class="card-description font-weight-light">Since the humble beginnings in 2012 as a Front-end developer I always dream to be big. My efforts now are starting to yeld ...</p>
             <v-btn
               color="success"
               round
