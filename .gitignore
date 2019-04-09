@@ -1,5 +1,5 @@
 *.pkl
-/docs/*.html
+# /docs/*.html
 *.csv
 __pycache__
 .vscode
