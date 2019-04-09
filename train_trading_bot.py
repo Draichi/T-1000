@@ -117,6 +117,59 @@ class TradingEnv(gym.Env):
         # return normalized_next_state, reward, done, {}
         return next_observable_state, reward, done, {}
 
+    def render(self, savefig=False, filename='myfig'):
+        if self._first_render:
+            self._f, self._ax = plt.subplots(
+                len(self._spread_coefficients) + int(len(self._spread_coefficients) > 1),
+                sharex=True
+            )
+            if len(self._spread_coefficients) == 1:
+                self._ax = [self._ax]
+            self._f.set_size_inches(12, 6)
+            self._first_render = False
+            self._f.canvas.mpl_connect('close_event', self._handle_close)
+        if len(self._spread_coefficients) > 1:
+            # TODO: To be checked
+            for prod_i in range(len(self._spread_coefficients)):
+                bid = self._prices_history[-1][2 * prod_i]
+                ask = self._prices_history[-1][2 * prod_i + 1]
+                self._ax[prod_i].plot([self.index, self.index + 1],
+                                      [bid, bid], color='white')
+                self._ax[prod_i].plot([self.index, self.index + 1],
+                                      [ask, ask], color='white')
+                self._ax[prod_i].set_title('Product {} (spread coef {})'.format(
+                    prod_i, str(self._spread_coefficients[prod_i])))
+
+        price_btc_index = list(self.keys).index('Price BTC')
+        observable_state = self.symbol_list[self.index]
+        price_btc_before_action = observable_state[price_btc_index]
+        # Spread price
+        prices = price_btc_before_action
+        # bid, ask = calc_spread(prices, self._spread_coefficients)
+        self._ax[-1].plot([self.index, self.index + 1],
+                          [prices, prices], color='white')
+        # self._ax[-1].plot([self.index, self.index + 1],
+        #                   [prices, prices], color='white')
+        ymin, ymax = self._ax[-1].get_ylim()
+        yrange = ymax - ymin
+        if self.action == 1: #sell
+            self._ax[-1].scatter(self.index + 0.5, prices + 0.03 *
+                                 yrange, color='orangered', marker='v')
+        elif self.action == 0: #buy
+            self._ax[-1].scatter(self.index + 0.5, prices - 0.03 *
+                                 yrange, color='lawngreen', marker='^')
+        # plt.suptitle('Cumulated Reward: ' + "%.2f" % self._total_reward + ' ~ ' +
+        #              'Cumulated PnL: ' + "%.2f" % self._total_pnl + ' ~ ' +
+        #              'Position: ' + ['flat', 'long', 'short'][list(self._position).index(1)] + ' ~ ' +
+        #              'Entry Price: ' + "%.2f" % self._entry_price)
+        self._f.tight_layout()
+        plt.xticks(range(self.index)[::5])
+        plt.xlim([max(0, self.index - 80.5), self.index + 0.5])
+        plt.subplots_adjust(top=0.85)
+        plt.pause(0.01)
+        if savefig:
+            plt.savefig(filename)
+
 
 if __name__ == "__main__":
     import argparse
