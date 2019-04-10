@@ -57,6 +57,7 @@ class TradingEnv(gym.Env):
         self.keys = config['keys']
         self.symbol_list = config['symbols']
         self.index = 0
+        self._first_render = True
         self.dicount_rate = 1 - FEES
         self.wallet_btc = WALLET_BTC
         self.wallet_symbol = 0.0
