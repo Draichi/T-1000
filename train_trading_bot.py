@@ -81,7 +81,7 @@ class TradingEnv(gym.Env):
     def step(self, action):
         if action not in [0,1,2]:
             raise AssertionError()
-
+        self.action = action
         price_btc_index = list(self.keys).index('close')
         wallet_btc_index = list(self.keys).index('wallet_btc')
         wallet_symbol_index = list(self.keys).index('wallet_symbol')
