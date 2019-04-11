@@ -168,7 +168,7 @@ def prophet():
                     fillcolor='rgba(252,201,5,.05)')
     offline.plot({'data': [y, yhat, yhat_lower, yhat_upper],
                  'layout': layout},
-                 filename='docs/prophet_{}.html'.format(datetime.datetime.now().date()))
+                 filename='/app/public/prophet_{}.html'.format(datetime.datetime.now().date()))
     if ds is None:
         return "Error: routes.py:17, ds is None", 400
     return 'Open /docs/prophet_{}.html'.format(datetime.datetime.now().date()), 201
