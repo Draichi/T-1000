@@ -46,6 +46,8 @@ def calc_exp_returns(avg_return, weigths):
 def efficient_frontier():
     values = request.get_json()
     timeseries = values.get('timeseries')
+    if timeseries == {}:
+        return 'Select your portfolio'
 
     potfolio_size = len(timeseries) - 1
     weigths = np.random.dirichlet(alpha=np.ones(potfolio_size), size=1) # makes sure that weights sums upto 1.
@@ -80,7 +82,7 @@ def efficient_frontier():
     # t_pos = np.arange(len(objects))
     data = go.Scatter(x=risk_vals, y=objects, mode='markers', marker=dict(size=20))
     layout = build_layout(title='Risk associated with different levels of returns',
-                          x_axis_title='Risk %'
+                          x_axis_title='Risk %',
                           y_axis_title='Expected returns %')
     offline.plot({'data': [data], 'layout': layout},
                  filename='app/public/efficient_frontier_{}.html'.format(datetime.datetime.now().date()))
@@ -107,6 +109,8 @@ def efficient_frontier():
 def correlation():
     values = request.get_json()
     timeseries = values.get('timeseries')
+    if timeseries == {}:
+        return 'Select your portfolio'
     df = pd.DataFrame(timeseries)
     df.set_index('date', inplace=True)
     for cor in ['pearson', 'kendall', 'spearman']:
@@ -117,7 +121,7 @@ def correlation():
                             zmin=-1.0,
                             zmax=1.0)
         layout = build_layout(title='{} Correlation'.format(cor.title()),
-                              x_axis_title=''
+                              x_axis_title='',
                               y_axis_title='')
         offline.plot({'data': [heatmap],
             'layout': layout},
@@ -128,6 +132,8 @@ def correlation():
 def returns():
     values = request.get_json()
     timeseries = values.get('timeseries')
+    if timeseries == {}:
+        return 'Select your portfolio'
     df = pd.DataFrame(timeseries)
     df.set_index('date', inplace=True)
     data = []
@@ -137,7 +143,7 @@ def returns():
                            name=coin)
         data.append(trace)
     layout = build_layout(title='Portfolio Returns',
-                          x_axis_title=''
+                          x_axis_title='',
                           y_axis_title='Retuns (%)')
     offline.plot({'data': data,
                  'layout': layout},
@@ -179,7 +185,7 @@ def prophet():
                             name='yhat_lower',
                             fillcolor='rgba(252,201,5,.05)')
     layout = build_layout(title='Propheting {} day(s) of {} (Changepoint: {})'.format(forecast_days, symbol, changepoint_prior_scale),
-                          x_axis_title=''
+                          x_axis_title='',
                           y_axis_title='Price (BTC)')
     offline.plot({'data': [y, yhat, yhat_lower, yhat_upper],'layout': layout},
                  filename='app/public/prophet_{}_{}.html'.format(datetime.datetime.now().date(), symbol))
