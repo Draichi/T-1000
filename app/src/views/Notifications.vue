@@ -15,7 +15,7 @@
           >
             <div class="title font-weight-light mb-2">Notifications</div>
             <div class="category">
-              Handcrafted by us with
+              Handcrafted with
               <v-icon
                 size="17"
               >

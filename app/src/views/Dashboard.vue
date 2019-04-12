@@ -63,7 +63,8 @@
           </template>
         </material-chart-card>
       </v-flex>
-      <v-container>
+
+      <v-container class="hidden-sm-and-down">
         <v-layout>
           <v-flex>
             <v-layout justify-center>
@@ -91,7 +92,10 @@
         </v-layout>
       </v-container>
 
-      <v-container fluid>
+      <v-container
+        fluid
+        class="hidden-sm-and-down"
+      >
         <v-layout row>
           <v-flex>
             <v-layout justify-center>
@@ -250,7 +254,30 @@
           </v-data-table>
         </material-card>
       </v-flex>
+      <v-container class="hidden-md-and-up">
+        <h3 class="text-xs-center">Portfolio functions only available on desktop</h3>
+      </v-container>
     </v-layout>
+    <v-snackbar
+      top
+      color="red"
+      v-model="this.$store.state.snackbar"
+      dark
+    >
+      <v-icon
+        color="white"
+        class="mr-3"
+      >
+        mdi-bell-plus
+      </v-icon>
+      <div>{{ this.$store.state.snackbarMsg }}</div>
+      <v-icon
+        size="16"
+        @click="snack()"
+      >
+        mdi-close-circle
+      </v-icon>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -320,8 +347,8 @@ export default {
     }
   },
   methods: {
-    complete (index) {
-      this.list[index] = !this.list[index]
+    snack () {
+      this.$store.state.snackbar = false
     },
     btn () {
       this.$store.commit('sendProphetReq', {
