@@ -23,12 +23,15 @@ from plotly import tools
 app = Flask(__name__)
 CORS(app)
 
-layout = go.Layout(plot_bgcolor='#2d2929',
+def build_layout(title, x_axis_title, y_axis_title):
+    layout = go.Layout(plot_bgcolor='#2d2929',
                        paper_bgcolor='#2d2929',
-                       title='title',
+                       title=title,
                        font=dict(color='rgb(255, 255, 255)', size=17),
                        legend=dict(orientation="h"),
-                       yaxis=dict(title='y_axis_title'))
+                       yaxis=dict(title=y_axis_title),
+                       xaxis=dict(title=x_axis_title))
+    return layout
 
 def var_cov_matrix(df, weigths):
     sigma = np.cov(np.array(df).T, ddof=0) # covariance
@@ -76,9 +79,11 @@ def efficient_frontier():
     objects, risk_vals = list(zip(*z))
     # t_pos = np.arange(len(objects))
     data = go.Scatter(x=risk_vals, y=objects, mode='markers', marker=dict(size=20))
-    offline.plot({'data': [data],
-                'layout': layout},
-                filename='docs/efficient_frontier_{}.html'.format(datetime.datetime.now().date()))
+    layout = build_layout(title='Risk associated with different levels of returns',
+                          x_axis_title='Risk %'
+                          y_axis_title='Expected returns %')
+    offline.plot({'data': [data], 'layout': layout},
+                 filename='app/public/efficient_frontier_{}.html'.format(datetime.datetime.now().date()))
 
     keys = sorted(list(results_comparison_dict.keys()))
     index = 0
@@ -95,8 +100,8 @@ def efficient_frontier():
                          font=dict(color='rgb(255, 255, 255)', size=14),
                          paper_bgcolor='#2d2929',
                          plot_bgcolor='#2d2929')
-    offline.plot(fig, filename='docs/weights_{}.html'.format(datetime.datetime.now().date()))
-    return 'docs/weights_{}.html'.format(datetime.datetime.now().date()), 201
+    offline.plot(fig, filename='app/public/weights_{}.html'.format(datetime.datetime.now().date()))
+    return 'app/public/weights_{}.html'.format(datetime.datetime.now().date()), 201
 
 @app.route('/correlation', methods=['POST'])
 def correlation():
@@ -111,10 +116,13 @@ def correlation():
                             colorscale=[[0, 'rgb(255,0,0)'], [1, 'rgb(0,255,0)']],
                             zmin=-1.0,
                             zmax=1.0)
+        layout = build_layout(title='{} Correlation'.format(cor.title()),
+                              x_axis_title=''
+                              y_axis_title='')
         offline.plot({'data': [heatmap],
             'layout': layout},
-            filename='docs/correlation_{}_{}.html'.format(cor, datetime.datetime.now().date()))
-    return 'Open /docs/correlation_{}.html'.format(datetime.datetime.now().date()), 201
+            filename='app/public/correlation_{}_{}.html'.format(cor, datetime.datetime.now().date()))
+    return 'Open /app/public/correlation_{}.html'.format(datetime.datetime.now().date()), 201
 
 @app.route('/returns', methods=['POST'])
 def returns():
@@ -128,10 +136,13 @@ def returns():
                            y=df[coin].pct_change()*100,
                            name=coin)
         data.append(trace)
+    layout = build_layout(title='Portfolio Returns',
+                          x_axis_title=''
+                          y_axis_title='Retuns (%)')
     offline.plot({'data': data,
                  'layout': layout},
-                 filename='docs/returns_{}.html'.format(datetime.datetime.now().date()))
-    return 'Open /docs/returns_{}.html'.format(datetime.datetime.now().date()), 201
+                 filename='app/public/returns_{}.html'.format(datetime.datetime.now().date()))
+    return 'Open /app/public/returns_{}.html'.format(datetime.datetime.now().date()), 201
 
 @app.route('/prophet', methods = ['POST'])
 def prophet():
@@ -141,6 +152,7 @@ def prophet():
     y = dataset['y']
     changepoint_prior_scale = values.get('changepoint_prior_scale')
     forecast_days = values.get('forecast_days')
+    symbol = values.get('symbol')
     df = pd.DataFrame(dataset)
     #------------------------------------------------------------->
     df_prophet = fbprophet.Prophet(changepoint_prior_scale=changepoint_prior_scale)
@@ -150,28 +162,30 @@ def prophet():
     df_forecast = df_prophet.predict(df_forecast)
     df_forecast.to_json(orient='columns')
     y = go.Scatter(x=df['ds'],
-                    y=df['y'],
-                    name='y',
-                    line=dict(color='#94B7F5'))
+                   y=df['y'],
+                   name='y',
+                   line=dict(color='#94B7F5'))
     yhat = go.Scatter(x=df_forecast['ds'], y=df_forecast['yhat'], name='yhat')
     yhat_upper = go.Scatter(x=df_forecast['ds'],
-                    y=df_forecast['yhat_upper'],
-                    fill='tonexty',
-                    mode='none',
-                    name='yhat_upper',
-                    fillcolor='rgba(0,201,253,.21)')
+                            y=df_forecast['yhat_upper'],
+                            fill='tonexty',
+                            mode='none',
+                            name='yhat_upper',
+                            fillcolor='rgba(0,201,253,.21)')
     yhat_lower = go.Scatter(x=df_forecast['ds'],
-                    y=df_forecast['yhat_lower'],
-                    fill='tonexty',
-                    mode='none',
-                    name='yhat_lower',
-                    fillcolor='rgba(252,201,5,.05)')
-    offline.plot({'data': [y, yhat, yhat_lower, yhat_upper],
-                 'layout': layout},
-                 filename='/app/public/prophet_{}.html'.format(datetime.datetime.now().date()))
+                            y=df_forecast['yhat_lower'],
+                            fill='tonexty',
+                            mode='none',
+                            name='yhat_lower',
+                            fillcolor='rgba(252,201,5,.05)')
+    layout = build_layout(title='Propheting {} day(s) of {} (Changepoint: {})'.format(forecast_days, symbol, changepoint_prior_scale),
+                          x_axis_title=''
+                          y_axis_title='Price (BTC)')
+    offline.plot({'data': [y, yhat, yhat_lower, yhat_upper],'layout': layout},
+                 filename='app/public/prophet_{}_{}.html'.format(datetime.datetime.now().date(), symbol))
     if ds is None:
         return "Error: routes.py:17, ds is None", 400
-    return 'Open /docs/prophet_{}.html'.format(datetime.datetime.now().date()), 201
+    return 'Open /app/public/prophet_{}.html'.format(datetime.datetime.now().date()), 201
 
 if __name__ == "__main__":
     app.debug = True
