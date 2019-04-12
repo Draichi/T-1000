@@ -130,7 +130,7 @@
           <v-card-text class="text-xs-center">
             <h6 class="category text-gray font-weight-thin mb-3">Fullstack Engineer</h6>
             <h4 class="card-title font-weight-light">Lucas Draichi</h4>
-            <p class="card-description font-weight-light">Since the humble beginnings in 2012 as a Front-end developer I always dream to be big. My efforts now are starting to yeld ...</p>
+            <p class="card-description font-weight-light">From the humble beginnings in 2012 as a front-end developer, I've always dreamed of being great. After studying computer engineering and going deeper into the field of reinforcement learning, I began to study finance. My efforts to create an intuitive platform to help myself and others make a safer decision on daily trading are now a reality.</p>
             <v-btn
               color="success"
               round
