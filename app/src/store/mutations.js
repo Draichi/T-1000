@@ -29,7 +29,16 @@ export default {
             'forecast_days': payload.forecast,
             'symbol': payload.symbol
           })
-          .then(res => console.log(res))
+          .then(res => {
+            console.log(res)
+            state.snackbar = true
+            state.snackbarMsg = res.data
+          })
+          .catch(e => {
+            state.snackbar = true
+            state.snackbarMsg = e.data
+            console.log('errosssss:',String(e))
+          })
       }
     }
   }

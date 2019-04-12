@@ -4,5 +4,7 @@ export default {
   loading: false,
   error: null,
   topVolCoins: [],
-  symbolData: []
+  symbolData: [],
+  snackbar: false,
+  snackbarMsg: null
 }

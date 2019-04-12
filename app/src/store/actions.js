@@ -70,7 +70,10 @@ export default {
         // 'headers': {'Content-Encoding': 'gzip', 'Access-Control-Allow-Origin': '*'},
         'timeseries': timeseries
       })
-      .then(res => console.log(res))
+      .then(res => {
+        state.snackbar = true
+        state.snackbarMsg = res.data
+      })
   },
   sendPortfolioCorrelationReq ({commit, state}) {
     let timeseries = getTimeseries(state)
@@ -79,7 +82,10 @@ export default {
         // 'headers': {'Content-Encoding': 'gzip', 'Access-Control-Allow-Origin': '*'},
         'timeseries': timeseries
       })
-      .then(res => console.log(res))
+      .then(res => {
+        state.snackbar = true
+        state.snackbarMsg = res.data
+      })
   },
   sendPortfolioEfficientFrontierReq ({commit, state}) {
     let timeseries = getTimeseries(state)
@@ -88,6 +94,9 @@ export default {
         // 'headers': {'Content-Encoding': 'gzip', 'Access-Control-Allow-Origin': '*'},
         'timeseries': timeseries
       })
-      .then(res => console.log(res))
+      .then(res => {
+        state.snackbar = true
+        state.snackbarMsg = res.data
+      })
   }
 }
