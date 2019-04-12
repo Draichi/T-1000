@@ -6,9 +6,8 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ebdf89dcba744a3c8aafdda210d3aeb6)](https://app.codacy.com/app/Draichi/cryptocurrency_prediction?utm_source=github.com&utm_medium=referral&utm_content=Draichi/cryptocurrency_prediction&utm_campaign=Badge_Grade_Dashboard)
 
-Deep tecnical analysis with [**ANY**](https://datalight.me/) cryptocurrency
-
-See also this live [demo](https://bud-fox.github.io/live/)
+Deep tecnical analysis of cryptocurrencies with reinforcement learning
+<!-- Deep tecnical analysis with [**ANY**](https://datalight.me/) cryptocurrency -->
 
 ## Prerequisites
 
@@ -17,7 +16,7 @@ See also this live [demo](https://bud-fox.github.io/live/)
 
 ## Setup
 
-Go to `configs/vars` and edit these lines:
+<!-- Go to `configs/vars` and edit these lines:
 
 ```python
 PORTFOLIO_SYMBOLS = [
@@ -28,7 +27,7 @@ PORTFOLIO_SYMBOLS = [
 TIME_INTERVAL = '1d'
 FROM_DATE = '2018-11-01'
 TO_DATE = '2019-03-18'
-```
+``` -->
 
 * * *
 
@@ -57,16 +56,21 @@ conda env create -f MAC_CPU.yml
 ```
 
 * * *
+### App
 
 ```sh
-python plot_portfolio.py --plot_coin [COIN_NAME]
-# e.g.: python plot_portfolio.py --plot_coin eth
-# open the /path/to/crytocurrency_prediction/temp-plot.html file
+cd app
+yarn # or `npm i`
+yarn serve # or `npm run dev`
 ```
+> This [dashboard](https://draichi.github.io/cryptocurrency_prediction/index.html) will open. You need the server though, so continue reading... or try this live [demo](https://bud-fox.github.io/live/)
+<!-- ![imgs/dashboard_demo.gif ](imgs/dashboard_demo.gif ) -->
 
-![imgs/dashboard_demo.gif ](imgs/dashboard_demo.gif )
+### Server
 
-## Live demos
+```sh
+python server.py
+```
 
 -   [Dashboard LTC Momentum](https://draichi.github.io/cryptocurrency_prediction/dashboard_ltc_momentum.html)
 -   [Dashboard LTC Hype](https://draichi.github.io/cryptocurrency_prediction/dashboard_ltc_hype.html)
@@ -74,8 +78,6 @@ python plot_portfolio.py --plot_coin [COIN_NAME]
 -   [Portfolio Weigths](https://draichi.github.io/cryptocurrency_prediction/weights.html)
 -   [Kendall Correlation](https://draichi.github.io/cryptocurrency_prediction/kendall_correlation.html)
 -   [Efficient Frontier](https://draichi.github.io/cryptocurrency_prediction/efficient_frontier.html)
-
-
 * * *
 
 ## Algotrading
