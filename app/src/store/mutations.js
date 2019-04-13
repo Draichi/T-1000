@@ -41,5 +41,8 @@ export default {
           })
       }
     }
+  },
+  setEpisodeRewardMax(state, payload) {
+    state.episodeRewardMax = payload
   }
 }

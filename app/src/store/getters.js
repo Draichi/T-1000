@@ -9,5 +9,8 @@ export default {
   },
   symbolData (state) {
     return state.symbolData
+  },
+  episodeRewardMax (state) {
+    return state.episodeRewardMax
   }
 }

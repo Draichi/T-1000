@@ -29,6 +29,7 @@ new Vue({
   store,
   beforeCreate () {
     this.$store.dispatch('getTopVolCoins')
+    this.$store.dispatch('getTradingBotStats')
     // this.$store.dispatch('getETHBTC')
     // this.$store.dispatch('getXRPBTC')
     // this.$store.dispatch('getEOSBTC')

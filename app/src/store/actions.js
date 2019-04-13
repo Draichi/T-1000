@@ -40,6 +40,17 @@ function getEachCoin (commit, symbol) {
     })
 }
 
+function csvJSON(csv){
+  var lines = csv.split("\n");
+  var result = {labels: [], series: [[]]}
+  for(var i=1;i<lines.length-1;i++){
+      var currentline=lines[i].split(",")
+      result.labels.push(currentline[1])
+      result.series[0].push(currentline[2])
+  }
+  return JSON.stringify(result); //JSON
+}
+
 export default {
   getTopVolCoins ({commit}) {
     commit('setLoading', true)
@@ -98,5 +109,20 @@ export default {
         state.snackbar = true
         state.snackbarMsg = res.data
       })
+  },
+  getTradingBotStats ({commit, state}) {
+    commit('setLoading', true)
+    let response = {labels: [], series: [[]]}
+    axios.get('https://raw.githubusercontent.com/Draichi/cryptocurrency_prediction/master/datasets/episode_reward_max.csv')
+      .then(res => {
+        var obj = csvJSON(res.data)
+        var series = JSON.parse(obj)
+        commit('setEpisodeRewardMax', series)
+      })
+      .catch(e => {
+        commit('setError', e)
+        console.warn(e)
+      })
+    commit('setLoading', false)
   }
 }

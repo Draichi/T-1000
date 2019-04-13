@@ -1,33 +1,82 @@
 <template>
-  <div>
-    <div class="mapouter">
-      <div class="gmap_canvas">
-        <iframe
-          id="gmap_canvas"
-          width="100%"
-          height="100%"
-          src="https://maps.google.com/maps?q=google&t=&z=13&ie=UTF8&iwloc=&output=embed"
-          frameborder="0"
-          scrolling="no"
-          marginheight="0"
-          marginwidth="0"
-        />
-      </div>
-    </div>
-  </div>
+  <v-container
+    fill-height
+    fluid
+    grid-list-xl
+  >
+    <v-layout
+      v-if="!loading"
+      wrap
+    >
+      <v-flex
+        md12
+        sm12
+        lg4
+      >
+        <material-chart-card
+          :color="colors"
+          :data="episodeRewardMax"
+          :options="ChartsOptions"
+          type="Line"
+        >
+          <h4 class="title font-weight-light">Episode Max Reward (BTC)</h4>
+          <p class="category d-inline-flex font-weight-light">
+            <!-- <v-icon
+              color="green"
+              small
+            >
+              mdi-account-check
+            </v-icon> -->
+            <span class="green--text">&nbsp;{{ episodeRewardMax.labels.slice(-1)[0] }}</span>&nbsp; episodes total
+
+          </p>
+          <template slot="actions">
+            <v-icon
+              class="mr-2"
+              small
+            >
+              mdi-clock-outline
+            </v-icon>
+            <span class="caption grey--text font-weight-light">since 123</span>
+          </template>
+        </material-chart-card>
+      </v-flex>
+    </v-layout>
+  </v-container>
 </template>
 
-<style>
-.mapouter {
-  text-align:right;
-  height:100%;
-  width:100%;
-  position: absolute;
+<script>
+
+export default {
+  data () {
+    return {
+      ChartsOptions: {
+        axisX: {
+          showLabel: false,
+          showGrid: false
+        },
+        lineSmooth: true,
+        showPoint: false,
+        showArea: true,
+        chartPadding: {
+          top: 25,
+          right: 0,
+          bottom: 0,
+          left: 15
+        }
+      }
+    }
+  },
+  computed: {
+    loading () {
+      return this.$store.getters.loading
+    },
+    episodeRewardMax () {
+      return this.$store.getters.episodeRewardMax
+    },
+    colors () {
+      return this.$store.state.app.color
+    }
+  }
 }
-.gmap_canvas {
-  overflow:hidden;
-  background:none!important;
-  height:100%;
-  width:100%;
-}
-</style>
+</script>

@@ -5,6 +5,7 @@ export default {
   error: null,
   topVolCoins: [],
   symbolData: [],
+  episodeRewardMax: null,
   snackbar: false,
   snackbarMsg: null
 }

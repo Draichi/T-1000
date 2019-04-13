@@ -108,14 +108,19 @@ export default {
         text: 'Dashboard'
       },
       {
-        to: '/user-profile',
-        icon: 'mdi-account',
-        text: 'About the dev'
+        to: '/maps',
+        icon: 'mdi-chart-scatterplot-hexbin',
+        text: 'Algotrading Bot'
       },
       {
         to: '/notifications',
         icon: 'mdi-bell',
         text: 'Notifications'
+      },
+      {
+        to: '/user-profile',
+        icon: 'mdi-account',
+        text: 'About the dev'
       }
     ],
     responsive: false
