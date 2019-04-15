@@ -1,3 +1,12 @@
+"""Server of cryptocurrency_prediction with portfolio functions.
+
+Example:
+    $ python server.py
+
+Lucas Draichi
+2018
+"""
+
 import pandas as pd
 import numpy as np
 import plotly.graph_objs as go
@@ -16,14 +25,21 @@ from urllib.parse import urlparse
 from scipy.optimize import minimize
 from plotly import tools
 
-# TODO
-# X transformar os botoes em ações relativas aos symbols selecionados
-# X add + indicators no cryptocompare_api.py
-
 app = Flask(__name__)
 CORS(app)
 
 def build_layout(title, x_axis_title, y_axis_title):
+    """Create the plotly's layout with custom configuration
+
+    Arguments:
+        title {str} -- Layout's central title
+        x_axis_title {str} -- Axis x title
+        y_axis_title {str} -- Axis y title
+
+    Returns:
+        Object -- Plotly object from plotly.graph_objs
+    """
+
     layout = go.Layout(plot_bgcolor='#2d2929',
                        paper_bgcolor='#2d2929',
                        title=title,
@@ -34,16 +50,38 @@ def build_layout(title, x_axis_title, y_axis_title):
     return layout
 
 def var_cov_matrix(df, weigths):
-    sigma = np.cov(np.array(df).T, ddof=0) # covariance
+    """Compute covariance matrix with respect of given weigths
+
+    Arguments:
+        df {pandas.DataFrame} -- The timeseries object
+        weigths {list} -- List of weights to be used
+
+    Returns:
+        numpy.array -- The covariance matrix
+    """
+
+    sigma = np.cov(np.array(df).T, ddof=0)
     var = (np.array(weigths) * sigma * np.array(weigths).T).sum()
     return var
 
 def calc_exp_returns(avg_return, weigths):
+    """Compute the expected returns
+
+    Arguments:
+        avg_return {pandas.DataFrame} -- The average of returns
+        weigths {list} -- A list of weigths
+
+    Returns:
+        array -- N dimensions array
+    """
+
     exp_returns = avg_return.dot(weigths.T)
     return exp_returns
 
 @app.route('/efficient_frontier', methods=['POST'])
 def efficient_frontier():
+    """Compute the efficient frontier given the timeseries via http post"""
+
     values = request.get_json()
     timeseries = values.get('timeseries')
     if timeseries == {}:
@@ -103,10 +141,12 @@ def efficient_frontier():
                          paper_bgcolor='#2d2929',
                          plot_bgcolor='#2d2929')
     offline.plot(fig, filename='app/public/weights_{}.html'.format(datetime.datetime.now().date()))
-    return 'app/public/weights_{}.html'.format(datetime.datetime.now().date()), 201
+    return 'app/public/weights_{}.html'.format(datetime.datetime.now().date())
 
 @app.route('/correlation', methods=['POST'])
 def correlation():
+    """Compute the correlation heatmap using the timeseries given via http post"""
+
     values = request.get_json()
     timeseries = values.get('timeseries')
     if timeseries == {}:
@@ -130,6 +170,8 @@ def correlation():
 
 @app.route('/returns', methods=['POST'])
 def returns():
+    """Compute and plot the returns. Timeseries must be given via http post"""
+
     values = request.get_json()
     timeseries = values.get('timeseries')
     if timeseries == {}:
@@ -148,10 +190,12 @@ def returns():
     offline.plot({'data': data,
                  'layout': layout},
                  filename='app/public/returns_{}.html'.format(datetime.datetime.now().date()))
-    return 'Open /app/public/returns_{}.html'.format(datetime.datetime.now().date()), 201
+    return 'Open /app/public/returns_{}.html'.format(datetime.datetime.now().date())
 
 @app.route('/prophet', methods = ['POST'])
 def prophet():
+    """Compute and plot a 'prophecy' of a given coin. Timeserie must be given via http post"""
+
     values = request.get_json()
     dataset = values.get('dataset')
     ds = dataset['ds']
@@ -190,8 +234,8 @@ def prophet():
     offline.plot({'data': [y, yhat, yhat_lower, yhat_upper],'layout': layout},
                  filename='app/public/prophet_{}_{}.html'.format(datetime.datetime.now().date(), symbol))
     if ds is None:
-        return "Error: routes.py:17, ds is None", 400
-    return 'Open /app/public/prophet_{}.html'.format(datetime.datetime.now().date()), 201
+        return "Error: routes.py:17, ds is None"
+    return 'Open /app/public/prophet_{}.html'.format(datetime.datetime.now().date())
 
 if __name__ == "__main__":
     app.debug = True
