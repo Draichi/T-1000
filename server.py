@@ -12,7 +12,6 @@ import numpy as np
 import plotly.graph_objs as go
 import plotly.offline as offline
 import json
-import matplotlib
 import fbprophet
 import os
 import ad
@@ -145,7 +144,7 @@ def efficient_frontier():
 
 @app.route('/correlation', methods=['POST'])
 def correlation():
-    """Compute the correlation heatmap using the timeseries given via http post"""
+    """Compute the rolling correlation and heatmap using the timeseries given via http post"""
 
     values = request.get_json()
     timeseries = values.get('timeseries')
@@ -166,7 +165,24 @@ def correlation():
         offline.plot({'data': [heatmap],
             'layout': layout},
             filename='app/public/correlation_{}_{}.html'.format(cor, datetime.datetime.now().date()))
-    return 'Open /app/public/correlation_{}.html'.format(datetime.datetime.now().date()), 201
+
+    rolling_correlation = df.rolling(30).corr(pairwise=True)
+    for col in rolling_correlation.columns:
+        unstacked_df = rolling_correlation.unstack(level=1)[col]
+        data = []
+        for unstacked_col in unstacked_df.columns:
+            if not unstacked_col == col:
+                trace = go.Scatter(x=unstacked_df.index,
+                                y=unstacked_df[unstacked_col],
+                                name=col+'/'+unstacked_col)
+                data.append(trace)
+        layout = build_layout(title='{} 30 Days Rolling Correlation'.format(col),
+                            x_axis_title='',
+                            y_axis_title='Correlation')
+        offline.plot({'data': data,
+                    'layout': layout},
+                    filename='app/public/rolling_corr_{}_{}.html'.format(col, datetime.datetime.now().date()))
+    return 'Open /app/public/correlation_{}.html'.format(datetime.datetime.now().date())
 
 @app.route('/returns', methods=['POST'])
 def returns():
