@@ -10,8 +10,13 @@ Deep tecnical analysis of cryptocurrencies with reinforcement learning
 
 <!-- TODO -->
 <!-- GIF WITH APP RUNNING -->
-<!-- LINK
--   [Dashboard LTC Momentum](https://draichi.github.io/cryptocurrency_prediction/dashboard_ltc_momentum.html) -->
+<!-- LINKs -->
+-   [Rolling Correlation](https://draichi.github.io/cryptocurrency_prediction/rolling_corr_DASH_2019-04-16.html)
+-   [Spearman Correlation](https://draichi.github.io/cryptocurrency_prediction/correlation_spearman_2019-04-16.html)
+-   [Portfolio Returns](https://draichi.github.io/cryptocurrency_prediction/returns_2019-04-16.html)
+-   [Propheting 51 day(s) of ETH (Changepoint: 0.57)](https://draichi.github.io/cryptocurrency_prediction/prophet_2019-04-16_ETH.html)
+-   [Weights per asset at different expected returns (%)](https://draichi.github.io/cryptocurrency_prediction/weights_2019-04-16.html)
+-   [Risk associated with different levels of returns](https://draichi.github.io/cryptocurrency_prediction/efficient_frontier_2019-04-16.html)
 
 ## Prerequisites
 
