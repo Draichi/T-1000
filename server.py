@@ -18,6 +18,7 @@ import ad
 import gzip
 import datetime
 from flask import Flask, jsonify, request
+from statsmodels.stats import stattools
 from flask_cors import CORS
 from io import StringIO
 from urllib.parse import urlparse
@@ -195,17 +196,34 @@ def returns():
     df = pd.DataFrame(timeseries)
     df.set_index('date', inplace=True)
     data = []
+    returns_list = []
     for coin in df.columns:
+        returns = df[coin].pct_change()[1:]
         trace = go.Scatter(x=df.index,
-                           y=df[coin].pct_change()*100,
+                           y=returns*100,
                            name=coin)
         data.append(trace)
+        returns_list.append(returns)
     layout = build_layout(title='Portfolio Returns',
                           x_axis_title='',
                           y_axis_title='Retuns (%)')
     offline.plot({'data': data,
                  'layout': layout},
                  filename='app/public/returns_{}.html'.format(datetime.datetime.now().date()))
+
+    portfolio_returns = sum(returns_list)
+    sample_mean = np.mean(portfolio_returns)
+    sample_std_dev = np.std(portfolio_returns)
+    _, pvalue, _, _ = stattools.jarque_bera(portfolio_returns)
+    layout = build_layout(title='The returns are likely normal.' if pvalue > 0.05 else 'The returns are likely not normal.',
+                            x_axis_title='Value',
+                            y_axis_title='Occurrences')
+    x = np.linspace(-(sample_mean + 4 * sample_std_dev), (sample_mean + 4 * sample_std_dev), len(portfolio_returns))
+    sample_distribution = ((1/np.sqrt(sample_std_dev * sample_std_dev * 2 * np.pi)) * np.exp(-(x - sample_mean)*(x - sample_mean) / (2 * sample_std_dev * sample_std_dev)))
+    data = [go.Histogram(x=portfolio_returns, nbinsx=len(portfolio_returns), name='Returns'), go.Scatter(x=x, y=sample_distribution, name='Normal Distribution')]
+    offline.plot({'data': data,
+                 'layout': layout},
+                 filename='app/public/histogram_{}.html'.format(datetime.datetime.now().date()))
     return 'Open /app/public/returns_{}.html'.format(datetime.datetime.now().date())
 
 @app.route('/prophet', methods = ['POST'])
