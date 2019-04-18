@@ -17,6 +17,8 @@ import os
 import ad
 import gzip
 import datetime
+import talib
+import requests
 from flask import Flask, jsonify, request
 from statsmodels.stats import stattools
 from flask_cors import CORS
@@ -270,6 +272,344 @@ def prophet():
     if ds is None:
         return "Error: routes.py:17, ds is None"
     return 'Open /app/public/prophet_{}.html'.format(datetime.datetime.now().date())
+
+@app.route('/indicatorsDashboard', methods=['POST'])
+# TODO
+# - fazer as requisições no lado do cliente e aqui apenas trabalhar com os dados
+def indicators():
+    values = request.get_json()
+    coin_id = values.get('coinId')
+    symbol = values.get('symbol')
+    headers = {'User-Agent': 'Mozilla/5.0', 'authorization': 'Apikey 3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'}
+
+    # print('\n')
+    # print(coin_id)
+    # print('\n')
+    # print(symbol)
+    # print('\n')
+    # quit()
+
+    # OHLC
+    url = 'https://min-api.cryptocompare.com/data/histohour?fsym={}&tsym=BTC&e=Binance&limit=2000'.format(symbol)
+    print('> downloading', symbol, 'OHLCV')
+    response = requests.get(url, headers=headers)
+    json_response = response.json()
+    result = json_response['Data']
+    # df = pd.DataFrame(result)
+    df1 = pd.DataFrame(result)
+
+    # social
+    url = 'https://min-api.cryptocompare.com/data/social/coin/histo/hour?coinId={}&limit=2000'.format(coin_id)
+    print('> downloading', symbol, 'Social')
+    response = requests.get(url, headers=headers)
+    json_response = response.json()
+    result = json_response['Data']
+    df2 = pd.DataFrame(result)
+
+    # #merge
+    print('\n')
+    print(coin_id)
+    print('\n')
+    print(df2)
+    print('\n')
+    df = pd.merge(df1, df2, on='time')
+    df['Date'] = pd.to_datetime(df['time'], utc=True, unit='s')
+    df.drop('time', axis=1, inplace=True)
+    # df.set_index('Date', inplace=True)
+
+    # indicators
+    # https://github.com/mrjbq7/ta-lib/blob/master/docs/func.md
+    open_price, high, low, close = np.array(df['open']), np.array(df['high']), np.array(df['low']), np.array(df['close'])
+    volume = np.array(df['volumefrom'])
+    # cycle indicators
+    df.loc[:, 'HT_DCPERIOD'] = talib.HT_DCPERIOD(close)
+    df.loc[:, 'HT_DCPHASE'] = talib.HT_DCPHASE(close)
+    df.loc[:, 'HT_PHASOR_inphase'], df.loc[:, 'HT_PHASOR_quadrature'] = talib.HT_PHASOR(close)
+    df.loc[:, 'HT_SINE_sine'], df.loc[:, 'HT_SINE_leadsine'] = talib.HT_SINE(close)
+    df.loc[:, 'HT_TRENDMODE'] = talib.HT_TRENDMODE(close)
+    # momemtum indicators
+    df.loc[:, 'ADX'] = talib.ADX(high, low, close, timeperiod=14)
+    df.loc[:, 'ADXR'] = talib.ADXR(high, low, close, timeperiod=14)
+    df.loc[:, 'APO'] = talib.APO(close, fastperiod=12, slowperiod=26, matype=0)
+    df.loc[:, 'AROON_down'], df.loc[:, 'AROON_up'] = talib.AROON(high, low, timeperiod=14)
+    df.loc[:, 'AROONOSC'] = talib.AROONOSC(high, low, timeperiod=14)
+    df.loc[:, 'BOP'] = talib.BOP(open_price, high, low, close)
+    df.loc[:, 'CCI'] = talib.CCI(high, low, close, timeperiod=14)
+    df.loc[:, 'CMO'] = talib.CMO(close, timeperiod=14)
+    df.loc[:, 'DX'] = talib.DX(high, low, close, timeperiod=14)
+    df['MACD'], df['MACD_signal'], df['MACD_hist'] = talib.MACD(close, fastperiod=12, slowperiod=26, signalperiod=9)
+    df.loc[:, 'MFI'] = talib.MFI(high, low, close, volume, timeperiod=14)
+    df.loc[:, 'MINUS_DI'] = talib.MINUS_DI(high, low, close, timeperiod=14)
+    df.loc[:, 'MINUS_DM'] = talib.MINUS_DM(high, low, timeperiod=14)
+    df.loc[:, 'MOM'] = talib.MOM(close, timeperiod=10)
+    df.loc[:, 'PPO'] = talib.PPO(close, fastperiod=12, slowperiod=26, matype=0)
+    df.loc[:, 'ROC'] = talib.ROC(close, timeperiod=10)
+    df.loc[:, 'RSI'] = talib.RSI(close, timeperiod=14)
+    df.loc[:, 'STOCH_k'], df.loc[:, 'STOCH_d'] = talib.STOCH(high, low, close, fastk_period=5, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
+    df.loc[:, 'STOCHF_k'], df.loc[:, 'STOCHF_d'] = talib.STOCHF(high, low, close, fastk_period=5, fastd_period=3, fastd_matype=0)
+    df.loc[:, 'STOCHRSI_K'], df.loc[:, 'STOCHRSI_D'] = talib.STOCHRSI(close, timeperiod=14, fastk_period=5, fastd_period=3, fastd_matype=0)
+    df.loc[:, 'TRIX'] = talib.TRIX(close, timeperiod=30)
+    df.loc[:, 'ULTOSC'] = talib.ULTOSC(high, low, close, timeperiod1=7, timeperiod2=14, timeperiod3=28)
+    df.loc[:, 'WILLR'] = talib.WILLR(high, low, close, timeperiod=14)
+    # overlap studies
+    df.loc[:, 'BBANDS_upper'], df.loc[:, 'BBANDS_middle'], df.loc[:, 'BBANDS_lower'] = talib.BBANDS(close, timeperiod=5, nbdevup=2, nbdevdn=2, matype=0)
+    df.loc[:, 'DEMA'] = talib.DEMA(close, timeperiod=30)
+    df.loc[:, 'EMA'] = talib.EMA(close, timeperiod=30)
+    df.loc[:, 'HT_TRENDLINE'] = talib.HT_TRENDLINE(close)
+    df.loc[:, 'KAMA'] = talib.KAMA(close, timeperiod=30)
+    df.loc[:, 'MA'] = talib.MA(close, timeperiod=30, matype=0)
+    df.loc[:, 'MIDPOINT'] = talib.MIDPOINT(close, timeperiod=14)
+    df.loc[:, 'WMA'] = talib.WMA(close, timeperiod=30)
+    df.loc[:, 'SMA'] = talib.SMA(close)
+    # pattern recoginition
+    df.loc[:, 'CDL2CROWS'] = talib.CDL2CROWS(open_price, high, low, close)
+    df.loc[:, 'CDL3BLACKCROWS'] = talib.CDL3BLACKCROWS(open_price, high, low, close)
+    df.loc[:, 'CDL3INSIDE'] = talib.CDL3INSIDE(open_price, high, low, close)
+    df.loc[:, 'CDL3LINESTRIKE'] = talib.CDL3LINESTRIKE(open_price, high, low, close)
+    # price transform
+    df.loc[:, 'WCLPRICE'] = talib.WCLPRICE(high, low, close)
+    # statistic funcitons
+    df.loc[:, 'BETA'] = talib.BETA(high, low, timeperiod=5)
+    df.loc[:, 'CORREL'] = talib.CORREL(high, low, timeperiod=30)
+    df.loc[:, 'STDDEV'] = talib.STDDEV(close, timeperiod=5, nbdev=1)
+    df.loc[:, 'TSF'] = talib.TSF(close, timeperiod=14)
+    df.loc[:, 'VAR'] = talib.VAR(close, timeperiod=5, nbdev=1)
+    # volatility indicators
+    df.loc[:, 'ATR'] = talib.ATR(high, low, close, timeperiod=14)
+    df.loc[:, 'NATR'] = talib.NATR(high, low, close, timeperiod=14)
+    df.loc[:, 'TRANGE'] = talib.TRANGE(high, low, close)
+    # volume indicators
+    df.loc[:, 'AD'] = talib.AD(high, low, close, volume)
+    df.loc[:, 'ADOSC'] = talib.ADOSC(high, low, close, volume, fastperiod=3, slowperiod=10)
+    df.loc[:, 'OBV'] = talib.OBV(close, volume)
+
+    df.fillna(df.mean(), inplace=True)
+    df.to_csv('datasets/{}-BTC_{}.csv'.format(symbol, datetime.datetime.now().date()))
+
+    INCREASING_COLOR = 'rgb(41, 127, 255)'
+    DECREASING_COLOR = 'rgb(255, 170, 0)'
+    # plot 1 dashboard
+    data = [ dict(
+        type = 'candlestick',
+        open = df['open'],
+        high = df['high'],
+        low = df['low'],
+        close = df['close'],
+        x = df['Date'],
+        yaxis = 'y2',
+        name = 'Price',
+        increasing = dict( line = dict( color = INCREASING_COLOR ) ),
+        decreasing = dict( line = dict( color = DECREASING_COLOR ) ),
+    ) ]
+
+    layout=dict()
+
+    fig = dict( data=data, layout=layout )
+
+    fig['layout'] = dict()
+    fig['layout']['title'] = 'Dashboard 1'
+    fig['layout']['plot_bgcolor'] = '#2d2929'
+    fig['layout']['paper_bgcolor'] = '#2d2929'
+    fig['layout']['font'] = dict(color='rgb(255, 255, 255)', size=17)
+    fig['layout']['xaxis'] = dict(rangeslider=dict(visible=False), rangeselector=dict(visible=True))
+    fig['layout']['yaxis'] = dict(domain=[0, 0.2], showticklabels=False)
+    fig['layout']['yaxis2'] = dict(domain=[0.2, 0.8])
+    rangeselector = dict(
+        visibe = True,
+        x = 0, y = 0.9,
+        bgcolor = 'rgba(150, 200, 250, 0.4)',
+        font = dict( size = 13 ),
+        buttons=list([
+            dict(count=1,
+                label='1 day',
+                step='day',
+                stepmode='backward'),
+            dict(count=7,
+                label='7 days',
+                step='day',
+                stepmode='backward'),
+            dict(count=15,
+                label='15 days',
+                step='day',
+                stepmode='backward'),
+            dict(count=1,
+                label='1 mo',
+                step='month',
+                stepmode='backward'),
+            dict(step='all')
+        ]))
+    fig['layout']['xaxis']['rangeselector'] = rangeselector
+    fig['data'].append( dict( x=df['Date'], y=df['SMA'], type='scatter', mode='lines',
+                            yaxis='y2', name='Moving Average' ) )
+
+    colors = []
+    for i in range(len(df['close'])):
+        if i != 0:
+            if df['close'][i] > df['close'][i-1]:
+                colors.append(INCREASING_COLOR)
+            else:
+                colors.append(DECREASING_COLOR)
+        else:
+            colors.append(DECREASING_COLOR)
+
+    fig['data'].append(dict(x=df['Date'], y=df['volumeto'],
+                            marker=dict( color=colors),
+                            type='bar', yaxis='y', name='Volume'))
+
+    offline.plot(fig, filename='app/public/overlap_{}_{}.html'.format(symbol, datetime.datetime.now().date()), validate=False)
+
+    # plot 2 dashboard
+    fig = tools.make_subplots(rows=5, cols=1, subplot_titles=['Analysis Page Views','Charts Page Views','Comments','FB Likes','FB Talking About'])
+    trace = go.Scatter(x=df['Date'], y=df['analysis_page_views'].pct_change(), name='Analysis Page Views', fill='tonexty', mode='none')
+    fig.append_trace(trace, 1, 1)
+    trace = go.Scatter(x=df['Date'], y=df['charts_page_views'].pct_change(), name='Charts Page Views', fill='tonexty', mode='none')
+    fig.append_trace(trace, 2, 1)
+    trace = go.Bar(x=df['Date'], y=df['comments'].pct_change(), name='Comments')
+    fig.append_trace(trace, 3, 1)
+    trace = go.Scatter(x=df['Date'], y=df['fb_likes'], name='FB Likes', fill='tonexty', mode='none')
+    fig.append_trace(trace, 4, 1)
+    trace = go.Scatter(x=df['Date'], y=df['fb_talking_about'], name='FB Talking About', fill='tonexty', mode='none')
+    fig.append_trace(trace, 5, 1)
+    fig['layout'].update(title='Social Indicators #1',
+                         showlegend=False,
+                         font=dict(color='rgb(255, 255, 255)', size=16),
+                         paper_bgcolor='#2d2929',
+                         plot_bgcolor='#2d2929')
+    offline.plot(fig, filename='app/public/social_{}_{}.html'.format(symbol, datetime.datetime.now().date()))
+
+    # plot 3 dashboard
+    fig = tools.make_subplots(rows=5, cols=1, subplot_titles=['Followers','Forum Page Views', 'Influence Page Views','Markets Page Views','Overview Page Views'])
+    trace = go.Bar(x=df['Date'], y=df['followers'].pct_change(), name='followers pct change')
+    fig.append_trace(trace, 1, 1)
+    trace = go.Scatter(x=df['Date'], y=df['forum_page_views'].pct_change(), name='forum_page_views pct change', fill='tonexty', mode='none')
+    fig.append_trace(trace, 2, 1)
+    trace = go.Scatter(x=df['Date'], y=df['influence_page_views'].pct_change(), name='influence_page_views pct change', fill='tonexty', mode='none')
+    fig.append_trace(trace, 3, 1)
+    trace = go.Scatter(x=df['Date'], y=df['markets_page_views'].pct_change(), name='markets_page_views pct change', fill='tonexty', mode='none')
+    fig.append_trace(trace, 4, 1)
+    trace = go.Scatter(x=df['Date'], y=df['overview_page_views'].pct_change(), name='overview_page_views pct change', fill='tonexty', mode='none')
+    fig.append_trace(trace, 5, 1)
+    fig['layout'].update(title='Social Indicators #2',
+                         showlegend=False,
+                        font=dict(color='rgb(255, 255, 255)', size=16),
+                        paper_bgcolor='#2d2929',
+                        plot_bgcolor='#2d2929')
+    offline.plot(fig, filename='app/public/social2_{}_{}.html'.format(symbol, datetime.datetime.now().date()))
+
+    # cycle indicators
+    fig = tools.make_subplots(rows=5, cols=1, subplot_titles=['HT_DCPERIOD','HT_DCPHASE','HT_PHASOR_inphase','HT_SINE_sine','HT_TRENDMODE'])
+    trace = go.Bar(x=df['Date'], y=df['HT_DCPERIOD'])
+    fig.append_trace(trace, 1, 1)
+    trace = go.Scatter(x=df['Date'], y=df['HT_DCPHASE'], fill='tonexty', mode='none')
+    fig.append_trace(trace, 2, 1)
+    trace = go.Scatter(x=df['Date'], y=df['HT_PHASOR_inphase'], fill='tonexty', mode='none')
+    fig.append_trace(trace, 3, 1)
+    trace = go.Scatter(x=df['Date'], y=df['HT_SINE_sine'], fill='tonexty', mode='none')
+    fig.append_trace(trace, 4, 1)
+    trace = go.Scatter(x=df['Date'], y=df['HT_TRENDMODE'], fill='tonexty', mode='none')
+    fig.append_trace(trace, 5, 1)
+    fig['layout'].update(title='Cycle Indicators',
+                         showlegend=False,
+                        font=dict(color='rgb(255, 255, 255)', size=16),
+                        paper_bgcolor='#2d2929',
+                        plot_bgcolor='#2d2929')
+    offline.plot(fig, filename='app/public/cycle_indicators_{}_{}.html'.format(symbol, datetime.datetime.now().date()))
+
+    # momemtum indicators
+    fig = tools.make_subplots(rows=5, cols=1, subplot_titles=['ADX','ADXR','APO','AROON_down','AROONOSC'])
+    trace = go.Bar(x=df['Date'], y=df['ADX'])
+    fig.append_trace(trace, 1, 1)
+    trace = go.Scatter(x=df['Date'], y=df['ADXR'], fill='tonexty', mode='none')
+    fig.append_trace(trace, 2, 1)
+    trace = go.Scatter(x=df['Date'], y=df['APO'], fill='tonexty', mode='none')
+    fig.append_trace(trace, 3, 1)
+    trace = go.Scatter(x=df['Date'], y=df['AROON_down'], fill='tonexty', mode='none')
+    fig.append_trace(trace, 4, 1)
+    trace = go.Scatter(x=df['Date'], y=df['AROONOSC'], fill='tonexty', mode='none')
+    fig.append_trace(trace, 5, 1)
+    fig['layout'].update(title='Momemtum Indicators #2',
+                         showlegend=False,
+                        font=dict(color='rgb(255, 255, 255)', size=16),
+                        paper_bgcolor='#2d2929',
+                        plot_bgcolor='#2d2929')
+    offline.plot(fig, filename='app/public/momemtum_indicators2_{}_{}.html'.format(symbol, datetime.datetime.now().date()))
+
+    # momemtum indicators
+    fig = tools.make_subplots(rows=5, cols=1, subplot_titles=['BOP','CCI','CMO','DX','MFI'])
+    trace = go.Bar(x=df['Date'], y=df['BOP'])
+    fig.append_trace(trace, 1, 1)
+    trace = go.Scatter(x=df['Date'], y=df['CCI'], fill='tonexty', mode='none')
+    fig.append_trace(trace, 2, 1)
+    trace = go.Scatter(x=df['Date'], y=df['CMO'], fill='tonexty', mode='none')
+    fig.append_trace(trace, 3, 1)
+    trace = go.Scatter(x=df['Date'], y=df['DX'], fill='tonexty', mode='none')
+    fig.append_trace(trace, 4, 1)
+    trace = go.Scatter(x=df['Date'], y=df['MFI'], fill='tonexty', mode='none')
+    fig.append_trace(trace, 5, 1)
+    fig['layout'].update(title='Momemtum Indicators #3',
+                         showlegend=False,
+                        font=dict(color='rgb(255, 255, 255)', size=16),
+                        paper_bgcolor='#2d2929',
+                        plot_bgcolor='#2d2929')
+    offline.plot(fig, filename='app/public/momemtum_indicators3_{}_{}.html'.format(symbol, datetime.datetime.now().date()))
+
+    # momemtum indicators
+    fig = tools.make_subplots(rows=5, cols=1, subplot_titles=['MOM','PPO','ROC','TRIX','RSI'])
+    trace = go.Bar(x=df['Date'], y=df['MOM'])
+    fig.append_trace(trace, 1, 1)
+    trace = go.Scatter(x=df['Date'], y=df['PPO'], fill='tonexty', mode='none')
+    fig.append_trace(trace, 2, 1)
+    trace = go.Scatter(x=df['Date'], y=df['ROC'], fill='tonexty', mode='none')
+    fig.append_trace(trace, 3, 1)
+    trace = go.Scatter(x=df['Date'], y=df['TRIX'], fill='tonexty', mode='none')
+    fig.append_trace(trace, 4, 1)
+    trace = go.Scatter(x=df['Date'], y=df['RSI'], fill='tonexty', mode='none')
+    fig.append_trace(trace, 5, 1)
+    fig['layout'].update(title='Momemtum Indicators #4',
+                         showlegend=False,
+                        font=dict(color='rgb(255, 255, 255)', size=16),
+                        paper_bgcolor='#2d2929',
+                        plot_bgcolor='#2d2929')
+    offline.plot(fig, filename='app/public/momemtum_indicators4_{}_{}.html'.format(symbol, datetime.datetime.now().date()))
+
+    # momemtum indicators
+    fig = tools.make_subplots(rows=5, cols=1, subplot_titles=['MACD','DMI','STOCH'])
+    trace = go.Scatter(x=df['Date'], y=df['MACD'])
+    fig.append_trace(trace, 1, 1)
+    trace = go.Scatter(x=df['Date'], y=df['MACD_signal'])
+    fig.append_trace(trace, 1, 1)
+    trace = go.Bar(x=df['Date'], y=df['MACD_hist'])
+    fig.append_trace(trace, 1, 1)
+    trace = go.Scatter(x=df['Date'], y=df['MINUS_DI'])
+    fig.append_trace(trace, 2, 1)
+    trace = go.Scatter(x=df['Date'], y=df['MINUS_DM'])
+    fig.append_trace(trace, 2, 1)
+    trace = go.Scatter(x=df['Date'], y=df['STOCH_k'])
+    fig.append_trace(trace, 3, 1)
+    trace = go.Scatter(x=df['Date'], y=df['STOCHF_k'])
+    fig.append_trace(trace, 3, 1)
+    fig['layout'].update(title='Momemtum Indicators #5',
+                         showlegend=False,
+                        font=dict(color='rgb(255, 255, 255)', size=16),
+                        paper_bgcolor='#2d2929',
+                        plot_bgcolor='#2d2929')
+    offline.plot(fig, filename='app/public/momemtum_indicators5_{}_{}.html'.format(symbol, datetime.datetime.now().date()))
+
+    # momemtum indicators
+    fig = tools.make_subplots(rows=3, cols=1, subplot_titles=['STOCHRSI_K','ULTOSC','WILLR'])
+    trace = go.Scatter(x=df['Date'], y=df['STOCHRSI_K'])
+    fig.append_trace(trace, 1, 1)
+    trace = go.Bar(x=df['Date'], y=df['ULTOSC'])
+    fig.append_trace(trace, 2, 1)
+    trace = go.Scatter(x=df['Date'], y=df['WILLR'])
+    fig.append_trace(trace, 3, 1)
+    fig['layout'].update(title='Momemtum Indicators #6',
+                         showlegend=False,
+                        font=dict(color='rgb(255, 255, 255)', size=16),
+                        paper_bgcolor='#2d2929',
+                        plot_bgcolor='#2d2929')
+    offline.plot(fig, filename='app/public/momemtum_indicators6_{}_{}.html'.format(symbol, datetime.datetime.now().date()))
+
 
 if __name__ == "__main__":
     app.debug = True
