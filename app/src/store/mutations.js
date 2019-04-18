@@ -37,12 +37,66 @@ export default {
           .catch(e => {
             state.snackbar = true
             state.snackbarMsg = e.data
-            console.log('errosssss:',String(e))
+            console.log('errosssss:', String(e))
           })
       }
     }
   },
-  setEpisodeRewardMax(state, payload) {
+  sendIndicatorsReq (state, payload) {
+    axios.get('https://min-api.cryptocompare.com/data/all/coinlist')
+      .then(res => {
+        var coinsList = res.data.Data
+        for (var coin in coinsList) {
+          if (coin === payload.symbol) {
+            axios.post('http://localhost:3030/indicatorsDashboard',
+              {
+                // 'headers': {'Content-Encoding': 'gzip', 'Access-Control-Allow-Origin': '*'},
+                'symbol': payload.symbol,
+                'coinId': coinsList[coin].Id
+              })
+              .then(res => {
+                console.log(res)
+                state.snackbar = true
+                state.snackbarMsg = res.data
+              })
+              .catch(e => {
+                state.snackbar = true
+                state.snackbarMsg = e.data
+                console.log('errosssss:', String(e))
+              })
+            state.coinToFeedBot = coinsList[coin].Id
+          }
+        }
+      })
+    // console.log(state.coinToFeedBot)
+    // return
+    // axios.get(`https://min-api.cryptocompare.com/data/histohour?fsym=${payload}&tsym=BTC&e=Binance&limit=2000`)
+    //   .then(res => {
+    //     var coinsList = res.data.Data
+    //     for (var coin in coinsList) {
+    //       if (coin == payload.symbol) {
+    //         state.coinToFeedBot = coinsList[coin].Id
+    //       }
+    //     }
+    //   })
+    // axios.post('http://localhost:3030/indicatorsDashboard',
+    //   {
+    //     // 'headers': {'Content-Encoding': 'gzip', 'Access-Control-Allow-Origin': '*'},
+    //     'symbol': payload.symbol,
+    //     'coinId': state.coinToFeedBot
+    //   })
+    //   .then(res => {
+    //     console.log(res)
+    //     state.snackbar = true
+    //     state.snackbarMsg = res.data
+    //   })
+    //   .catch(e => {
+    //     state.snackbar = true
+    //     state.snackbarMsg = e.data
+    //     console.log('errosssss:',String(e))
+    //   })
+  },
+  setEpisodeRewardMax (state, payload) {
     state.episodeRewardMax = payload
   }
 }

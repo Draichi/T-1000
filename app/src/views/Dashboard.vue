@@ -4,6 +4,24 @@
     fluid
     grid-list-xl
   >
+    <v-container
+      v-show="loading"
+      fluid>
+      <v-layout row>
+        <v-flex>
+          <v-layout
+            justify-center>
+            <div class="text-xs-center">
+              <v-progress-circular
+                :color="colors"
+                :size="80"
+                indeterminate
+              />
+            </div>
+          </v-layout>
+        </v-flex>
+      </v-layout>
+    </v-container>
     <v-layout
       v-if="!loading"
       wrap
@@ -221,6 +239,48 @@
         />
       </v-flex> -->
       <!-- ###### section 3 -->
+
+      <v-container
+        fluid
+        class="hidden-sm-and-down"
+      >
+        <v-layout row>
+          <v-flex>
+            <v-layout justify-center>
+              <h2>Show {{ symbolToShowIndicators }} data to feed the trading bot</h2>
+            </v-layout>
+            <v-layout justify-center>
+              <v-flex
+                xs12
+                md6
+              >
+                <v-layout >
+                  <v-select
+                    v-model="symbolToShowIndicators"
+                    :items="itemsCoins"
+                    :color="colors"
+                    outline
+                    label="Select symbol"
+                    return-object
+                    single-line
+                  />
+                </v-layout>
+              </v-flex>
+            </v-layout>
+            <v-layout row>
+              <v-flex>
+                <v-layout justify-center>
+                  <v-btn
+                    :color="colors"
+                    @click="showIndicators">Show
+                  </v-btn>
+                </v-layout>
+              </v-flex>
+            </v-layout>
+          </v-flex>
+        </v-layout>
+      </v-container>
+
       <v-flex
         md12
       >
@@ -259,9 +319,9 @@
       </v-container>
     </v-layout>
     <v-snackbar
+      v-model="this.$store.state.snackbar"
       top
       color="red"
-      v-model="this.$store.state.snackbar"
       dark
     >
       <v-icon
@@ -291,6 +351,7 @@ export default {
       forecastDays: 15,
       changepointPriorScale: 0.49,
       symbolToProphet: 'ETH',
+      symbolToShowIndicators: 'ETH',
       ChartsOptions: {
         axisX: {
           showLabel: false,
@@ -355,6 +416,11 @@ export default {
         forecast: this.forecastDays,
         symbol: this.symbolToProphet,
         changepoint: this.changepointPriorScale
+      })
+    },
+    showIndicators () {
+      this.$store.commit('sendIndicatorsReq', {
+        symbol: this.symbolToShowIndicators
       })
     },
     calcReturns () {

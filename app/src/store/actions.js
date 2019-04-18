@@ -18,7 +18,7 @@ function getTimeseries (state) {
 }
 
 function getEachCoin (commit, symbol) {
-  axios.get(`https://min-api.cryptocompare.com/data/histoday?fsym=${symbol}&tsym=BTC&limit=200`,
+  axios.get(`https://min-api.cryptocompare.com/data/histoday?fsym=${symbol}&tsym=BTC&limit=800`,
     {
       headers: {
         authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
@@ -40,15 +40,15 @@ function getEachCoin (commit, symbol) {
     })
 }
 
-function csvJSON(csv){
-  var lines = csv.split("\n");
+function csvJSON (csv) {
+  var lines = csv.split('\n')
   var result = {labels: [], series: [[]]}
-  for(var i=1;i<lines.length-1;i++){
-      var currentline=lines[i].split(",")
-      result.labels.push(currentline[1])
-      result.series[0].push(currentline[2])
+  for (var i = 1; i < lines.length - 1; i++) {
+    var currentline = lines[i].split(',')
+    result.labels.push(currentline[1])
+    result.series[0].push(currentline[2])
   }
-  return JSON.stringify(result); //JSON
+  return JSON.stringify(result)
 }
 
 export default {
@@ -112,7 +112,6 @@ export default {
   },
   getTradingBotStats ({commit, state}) {
     commit('setLoading', true)
-    let response = {labels: [], series: [[]]}
     axios.get('https://raw.githubusercontent.com/Draichi/cryptocurrency_prediction/master/datasets/episode_reward_max.csv')
       .then(res => {
         var obj = csvJSON(res.data)

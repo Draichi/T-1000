@@ -6,6 +6,7 @@ export default {
   topVolCoins: [],
   symbolData: [],
   episodeRewardMax: null,
+  coinToFeedBot: null,
   snackbar: false,
   snackbarMsg: null
 }
