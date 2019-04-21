@@ -64,7 +64,7 @@ def get_datasets(symbol, coin_id):
     df.loc[:, 'RSI'] = talib.RSI(close, timeperiod=14)
     df.loc[:, 'STOCH_k'], df.loc[:, 'STOCH_d'] = talib.STOCH(high, low, close, fastk_period=5, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
     df.loc[:, 'STOCHF_k'], df.loc[:, 'STOCHF_d'] = talib.STOCHF(high, low, close, fastk_period=5, fastd_period=3, fastd_matype=0)
-    df.loc[:, 'STOCHRSI_K'], df.loc[:, 'STOCHRSI_D'] = talib.STOCHRSI(close, timeperiod=14, fastk_period=5, fastd_period=3, fastd_matype=0)
+    df.loc[:, 'STOCHRSI_K'], df.loc[:, 'STOCHRSI_D'] = talib.STOCHRSI(close, timeperiod=30, fastk_period=14, fastd_period=10, fastd_matype=1)
     df.loc[:, 'TRIX'] = talib.TRIX(close, timeperiod=30)
     df.loc[:, 'ULTOSC'] = talib.ULTOSC(high, low, close, timeperiod1=7, timeperiod2=14, timeperiod3=28)
     df.loc[:, 'WILLR'] = talib.WILLR(high, low, close, timeperiod=14)
@@ -99,6 +99,8 @@ def get_datasets(symbol, coin_id):
     df.loc[:, 'AD'] = talib.AD(high, low, close, volume)
     df.loc[:, 'ADOSC'] = talib.ADOSC(high, low, close, volume, fastperiod=3, slowperiod=10)
     df.loc[:, 'OBV'] = talib.OBV(close, volume)
+    # edit social
+    df.loc[:, 'fb_likes'] = df.loc[:, 'fb_likes'].pct_change()
 
     df.fillna(df.mean(), inplace=True)
     df.to_csv('datasets/trading_{}-BTC_{}.csv'.format(symbol, datetime.datetime.now().date()))
