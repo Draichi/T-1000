@@ -13,7 +13,7 @@ def get_datasets(symbol, coin_id):
 
     # OHLC
     url = 'https://min-api.cryptocompare.com/data/histohour?fsym={}&tsym=BTC&e=Binance&limit=2000'.format(symbol)
-    print('> downloading', symbol, 'OHLCV')
+    print(colored('> downloading ' + symbol + ' OHLCV', 'green'))
     response = requests.get(url, headers=headers)
     json_response = response.json()
     result = json_response['Data']
@@ -22,7 +22,7 @@ def get_datasets(symbol, coin_id):
 
     # social
     url = 'https://min-api.cryptocompare.com/data/social/coin/histo/hour?coinId={}&limit=2000'.format(coin_id)
-    print('> downloading', symbol, 'Social')
+    print(colored('> downloading ' + symbol + ' Social', 'green'))
     response = requests.get(url, headers=headers)
     json_response = response.json()
     result = json_response['Data']
@@ -101,13 +101,31 @@ def get_datasets(symbol, coin_id):
     df.loc[:, 'OBV'] = talib.OBV(close, volume)
     # edit social
     df.loc[:, 'fb_likes'] = df.loc[:, 'fb_likes'].pct_change()
+    # wallet indicator to trading bot
+    df.loc[:, 'wallet_btc'] = 1.0
+    df.loc[:, 'wallet_symbol'] = 0.0
 
     df.fillna(df.mean(), inplace=True)
     df.to_csv('datasets/trading_{}-BTC_{}.csv'.format(symbol, datetime.datetime.now().date()))
+    train_size = round(len(df) * 0.8) # 80% to train
+    df_train = df[:train_size]
+    df_rollout = df[train_size:]
+    df_train.to_csv('datasets/bot_train_{}.csv'.format(symbol))
+    df_rollout.to_csv('datasets/bot_rollout_{}.csv'.format(symbol))
+
 
     return df
 
 #------------------------------------------------------------->
+
+def init_data(symbol, mode):
+    df = pd.read_csv('datasets/bot_{}_{}.csv'.format(mode, symbol))
+    df.drop('Date', axis=1, inplace=True)
+    df_array = df.values.tolist()
+    keys = df.keys()
+    return keys, df_array
+
+
 def print_dollar():
     print(chr(27) + "[2J")
     print(colored("""
