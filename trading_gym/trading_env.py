@@ -20,29 +20,31 @@ mpl.rcParams.update(
     }
 )
 
-def init_data():
-    df = pd.read_csv('/home/lucas/Documents/cryptocurrency_prediction/datasets/LTC_1d_2018-11-01_2019-03-18.csv')
-    df['Volume 24h $'] = df['Volume 24h $'] * 1e-11
-    df['Wikipedia views 30d'] = df['Wikipedia views 30d'] * 1e-5
-    df['Market Cap'] = df['Market Cap'] * 1e-11
-    df['Price EOS'] = df['Price EOS'] * 1e-3
-    df['Price XRP'] = df['Price XRP'] * 1e-3
-    df['Telegram Mood (total value for all messages)'] = df['Telegram Mood (total value for all messages)'] * 1e-3
-    df['Buy market 24h'] = df['Buy market 24h'] * 1e-3
-    df['wallet_btc'] = 1.0
-    df['wallet_symbol'] = 0.0
-    # df.to_csv('datasets/trading_{}_{}_{}_{}.csv'.format(symbol.upper(), TIME_INTERVAL, FROM_DATE, TO_DATE))
-    df.drop(['Date', 'Coin'], axis=1, inplace=True)
-    df_array = df.values.tolist()
-    keys = df.keys()
+# def init_data():
+#     df = pd.read_csv('/home/lucas/Documents/cryptocurrency_prediction/datasets/LTC_1d_2018-11-01_2019-03-18.csv')
+#     df['Volume 24h $'] = df['Volume 24h $'] * 1e-11
+#     df['Wikipedia views 30d'] = df['Wikipedia views 30d'] * 1e-5
+#     df['Market Cap'] = df['Market Cap'] * 1e-11
+#     df['Price EOS'] = df['Price EOS'] * 1e-3
+#     df['Price XRP'] = df['Price XRP'] * 1e-3
+#     df['Telegram Mood (total value for all messages)'] = df['Telegram Mood (total value for all messages)'] * 1e-3
+#     df['Buy market 24h'] = df['Buy market 24h'] * 1e-3
+#     df['wallet_btc'] = 1.0
+#     df['wallet_symbol'] = 0.0
+#     # df.to_csv('datasets/trading_{}_{}_{}_{}.csv'.format(symbol.upper(), TIME_INTERVAL, FROM_DATE, TO_DATE))
+#     df.drop(['Date', 'Coin'], axis=1, inplace=True)
+#     df_array = df.values.tolist()
+#     keys = df.keys()
 
-    return keys, df_array
+#     return keys, df_array
 
 class TradingEnv(gym.Env):
 
-    def __init__(self):
+    def __init__(self, config):
         # self.keys, self.symbol_list = init_data(FLAGS.symbol)
-        self.keys, self.symbol_list = init_data()
+        # self.keys, self.symbol_list = init_data()
+        self.keys = config['keys']
+        self.symbol_list = config['symbols']
         self.index = 0
         self._first_render = True
         self._spread_coefficients = [1]
@@ -72,7 +74,7 @@ class TradingEnv(gym.Env):
         if action not in [0,1,2]:
             raise AssertionError()
         self.action = action
-        price_btc_index = list(self.keys).index('Price BTC')
+        price_btc_index = list(self.keys).index('close')
         wallet_btc_index = list(self.keys).index('wallet_btc')
         wallet_symbol_index = list(self.keys).index('wallet_symbol')
         observable_state = self.symbol_list[self.index]
@@ -134,7 +136,7 @@ class TradingEnv(gym.Env):
                 self._ax[prod_i].set_title('Product {} (spread coef {})'.format(
                     prod_i, str(self._spread_coefficients[prod_i])))
 
-        price_btc_index = list(self.keys).index('Price BTC')
+        price_btc_index = list(self.keys).index('close')
         observable_state = self.symbol_list[self.index]
         price_btc_before_action = observable_state[price_btc_index]
         # Spread price
