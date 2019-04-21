@@ -26,9 +26,10 @@
       v-if="!loading"
       wrap
     >
+      <!-- {{ symbolData }} -->
       <v-flex
-        v-for="symbol in symbolData"
-        :key="symbol.coin"
+        v-for="(symbol, indx) in symbolDataFiltered"
+        :key="indx"
         md12
         sm12
         lg4
@@ -39,37 +40,17 @@
           :color="colors"
           type="Line"
         >
-          <h4 class="title font-weight-light">{{ symbol.coin }}/BTC</h4>
+          <h3 class="title font-weight-light">{{ symbol.info.CoinInfo.FullName }}</h3>
+          <h4 class="title font-weight-light">{{ symbol.info.DISPLAY[Object.keys(symbol.info.DISPLAY)[0]].FROMSYMBOL }} / {{ symbol.info.DISPLAY[Object.keys(symbol.info.DISPLAY)[0]].TOSYMBOL }}</h4>
+          <p class="category font-weight-light">Price: {{ symbol.info.DISPLAY[Object.keys(symbol.info.DISPLAY)[0]].PRICE }}</p>
+          <p class="category font-weight-light">Change 24h: {{ symbol.info.DISPLAY[Object.keys(symbol.info.DISPLAY)[0]].CHANGE24HOUR }}</p>
+          <p class="category font-weight-light">Total Volume 24h: {{ symbol.info.DISPLAY[Object.keys(symbol.info.DISPLAY)[0]].TOTALVOLUME24HTO }}</p>
+          <p class="category font-weight-light">Market Cap: {{ symbol.info.DISPLAY[Object.keys(symbol.info.DISPLAY)[0]].MKTCAP }}</p>
           <v-checkbox
-            :label="`Last price: ${symbol.data.series[0].slice(-1)[0]} BTC`"
+            :label="(symbol.checkbox) ? 'Added to Portfolio' : 'Not in the portfolio'"
             v-model="symbol.checkbox"
             :color="colors"
           />
-          <p
-            v-if="symbol.checkbox"
-            class="category d-inline-flex font-weight-light"
-          >
-            <v-icon
-              color="green"
-              small
-            >
-              mdi-account-check
-            </v-icon>
-            <span class="green--text">&nbsp;Added to portfolio</span>
-
-          </p>
-          <p
-            v-else
-            class="category d-inline-flex font-weight-light"
-          >
-            <v-icon
-              color="red"
-              small
-            >
-              mdi-account-plus
-            </v-icon>
-            <span class="red--text">&nbsp;Not in portfolio</span>
-          </p>
           <template slot="actions">
             <v-icon
               class="mr-2"
@@ -286,12 +267,12 @@
       >
         <material-card
           color="green"
-          title="Top 24h Volume"
-          text="Volume in BTC"
+          title="Top Market Cap Coins"
+          text="..."
         >
           <v-data-table
             :headers="headers"
-            :items="topVolCoins"
+            :items="topCoinsTable"
             hide-actions
           >
             <template
@@ -307,9 +288,10 @@
               slot="items"
               slot-scope="{ item }"
             >
-              <td>{{ item.NAME }}</td>
-              <td>{{ item.SYMBOL }}</td>
-              <td>{{ item.VOLUME24HOURTO }}</td>
+              <td>{{ item.CoinInfo.FullName }}</td>
+              <td>{{ item.CoinInfo.Name }}</td>
+              <td>{{ item.CoinInfo.Algorithm }}</td>
+              <td>{{ item.CoinInfo.ProofType }}</td>
             </template>
           </v-data-table>
         </material-card>
@@ -380,8 +362,13 @@ export default {
         },
         {
           sortable: false,
-          text: 'Volume',
-          value: 'VOLUME24HOURTO'
+          text: 'Algorithm',
+          value: 'Algorithm'
+        },
+        {
+          sortable: false,
+          text: 'ProofType',
+          value: 'ProofType'
         }
       ]
     }
@@ -390,16 +377,31 @@ export default {
     loading () {
       return this.$store.getters.loading
     },
-    topVolCoins () {
-      return this.$store.getters.topVolCoins
-    },
     symbolData () {
       return this.$store.getters.symbolData
     },
+    topCoinsTable () {
+      return this.$store.getters.topCoinsTable
+    },
+    fisrtIndex () {
+      return  Object.keys(item.info.DISPLAY)[0]
+    },
+    symbolDataFiltered () {
+      var symbolDataList = []
+      this.symbolData.map(function (item) {
+        var firstIndex = Object.keys(item.info.DISPLAY)[0]
+        var fromSymbol = item.info.RAW[firstIndex].FROMSYMBOL
+        var toSymbol = item.info.RAW[firstIndex].TOSYMBOL
+        if (fromSymbol != toSymbol) {
+          symbolDataList.push(item)
+        }
+      })
+      return symbolDataList
+    },
     itemsCoins () {
       var symbolList = []
-      this.topVolCoins.map(function (item) {
-        symbolList.push(item.SYMBOL)
+      this.symbolData.map(function (item) {
+        symbolList.push(item.info.CoinInfo.Name)
       })
       return symbolList
     },

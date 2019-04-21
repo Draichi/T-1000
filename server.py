@@ -416,7 +416,7 @@ def indicators():
     fig.append_trace(trace, 2, 1)
     trace = go.Scatter(x=df['Date'], y=df['APO'], fill='tonexty', mode='none')
     fig.append_trace(trace, 3, 1)
-    fig['layout'].update(title='{} Momemtum Indicators #1',
+    fig['layout'].update(title='{} Momemtum Indicators #1'.format(symbol),
                          showlegend=False,
                         font=dict(color='rgb(255, 255, 255)', size=16),
                         paper_bgcolor='#2d2929',
@@ -479,7 +479,7 @@ def indicators():
                         plot_bgcolor='#2d2929')
     offline.plot(fig, filename='app/public/momemtum_indicators5_{}_{}.html'.format(symbol, datetime.datetime.now().date()))
 
-    fig = tools.make_subplots(rows=5, cols=1, subplot_titles=['MACD','DMI','STOCH'])
+    fig = tools.make_subplots(rows=4, cols=1, subplot_titles=['MACD','DMI','STOCH', 'STOCHF'])
     trace = go.Scatter(x=df['Date'], y=df['MACD'])
     fig.append_trace(trace, 1, 1)
     trace = go.Scatter(x=df['Date'], y=df['MACD_signal'])
@@ -492,8 +492,12 @@ def indicators():
     fig.append_trace(trace, 2, 1)
     trace = go.Scatter(x=df['Date'], y=df['STOCH_k'])
     fig.append_trace(trace, 3, 1)
-    trace = go.Scatter(x=df['Date'], y=df['STOCHF_k'])
+    trace = go.Scatter(x=df['Date'], y=df['STOCH_d'])
     fig.append_trace(trace, 3, 1)
+    trace = go.Scatter(x=df['Date'], y=df['STOCHF_k'])
+    fig.append_trace(trace, 4, 1)
+    trace = go.Scatter(x=df['Date'], y=df['STOCHF_d'])
+    fig.append_trace(trace, 4, 1)
     fig['layout'].update(title='{} Momemtum Indicators #6'.format(symbol),
                          showlegend=False,
                         font=dict(color='rgb(255, 255, 255)', size=16),
@@ -501,8 +505,10 @@ def indicators():
                         plot_bgcolor='#2d2929')
     offline.plot(fig, filename='app/public/momemtum_indicators6_{}_{}.html'.format(symbol, datetime.datetime.now().date()))
 
-    fig = tools.make_subplots(rows=3, cols=1, subplot_titles=['STOCHRSI_K','ULTOSC','WILLR'])
+    fig = tools.make_subplots(rows=3, cols=1, subplot_titles=['STOCHRSI','ULTOSC','WILLR'])
     trace = go.Scatter(x=df['Date'], y=df['STOCHRSI_K'])
+    fig.append_trace(trace, 1, 1)
+    trace = go.Scatter(x=df['Date'], y=df['STOCHRSI_D'])
     fig.append_trace(trace, 1, 1)
     trace = go.Bar(x=df['Date'], y=df['ULTOSC'])
     fig.append_trace(trace, 2, 1)
@@ -516,7 +522,7 @@ def indicators():
     offline.plot(fig, filename='app/public/momemtum_indicators7_{}_{}.html'.format(symbol, datetime.datetime.now().date()))
 
     # pattern recognition
-    fig = tools.make_subplots(rows=3, cols=1, subplot_titles=['CDL2','CDL3'])
+    fig = tools.make_subplots(rows=2, cols=1, subplot_titles=['CDL2','CDL3'])
     trace = go.Scatter(x=df['Date'], y=df['CDL2CROWS'])
     fig.append_trace(trace, 1, 1)
     trace = go.Bar(x=df['Date'], y=df['CDL3BLACKCROWS'])
@@ -531,6 +537,58 @@ def indicators():
                         paper_bgcolor='#2d2929',
                         plot_bgcolor='#2d2929')
     offline.plot(fig, filename='app/public/pattern_recognition_{}_{}.html'.format(symbol, datetime.datetime.now().date()))
+
+    # price transform
+    fig = tools.make_subplots(rows=4, cols=1, subplot_titles=['WCLPRICE','ATR','NATR','TRANGE'])
+    trace = go.Scatter(x=df['Date'], y=df['WCLPRICE'])
+    fig.append_trace(trace, 1, 1)
+    # volatility indicators
+    trace = go.Bar(x=df['Date'], y=df['ATR'])
+    fig.append_trace(trace, 2, 1)
+    trace = go.Scatter(x=df['Date'], y=df['NATR'])
+    fig.append_trace(trace, 3, 1)
+    trace = go.Scatter(x=df['Date'], y=df['TRANGE'])
+    fig.append_trace(trace, 4, 1)
+    fig['layout'].update(title='{} Volatility Indicators'.format(symbol),
+                         showlegend=False,
+                        font=dict(color='rgb(255, 255, 255)', size=16),
+                        paper_bgcolor='#2d2929',
+                        plot_bgcolor='#2d2929')
+    offline.plot(fig, filename='app/public/volatility_indicators_{}_{}.html'.format(symbol, datetime.datetime.now().date()))
+
+    # statistic funcitons
+    fig = tools.make_subplots(rows=5, cols=1, subplot_titles=['BETA','CORREL','STDDEV','TSF','VAR'])
+    trace = go.Scatter(x=df['Date'], y=df['BETA'])
+    fig.append_trace(trace, 1, 1)
+    trace = go.Bar(x=df['Date'], y=df['CORREL'])
+    fig.append_trace(trace, 2, 1)
+    trace = go.Scatter(x=df['Date'], y=df['STDDEV'])
+    fig.append_trace(trace, 3, 1)
+    trace = go.Scatter(x=df['Date'], y=df['TSF'])
+    fig.append_trace(trace, 4, 1)
+    trace = go.Scatter(x=df['Date'], y=df['VAR'])
+    fig.append_trace(trace, 5, 1)
+    fig['layout'].update(title='{} Statistic Funcitons'.format(symbol),
+                         showlegend=False,
+                        font=dict(color='rgb(255, 255, 255)', size=16),
+                        paper_bgcolor='#2d2929',
+                        plot_bgcolor='#2d2929')
+    offline.plot(fig, filename='app/public/statistic_funcitons_{}_{}.html'.format(symbol, datetime.datetime.now().date()))
+
+    # volume indicators
+    fig = tools.make_subplots(rows=3, cols=1, subplot_titles=['AD','ADOSC','OBV'])
+    trace = go.Scatter(x=df['Date'], y=df['AD'])
+    fig.append_trace(trace, 1, 1)
+    trace = go.Bar(x=df['Date'], y=df['ADOSC'])
+    fig.append_trace(trace, 2, 1)
+    trace = go.Scatter(x=df['Date'], y=df['OBV'])
+    fig.append_trace(trace, 3, 1)
+    fig['layout'].update(title='{} Volume Indicators'.format(symbol),
+                         showlegend=False,
+                        font=dict(color='rgb(255, 255, 255)', size=16),
+                        paper_bgcolor='#2d2929',
+                        plot_bgcolor='#2d2929')
+    offline.plot(fig, filename='app/public/volume_indicators_{}_{}.html'.format(symbol, datetime.datetime.now().date()))
 
 
 if __name__ == "__main__":

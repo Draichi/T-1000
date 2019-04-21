@@ -4,11 +4,11 @@ export default {
   loading (state) {
     return state.loading
   },
-  topVolCoins (state) {
-    return state.topVolCoins
-  },
   symbolData (state) {
     return state.symbolData
+  },
+  topCoinsTable (state) {
+    return state.topCoinsTable
   },
   episodeRewardMax (state) {
     return state.episodeRewardMax

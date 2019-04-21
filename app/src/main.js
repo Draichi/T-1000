@@ -28,7 +28,7 @@ new Vue({
   router,
   store,
   beforeCreate () {
-    this.$store.dispatch('getTopVolCoins')
+    this.$store.dispatch('getTopCapCoins')
     this.$store.dispatch('getTradingBotStats')
     // this.$store.dispatch('getETHBTC')
     // this.$store.dispatch('getXRPBTC')

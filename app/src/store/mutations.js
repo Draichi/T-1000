@@ -11,8 +11,8 @@ export default {
   clearError (state) {
     state.error = null
   },
-  setTopVolCoins (state, payload) {
-    state.topVolCoins = payload
+  setTopCoinsTable (state, payload) {
+    state.topCoinsTable = payload
   },
   addSymbolData (state, payload) {
     state.symbolData.push(payload)
@@ -43,31 +43,26 @@ export default {
     }
   },
   sendIndicatorsReq (state, payload) {
-    axios.get('https://min-api.cryptocompare.com/data/all/coinlist')
-      .then(res => {
-        var coinsList = res.data.Data
-        for (var coin in coinsList) {
-          if (coin === payload.symbol) {
-            axios.post('http://localhost:3030/indicatorsDashboard',
-              {
-                // 'headers': {'Content-Encoding': 'gzip', 'Access-Control-Allow-Origin': '*'},
-                'symbol': payload.symbol,
-                'coinId': coinsList[coin].Id
-              })
-              .then(res => {
-                console.log(res)
-                state.snackbar = true
-                state.snackbarMsg = res.data
-              })
-              .catch(e => {
-                state.snackbar = true
-                state.snackbarMsg = e.data
-                console.log('errosssss:', String(e))
-              })
-            state.coinToFeedBot = coinsList[coin].Id
-          }
-        }
-      })
+    for (var item in state.symbolData) {
+      if (state.symbolData[item].info.CoinInfo.Name === payload.symbol) {
+        axios.post('http://localhost:3030/indicatorsDashboard',
+          {
+            // 'headers': {'Content-Encoding': 'gzip', 'Access-Control-Allow-Origin': '*'},
+            'symbol': payload.symbol,
+            'coinId': state.symbolData[item].info.CoinInfo.Id
+          })
+          .then(res => {
+            console.log(res)
+            state.snackbar = true
+            state.snackbarMsg = res.data
+          })
+          .catch(e => {
+            state.snackbar = true
+            state.snackbarMsg = e.data
+            console.log('errosssss:', String(e))
+          })
+      }
+    }
   },
   setEpisodeRewardMax (state, payload) {
     state.episodeRewardMax = payload

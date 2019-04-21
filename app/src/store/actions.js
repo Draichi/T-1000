@@ -9,23 +9,26 @@ function getTimeseries (state) {
       var obj = state.symbolData[key]
       var date = obj.data.labels
       timeseries['date'] = date
-      var coin = obj.coin
+      // var coin = obj.info.CoinInfo.Name
+      var fromSymbol = obj.info.RAW[Object.keys(obj.info.RAW)[0]].FROMSYMBOL
+      var toSymbol = obj.info.RAW[Object.keys(obj.info.RAW)[0]].TOSYMBOL
       var price = obj.data.series[0]
-      timeseries[coin] = price
+      timeseries[fromSymbol + toSymbol] = price
     }
   }
   return timeseries
 }
 
-function getEachCoin (commit, symbol) {
-  axios.get(`https://min-api.cryptocompare.com/data/histoday?fsym=${symbol}&tsym=BTC&limit=800`,
+function getEachCoin (commit, state, info) {
+  var firstIndex = Object.keys(info.DISPLAY)[0]
+  axios.get(`https://min-api.cryptocompare.com/data/histo${state.history}?fsym=${info.RAW[firstIndex].FROMSYMBOL}&tsym=${info.RAW[firstIndex].TOSYMBOL}&limit=${state.timeseriesItens}`,
     {
       headers: {
         authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
       }
     })
     .then(res => {
-      var response = {coin: symbol, data: {labels: [], series: [[]]}, checkbox: false}
+      var response = {data: {labels: [], series: [[]]}, checkbox: false, info: info}
       var obj = res.data.Data
       for (let key in obj) {
         let date = new Date(obj[key].time * 1000)
@@ -52,9 +55,9 @@ function csvJSON (csv) {
 }
 
 export default {
-  getTopVolCoins ({commit}) {
+  getTopCapCoins ({commit, state}) {
     commit('setLoading', true)
-    axios.get('https://min-api.cryptocompare.com/data/top/volumes?tsym=BTC&limit=25',
+    axios.get(`https://min-api.cryptocompare.com/data/top/mktcapfull?limit=${state.coinsToShow}&tsym=BTC`,
       {
         headers: {
           authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
@@ -62,10 +65,27 @@ export default {
       })
       .then(res => {
         var obj = res.data.Data
-        commit('setTopVolCoins', obj)
+        commit('setTopCoinsTable', obj)
         for (let key in obj) {
-          var symbol = obj[key].SYMBOL
-          getEachCoin(commit, symbol)
+          var info = obj[key]
+          getEachCoin(commit, state, info)
+        }
+      })
+      .catch(e => {
+        commit('setError', e)
+        console.warn(e)
+      })
+    axios.get(`https://min-api.cryptocompare.com/data/top/mktcapfull?limit=${state.coinsToShow}&tsym=ETH`,
+      {
+        headers: {
+          authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
+        }
+      })
+      .then(res => {
+        var obj = res.data.Data
+        for (let key in obj) {
+          var info = obj[key]
+          getEachCoin(commit, state, info)
         }
       })
       .catch(e => {
@@ -74,7 +94,7 @@ export default {
       })
     commit('setLoading', false)
   },
-  sendPortfolioRetunsReq ({commit, state}) {
+  sendPortfolioRetunsReq ({state}) {
     let timeseries = getTimeseries(state)
     axios.post('http://localhost:3030/returns',
       {

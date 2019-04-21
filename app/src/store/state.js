@@ -2,11 +2,13 @@
 
 export default {
   loading: false,
+  coinsToShow: 10,
+  timeseriesItens: 120,
+  history: 'day', // 'day' or 'hour'
   error: null,
-  topVolCoins: [],
   symbolData: [],
+  topCoinsTable: [],
   episodeRewardMax: null,
-  coinToFeedBot: null,
   snackbar: false,
   snackbarMsg: null
 }
