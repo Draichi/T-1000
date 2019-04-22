@@ -11,6 +11,11 @@ Deep tecnical analysis of cryptocurrencies with reinforcement learning
 <!-- TODO -->
 <!-- GIF WITH APP RUNNING -->
 <!-- LINKs -->
+
+<div style="text-align:center">
+  <img src="imgs/rollout.gif"/>
+</div>
+
 ## Live
 
 -   [Rolling Correlation](https://draichi.github.io/cryptocurrency_prediction/rolling_corr_DASH_2019-04-16.html)
@@ -140,6 +145,7 @@ rllib rollout /home/lucas/ray_results/default/PPO_Trading-v0_0_2019-03-26_09-40-
 -   [Papers](https://github.com/Draichi/Portfolio-Management-list/blob/master/README.md)
 -   [Analyzing cryptocurrency markets using python](https://blog.patricktriest.com/analyzing-cryptocurrencies-python/)
 -   [Q-trader](https://github.com/edwardhdlu/q-trader)
+-   [Trading-Gym](https://github.com/thedimlebowski/Trading-Gym)
 
 * * *
 
