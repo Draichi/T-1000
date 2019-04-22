@@ -107,7 +107,7 @@ def get_datasets(symbol, coin_id):
 
     df.fillna(df.mean(), inplace=True)
     df.to_csv('datasets/trading_{}-BTC_{}.csv'.format(symbol, datetime.datetime.now().date()))
-    train_size = round(len(df) * 0.8) # 80% to train
+    train_size = round(len(df) * 0.5) # 50% to train -> test with different value
     df_train = df[:train_size]
     df_rollout = df[train_size:]
     df_train.to_csv('datasets/bot_train_{}.csv'.format(symbol))

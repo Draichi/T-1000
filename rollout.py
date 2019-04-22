@@ -1,5 +1,17 @@
 #!/usr/bin/env python
 
+"""
+
+Example:
+    python rollout.py /home/lucas/ray_results/test_ETH_1d_2018-11-01_2019-03-18/PPO_corridor_0_lr=1e-07_2019-04-22_06-26-33mu6oow2q/checkpoint_25/checkpoint-25 \
+        --run PPO \
+        --env corridor \
+        --steps 200 \
+        --out rollouts.pkl \
+        --symbol ETH 
+"""
+
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -20,6 +32,8 @@ from ray.tune.util import merge_dicts
 from ray.tune.registry import register_env
 
 from trading_gym.trading_env import TradingEnv
+from configs.functions import init_data
+
 
 
 EXAMPLE_USAGE = """
@@ -36,7 +50,6 @@ Example Usage via executable:
 #
 # ModelCatalog.register_custom_model("pa_model", ParametricActionsModel)
 # register_env("pa_cartpole", lambda _: ParametricActionCartpole(10))
-register_env("corridor", lambda config: TradingEnv(config))
 
 
 def create_parser(parser_creator=None):
@@ -60,6 +73,8 @@ def create_parser(parser_creator=None):
         "tune registry.")
     required_named.add_argument(
         "--env", type=str, help="The gym environment to use.")
+    required_named.add_argument(
+        "--symbol", type=str, help="The coin symbol to use.")
     parser.add_argument(
         "--no-render",
         default=False,
@@ -79,7 +94,14 @@ def create_parser(parser_creator=None):
 
 
 def run(args, parser):
-    config = {}
+    # keys, symbols = init_data(args.symbol, 'rollout')
+
+    config = {
+        # "env_config": {
+        #     'keys': keys,
+        #     'symbols': symbols
+        # }
+    }
     # Load configuration from file
     config_dir = os.path.dirname(args.checkpoint)
     config_path = os.path.join(config_dir, "params.pkl")
@@ -215,4 +237,11 @@ def rollout(agent, env_name, num_steps, out=None, no_render=True):
 if __name__ == "__main__":
     parser = create_parser()
     args = parser.parse_args()
+    # config_function = lambda _: TradingEnv(config)
+    keys, symbols = init_data(args.symbol, 'rollout')
+    config = {
+        "keys": keys,
+        "symbols": symbols
+    }
+    register_env("corridor", lambda _: TradingEnv(config))
     run(args, parser)

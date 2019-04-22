@@ -41,13 +41,16 @@ if __name__ == "__main__":
     register_env("corridor", lambda config: TradingEnv(config))
     ray.init()
     run_experiments({
-        "{}_{}_{}_{}".format(FLAGS.symbol.upper(),TIME_INTERVAL,FROM_DATE,TO_DATE): {
+        "test_{}_{}_{}_{}".format(FLAGS.symbol.upper(),TIME_INTERVAL,FROM_DATE,TO_DATE): {
             "run": FLAGS.algo,
             # "env": TradingEnv,  # or "corridor" if registered above
             "env": "corridor",  # or "corridor" if registered above
             "stop": {
-                "timesteps_total": 1e6,
+                # "timesteps_total": 1e6,
+                "timesteps_total": 1e5,
             },
+            "checkpoint_freq": 10,
+            "checkpoint_at_end": True,
             "config": {
                 "lr": grid_search([
                     # 1e-2,
