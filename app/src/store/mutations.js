@@ -20,7 +20,7 @@ export default {
   sendProphetReq (state, payload) {
     var coins = state.symbolData
     for (let key in coins) {
-      if (coins[key].coin === payload.symbol) {
+      if (coins[key].info.CoinInfo.Name == payload.symbol) {
         axios.post('http://localhost:3030/prophet',
           {
             // 'headers': {'Content-Encoding': 'gzip', 'Access-Control-Allow-Origin': '*'},
@@ -44,12 +44,11 @@ export default {
   },
   sendIndicatorsReq (state, payload) {
     for (var item in state.symbolData) {
-      if (state.symbolData[item].info.CoinInfo.Name === payload.symbol) {
+      if (state.symbolData[item].botFood.pair === payload.symbol) {
         axios.post('http://localhost:3030/indicatorsDashboard',
           {
             // 'headers': {'Content-Encoding': 'gzip', 'Access-Control-Allow-Origin': '*'},
-            'symbol': payload.symbol,
-            'coinId': state.symbolData[item].info.CoinInfo.Id
+            'timeseries': state.symbolData[item].botFood
           })
           .then(res => {
             console.log(res)

@@ -21,19 +21,47 @@ function getTimeseries (state) {
 
 function getEachCoin (commit, state, info) {
   var firstIndex = Object.keys(info.DISPLAY)[0]
-  axios.get(`https://min-api.cryptocompare.com/data/histo${state.history}?fsym=${info.RAW[firstIndex].FROMSYMBOL}&tsym=${info.RAW[firstIndex].TOSYMBOL}&limit=${state.timeseriesItens}`,
+  var fromSymbol = info.RAW[firstIndex].FROMSYMBOL
+  var toSymbol = info.RAW[firstIndex].TOSYMBOL
+  var pair = fromSymbol + toSymbol
+  axios.get(`https://min-api.cryptocompare.com/data/histo${state.history}?fsym=${fromSymbol}&tsym=${toSymbol}&limit=${state.timeseriesItens}&e=Binance`,
     {
       headers: {
         authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
       }
     })
     .then(res => {
-      var response = {data: {labels: [], series: [[]]}, checkbox: false, info: info}
+      if (res.data.Response !== 'Success') { return }
+      var response = {
+        botFood: {
+          pair: pair,
+          open: [],
+          high: [],
+          low: [],
+          close: [],
+          volume: [],
+          time: []
+        },
+        data: {
+          labels: [],
+          series: [[]]
+        },
+        checkbox: false,
+        info: info
+      }
       var obj = res.data.Data
       for (let key in obj) {
-        let date = new Date(obj[key].time * 1000)
+        var i = obj[key]
+        let date = new Date(i.time * 1000)
         response.data.labels.push(date)
-        response.data.series[0].push(obj[key].close)
+        response.data.series[0].push(i.close)
+
+        response.botFood.open.push(i.open)
+        response.botFood.high.push(i.high)
+        response.botFood.low.push(i.low)
+        response.botFood.close.push(i.close)
+        response.botFood.volume.push(i.volumefrom)
+        response.botFood.time.push(i.time)
       }
       commit('addSymbolData', response)
     })
@@ -57,25 +85,9 @@ function csvJSON (csv) {
 export default {
   getTopCapCoins ({commit, state}) {
     commit('setLoading', true)
-    axios.get(`https://min-api.cryptocompare.com/data/top/mktcapfull?limit=${state.coinsToShow}&tsym=BTC`,
-      {
-        headers: {
-          authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
-        }
-      })
-      .then(res => {
-        var obj = res.data.Data
-        commit('setTopCoinsTable', obj)
-        for (let key in obj) {
-          var info = obj[key]
-          getEachCoin(commit, state, info)
-        }
-      })
-      .catch(e => {
-        commit('setError', e)
-        console.warn(e)
-      })
-    axios.get(`https://min-api.cryptocompare.com/data/top/mktcapfull?limit=${state.coinsToShow}&tsym=ETH`,
+    let currencyList = ['BTC', 'USDT', 'BNB', 'ETH']
+    for (var i in currencyList) {
+      axios.get(`https://min-api.cryptocompare.com/data/top/mktcapfull?limit=${state.coinsToShow}&tsym=${currencyList[i]}`,
       {
         headers: {
           authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
@@ -92,6 +104,76 @@ export default {
         commit('setError', e)
         console.warn(e)
       })
+    }
+    // axios.get(`https://min-api.cryptocompare.com/data/top/mktcapfull?limit=${state.coinsToShow}&tsym=BTC`,
+    //   {
+    //     headers: {
+    //       authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
+    //     }
+    //   })
+    //   .then(res => {
+    //     var obj = res.data.Data
+    //     commit('setTopCoinsTable', obj)
+    //     for (let key in obj) {
+    //       var info = obj[key]
+    //       getEachCoin(commit, state, info)
+    //     }
+    //   })
+    //   .catch(e => {
+    //     commit('setError', e)
+    //     console.warn(e)
+    //   })
+    // axios.get(`https://min-api.cryptocompare.com/data/top/mktcapfull?limit=${state.coinsToShow}&tsym=BNB`,
+    //   {
+    //     headers: {
+    //       authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
+    //     }
+    //   })
+    //   .then(res => {
+    //     var obj = res.data.Data
+    //     for (let key in obj) {
+    //       var info = obj[key]
+    //       getEachCoin(commit, state, info)
+    //     }
+    //   })
+    //   .catch(e => {
+    //     commit('setError', e)
+    //     console.warn(e)
+    //   })
+    // axios.get(`https://min-api.cryptocompare.com/data/top/mktcapfull?limit=${state.coinsToShow}&tsym=ETH`,
+    //   {
+    //     headers: {
+    //       authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
+    //     }
+    //   })
+    //   .then(res => {
+    //     var obj = res.data.Data
+    //     for (let key in obj) {
+    //       var info = obj[key]
+    //       getEachCoin(commit, state, info)
+    //     }
+    //   })
+    //   .catch(e => {
+    //     commit('setError', e)
+    //     console.warn(e)
+    //   })
+    // axios.get(`https://min-api.cryptocompare.com/data/top/mktcapfull?limit=${state.coinsToShow}&tsym=USDT`,
+    //   {
+    //     headers: {
+    //       authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
+    //     }
+    //   })
+    //   .then(res => {
+    //     var obj = res.data.Data
+    //     for (let key in obj) {
+    //       var info = obj[key]
+    //       getEachCoin(commit, state, info)
+    //     }
+    //   })
+    //   .catch(e => {
+    //     commit('setError', e)
+    //     console.warn(e)
+    //   })
     commit('setLoading', false)
   },
   sendPortfolioRetunsReq ({state}) {
@@ -106,30 +188,30 @@ export default {
         state.snackbarMsg = res.data
       })
   },
-  sendPortfolioCorrelationReq ({commit, state}) {
-    let timeseries = getTimeseries(state)
-    axios.post('http://localhost:3030/correlation',
-      {
-        // 'headers': {'Content-Encoding': 'gzip', 'Access-Control-Allow-Origin': '*'},
-        'timeseries': timeseries
-      })
-      .then(res => {
-        state.snackbar = true
-        state.snackbarMsg = res.data
-      })
-  },
-  sendPortfolioEfficientFrontierReq ({commit, state}) {
-    let timeseries = getTimeseries(state)
-    axios.post('http://localhost:3030/efficient_frontier',
-      {
-        // 'headers': {'Content-Encoding': 'gzip', 'Access-Control-Allow-Origin': '*'},
-        'timeseries': timeseries
-      })
-      .then(res => {
-        state.snackbar = true
-        state.snackbarMsg = res.data
-      })
-  },
+  // sendPortfolioCorrelationReq ({commit, state}) {
+  //   let timeseries = getTimeseries(state)
+  //   axios.post('http://localhost:3030/correlation',
+  //     {
+  //       // 'headers': {'Content-Encoding': 'gzip', 'Access-Control-Allow-Origin': '*'},
+  //       'timeseries': timeseries
+  //     })
+  //     .then(res => {
+  //       state.snackbar = true
+  //       state.snackbarMsg = res.data
+  //     })
+  // },
+  // sendPortfolioEfficientFrontierReq ({commit, state}) {
+  //   let timeseries = getTimeseries(state)
+  //   axios.post('http://localhost:3030/efficient_frontier',
+  //     {
+  //       // 'headers': {'Content-Encoding': 'gzip', 'Access-Control-Allow-Origin': '*'},
+  //       'timeseries': timeseries
+  //     })
+  //     .then(res => {
+  //       state.snackbar = true
+  //       state.snackbarMsg = res.data
+  //     })
+  // },
   getTradingBotStats ({commit, state}) {
     commit('setLoading', true)
     axios.get('https://raw.githubusercontent.com/Draichi/cryptocurrency_prediction/master/datasets/episode_reward_max.csv')

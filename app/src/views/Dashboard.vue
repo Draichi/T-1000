@@ -28,7 +28,7 @@
     >
       <!-- {{ symbolData }} -->
       <v-flex
-        v-for="(symbol, indx) in symbolDataFiltered"
+        v-for="(symbol, indx) in symbolData"
         :key="indx"
         md12
         sm12
@@ -73,18 +73,6 @@
               <v-btn
                 :color="colors"
                 @click="calcReturns">Returns
-              </v-btn>
-            </v-layout>
-            <v-layout justify-center>
-              <v-btn
-                :color="colors"
-                @click="calcCorrelation">Correlation
-              </v-btn>
-            </v-layout>
-            <v-layout justify-center>
-              <v-btn
-                :color="colors"
-                @click="calcEfficientFrontier">Efficient Frontier
               </v-btn>
             </v-layout>
           </v-flex>
@@ -158,7 +146,7 @@
                 <v-layout justify-center>
                   <v-btn
                     :color="colors"
-                    @click="btn">Plot
+                    @click.stop="btn">Plot
                   </v-btn>
                 </v-layout>
               </v-flex>
@@ -248,12 +236,47 @@
                 </v-layout>
               </v-flex>
             </v-layout>
+            <v-layout justify-center>
+              <v-flex
+                xs12
+                md6
+              >
+                <v-layout >
+                  <v-select
+                    v-model="modeToShowIndicators"
+                    :items="['day', 'hour']"
+                    :color="colors"
+                    outline
+                    label="Select mode"
+                    return-object
+                    single-line
+                  />
+                </v-layout>
+              </v-flex>
+            </v-layout>
+            <v-layout justify-center>
+              <v-flex
+                xs12
+                md6
+              >
+                <v-layout >
+                  <v-slider
+                    v-model="daysToShowIndicators"
+                    :color="colors"
+                    :max="2000"
+                    :min="24"
+                    :label="modeToShowIndicators + 's'"
+                    thumb-label="always"
+                  />
+                </v-layout>
+              </v-flex>
+            </v-layout>
             <v-layout row>
               <v-flex>
                 <v-layout justify-center>
                   <v-btn
                     :color="colors"
-                    @click="showIndicators">Show
+                    @click.stop="showIndicators">Show
                   </v-btn>
                 </v-layout>
               </v-flex>
@@ -262,40 +285,6 @@
         </v-layout>
       </v-container>
 
-      <v-flex
-        md12
-      >
-        <material-card
-          color="green"
-          title="Top Market Cap Coins"
-          text="..."
-        >
-          <v-data-table
-            :headers="headers"
-            :items="topCoinsTable"
-            hide-actions
-          >
-            <template
-              slot="headerCell"
-              slot-scope="{ header }"
-            >
-              <span
-                class="subheading font-weight-light text-success text--darken-3"
-                v-text="header.text"
-              />
-            </template>
-            <template
-              slot="items"
-              slot-scope="{ item }"
-            >
-              <td>{{ item.CoinInfo.FullName }}</td>
-              <td>{{ item.CoinInfo.Name }}</td>
-              <td>{{ item.CoinInfo.Algorithm }}</td>
-              <td>{{ item.CoinInfo.ProofType }}</td>
-            </template>
-          </v-data-table>
-        </material-card>
-      </v-flex>
       <v-container class="hidden-md-and-up">
         <h3 class="text-xs-center">Portfolio functions only available on desktop</h3>
       </v-container>
@@ -331,6 +320,8 @@ export default {
   data () {
     return {
       forecastDays: 15,
+      modeToShowIndicators: 'day',
+      daysToShowIndicators: 60,
       changepointPriorScale: 0.49,
       symbolToProphet: 'ETH',
       symbolToShowIndicators: 'ETH',
@@ -349,28 +340,6 @@ export default {
           left: 15
         }
       },
-      headers: [
-        {
-          sortable: false,
-          text: 'Name',
-          value: 'NAME'
-        },
-        {
-          sortable: false,
-          text: 'Symbol',
-          value: 'SYMBOL'
-        },
-        {
-          sortable: false,
-          text: 'Algorithm',
-          value: 'Algorithm'
-        },
-        {
-          sortable: false,
-          text: 'ProofType',
-          value: 'ProofType'
-        }
-      ]
     }
   },
   computed: {
@@ -380,28 +349,10 @@ export default {
     symbolData () {
       return this.$store.getters.symbolData
     },
-    topCoinsTable () {
-      return this.$store.getters.topCoinsTable
-    },
-    fisrtIndex () {
-      return  Object.keys(item.info.DISPLAY)[0]
-    },
-    symbolDataFiltered () {
-      var symbolDataList = []
-      this.symbolData.map(function (item) {
-        var firstIndex = Object.keys(item.info.DISPLAY)[0]
-        var fromSymbol = item.info.RAW[firstIndex].FROMSYMBOL
-        var toSymbol = item.info.RAW[firstIndex].TOSYMBOL
-        if (fromSymbol != toSymbol) {
-          symbolDataList.push(item)
-        }
-      })
-      return symbolDataList
-    },
     itemsCoins () {
       var symbolList = []
       this.symbolData.map(function (item) {
-        symbolList.push(item.info.CoinInfo.Name)
+        symbolList.push(item.botFood.pair)
       })
       return symbolList
     },
@@ -422,17 +373,13 @@ export default {
     },
     showIndicators () {
       this.$store.commit('sendIndicatorsReq', {
-        symbol: this.symbolToShowIndicators
+        symbol: this.symbolToShowIndicators,
+        mode: this.modeToShowIndicators,
+        limit: this.daysToShowIndicators
       })
     },
     calcReturns () {
       this.$store.dispatch('sendPortfolioRetunsReq')
-    },
-    calcCorrelation () {
-      this.$store.dispatch('sendPortfolioCorrelationReq')
-    },
-    calcEfficientFrontier () {
-      this.$store.dispatch('sendPortfolioEfficientFrontierReq')
     }
   }
 }
