@@ -8,7 +8,7 @@ Example:
         --env corridor \
         --steps 200 \
         --out rollouts.pkl \
-        --symbol ETH 
+        --symbol ETH
 """
 
 
@@ -96,12 +96,7 @@ def create_parser(parser_creator=None):
 def run(args, parser):
     # keys, symbols = init_data(args.symbol, 'rollout')
 
-    config = {
-        # "env_config": {
-        #     'keys': keys,
-        #     'symbols': symbols
-        # }
-    }
+    config = {}
     # Load configuration from file
     config_dir = os.path.dirname(args.checkpoint)
     config_path = os.path.join(config_dir, "params.pkl")
@@ -243,5 +238,5 @@ if __name__ == "__main__":
         "keys": keys,
         "symbols": symbols
     }
-    register_env("corridor", lambda _: TradingEnv(config))
+    register_env("TradingEnv", lambda _: TradingEnv(config))
     run(args, parser)
