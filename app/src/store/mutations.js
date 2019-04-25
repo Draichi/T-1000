@@ -20,7 +20,7 @@ export default {
   sendProphetReq (state, payload) {
     var coins = state.symbolData
     for (let key in coins) {
-      if (coins[key].info.CoinInfo.Name == payload.symbol) {
+      if (coins[key].botFood.pair == payload.symbol) {
         axios.post('http://localhost:3030/prophet',
           {
             // 'headers': {'Content-Encoding': 'gzip', 'Access-Control-Allow-Origin': '*'},

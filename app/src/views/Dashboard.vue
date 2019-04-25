@@ -313,8 +313,6 @@
 </template>
 
 <script>
-// https://github.com/Bud-Fox/client
-// https://github.com/Bud-Fox/API
 
 export default {
   data () {
@@ -323,8 +321,8 @@ export default {
       modeToShowIndicators: 'day',
       daysToShowIndicators: 60,
       changepointPriorScale: 0.49,
-      symbolToProphet: 'ETH',
-      symbolToShowIndicators: 'ETH',
+      symbolToProphet: 'choose pair',
+      symbolToShowIndicators: 'choose pair',
       ChartsOptions: {
         axisX: {
           showLabel: false,
