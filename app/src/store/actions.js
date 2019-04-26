@@ -88,22 +88,22 @@ export default {
     let currencyList = ['BTC', 'USDT', 'BNB', 'ETH']
     for (var i in currencyList) {
       axios.get(`https://min-api.cryptocompare.com/data/top/mktcapfull?limit=${state.coinsToShow}&tsym=${currencyList[i]}`,
-      {
-        headers: {
-          authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
-        }
-      })
-      .then(res => {
-        var obj = res.data.Data
-        for (let key in obj) {
-          var info = obj[key]
-          getEachCoin(commit, state, info)
-        }
-      })
-      .catch(e => {
-        commit('setError', e)
-        console.warn(e)
-      })
+        {
+          headers: {
+            authorization: '3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'
+          }
+        })
+        .then(res => {
+          var obj = res.data.Data
+          for (let key in obj) {
+            var info = obj[key]
+            getEachCoin(commit, state, info)
+          }
+        })
+        .catch(e => {
+          commit('setError', e)
+          console.warn(e)
+        })
     }
     // axios.get(`https://min-api.cryptocompare.com/data/top/mktcapfull?limit=${state.coinsToShow}&tsym=BTC`,
     //   {
