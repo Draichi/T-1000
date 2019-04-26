@@ -4,35 +4,23 @@ import colorama
 import requests
 import pandas as pd
 import numpy as np
+import plotly.graph_objs as go
 from termcolor import colored
 
 colorama.init()
 
-def get_datasets(symbol, coin_id):
+def get_datasets(symbol, mode, limit):
     headers = {'User-Agent': 'Mozilla/5.0', 'authorization': 'Apikey 3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'}
 
     # OHLC
-    url = 'https://min-api.cryptocompare.com/data/histohour?fsym={}&tsym=BTC&e=Binance&limit=2000'.format(symbol)
+    url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym=BTC&e=Binance&limit={}'.format(mode, symbol, limit)
     print(colored('> downloading ' + symbol + ' OHLCV', 'green'))
     response = requests.get(url, headers=headers)
     json_response = response.json()
     result = json_response['Data']
-    # df = pd.DataFrame(result)
-    df1 = pd.DataFrame(result)
-
-    # social
-    url = 'https://min-api.cryptocompare.com/data/social/coin/histo/hour?coinId={}&limit=2000'.format(coin_id)
-    print(colored('> downloading ' + symbol + ' Social', 'green'))
-    response = requests.get(url, headers=headers)
-    json_response = response.json()
-    result = json_response['Data']
-    df2 = pd.DataFrame(result)
-
-    # #merge
-    df = pd.merge(df1, df2, on='time')
+    df = pd.DataFrame(result)
     df['Date'] = pd.to_datetime(df['time'], utc=True, unit='s')
     df.drop('time', axis=1, inplace=True)
-    # df.set_index('Date', inplace=True)
 
     # indicators
     # https://github.com/mrjbq7/ta-lib/blob/master/docs/func.md
@@ -99,20 +87,18 @@ def get_datasets(symbol, coin_id):
     df.loc[:, 'AD'] = talib.AD(high, low, close, volume)
     df.loc[:, 'ADOSC'] = talib.ADOSC(high, low, close, volume, fastperiod=3, slowperiod=10)
     df.loc[:, 'OBV'] = talib.OBV(close, volume)
-    # edit social
-    df.loc[:, 'fb_likes'] = df.loc[:, 'fb_likes'].pct_change()
     # wallet indicator to trading bot
     df.loc[:, 'wallet_btc'] = 1.0
     df.loc[:, 'wallet_symbol'] = 0.0
 
-    df.fillna(df.mean(), inplace=True)
-    df.to_csv('datasets/trading_{}-BTC_{}.csv'.format(symbol, datetime.datetime.now().date()))
+    # df.fillna(df.mean(), inplace=True)
+    df.dropna(inplace=True)
+    df.set_index('Date', inplace=True)
     train_size = round(len(df) * 0.5) # 50% to train -> test with different value
     df_train = df[:train_size]
     df_rollout = df[train_size:]
     df_train.to_csv('datasets/bot_train_{}.csv'.format(symbol))
     df_rollout.to_csv('datasets/bot_rollout_{}.csv'.format(symbol))
-
 
     return df
 
@@ -124,6 +110,59 @@ def init_data(symbol, mode):
     df_array = df.values.tolist()
     keys = df.keys()
     return keys, df_array
+
+
+def build_layout(title, x_axis_title, y_axis_title):
+    """Create the plotly's layout with custom configuration
+
+    Arguments:
+        title {str} -- Layout's central title
+        x_axis_title {str} -- Axis x title
+        y_axis_title {str} -- Axis y title
+
+    Returns:
+        Object -- Plotly object from plotly.graph_objs
+    """
+
+    layout = go.Layout(plot_bgcolor='#2d2929',
+                       paper_bgcolor='#2d2929',
+                       title=title,
+                       font=dict(color='rgb(255, 255, 255)', size=17),
+                       legend=dict(orientation="h"),
+                       yaxis=dict(title=y_axis_title),
+                       xaxis=dict(title=x_axis_title))
+    return layout
+
+def var_cov_matrix(df, weigths):
+    """Compute covariance matrix with respect of given weigths
+
+    Arguments:
+        df {pandas.DataFrame} -- The timeseries object
+        weigths {list} -- List of weights to be used
+
+    Returns:
+        numpy.array -- The covariance matrix
+    """
+
+    sigma = np.cov(np.array(df).T, ddof=0)
+    var = (np.array(weigths) * sigma * np.array(weigths).T).sum()
+    return var
+
+def calc_exp_returns(avg_return, weigths):
+    """Compute the expected returns
+
+    Arguments:
+        avg_return {pandas.DataFrame} -- The average of returns
+        weigths {list} -- A list of weigths
+
+    Returns:
+        array -- N dimensions array
+    """
+
+    exp_returns = avg_return.dot(weigths.T)
+    return exp_returns
+
+
 
 
 def print_dollar():
