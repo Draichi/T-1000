@@ -8,12 +8,8 @@
 
 Deep tecnical analysis of cryptocurrencies with reinforcement learning
 
-<!-- TODO -->
-<!-- GIF WITH APP RUNNING -->
-<!-- LINKs -->
-
 <div style="text-align:center">
-  <img src="imgs/rollout.gif"/>
+  <img src="imgs/dashboard.gif"/>
 </div>
 
 ## Live
@@ -24,6 +20,10 @@ Deep tecnical analysis of cryptocurrencies with reinforcement learning
 -   [Propheting 51 day(s) of ETH (Changepoint: 0.57)](https://draichi.github.io/cryptocurrency_prediction/prophet_2019-04-16_ETH.html)
 -   [Weights per asset at different expected returns (%)](https://draichi.github.io/cryptocurrency_prediction/weights_2019-04-16.html)
 -   [Risk associated with different levels of returns](https://draichi.github.io/cryptocurrency_prediction/efficient_frontier_2019-04-16.html)
+
+<div style="text-align:center">
+  <img src="imgs/prophet.gif"/>
+</div>
 
 ## Prerequisites
 
@@ -86,33 +86,13 @@ yarn serve
 
 ## Algotrading
 
-The data seen on dashboard will be used to train an agent to operate in the market. But first:
-
-### Register Env
-
-Add this to `~/miniconda3/envs/crypto_prediction/lib/python3.5/site-packages/gym/envs/__init__.py`:
-
-```python
-# Custon Env
-# ----------------------------------------
-register(
-    id='Trading-v0',
-    entry_point='gym.envs.trading_gym:TradingEnv',
-    reward_threshold=2.0,
-
-)
-```
-and paste the `trading_gym` folder inside `~/miniconda3/envs/crypto_prediction/lib/python3.5/site-packages/gym/envs/`
+The data seen on dashboard will be used to train an agent to operate in the market.
 
 ### Train
 
 ```sh
-# there are 2 versions beens developed
-# one can run using the env registered above
-rllib train --run PPO --env Trading-v0 --stop '{"timesteps_total": 180000}' --checkpoint-freq 10 --config '{"lr": 1e-5, "num_workers": 2, "observation_filter": "MeanStdFilter"}'
-
-# the latter use an env registed in the file itself
-python run_agent.py --symbol ltc --algo PPO
+# change the variables in `run_experiments` function to improve performance
+python train_trading_agent.py --symbol LTC --algo PPO
 ```
 
 ![algorithms](imgs/algorithms.png)
@@ -120,23 +100,28 @@ python run_agent.py --symbol ltc --algo PPO
 > Different algorithms compared (mean reward in BTC)
 
 ```sh
-# to keep monitoring while the algo is trainning you can
-# run one of these lines in different terminal windows
+# to keep monitoring while the algo is trainning
 tensorboard --logdir=~/ray_results
+# or
 gpustat -i
+# or
 htop
 ```
 
-![terminal_monitoring](imgs/terminal_monitoring.png)
-
 ### Evaluate
 
-You must pick a different time period to evaluate how it performs (wip)
-
 ```sh
-# wip
-rllib rollout /home/lucas/ray_results/default/PPO_Trading-v0_0_2019-03-26_09-40-05q0q7h143/checkpoint_20/checkpoint-20 --run PPO --env Trading-v0 --steps 1000
+# It will automatically use a diffrent time period to evaluate
+python rollout.py /path_to_checkpoint_saved_before \
+        --run PPO \
+        --env TradingEnv-v1 \
+        --steps 200 \
+        --symbol ETH
 ```
+
+<div style="text-align:center">
+  <img src="imgs/rollout.gif"/>
+</div>
 
 * * *
 
