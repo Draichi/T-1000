@@ -84,9 +84,10 @@ yarn serve
 
 * * *
 
-## Algotrading
+## Algotrading (WIP)
 
 The data seen on dashboard will be used to train an agent to operate in the market.
+[Available algorithms](https://ray.readthedocs.io/en/latest/rllib-algorithms.html)
 
 ### Train
 
@@ -96,8 +97,6 @@ python train_trading_agent.py --symbol LTC --algo PPO
 ```
 
 ![algorithms](imgs/algorithms.png)
-
-> Different algorithms compared (mean reward in BTC)
 
 ```sh
 # to keep monitoring while the algo is trainning
