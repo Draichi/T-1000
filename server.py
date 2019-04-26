@@ -58,8 +58,6 @@ def returns():
     df = pd.DataFrame(timeseries)
     df.set_index('date', inplace=True)
 
-    open_price, high, low, close = np.array(df['open']), np.array(df['high']), np.array(df['low']), np.array(df['close'])
-    volume = np.array(df['volume'])
     data = []
     returns_list = []
     for coin in df.columns:

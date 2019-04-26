@@ -5,9 +5,8 @@
 Example:
     python rollout.py /home/lucas/ray_results/test_ETH_1d_2018-11-01_2019-03-18/PPO_corridor_0_lr=1e-07_2019-04-22_06-26-33mu6oow2q/checkpoint_25/checkpoint-25 \
         --run PPO \
-        --env corridor \
+        --env TradingEnv-v1 \
         --steps 200 \
-        --out rollouts.pkl \
         --symbol ETH
 """
 
