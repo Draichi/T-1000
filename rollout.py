@@ -31,7 +31,7 @@ from ray.rllib.evaluation.sample_batch import DEFAULT_POLICY_ID
 from ray.tune.util import merge_dicts
 from ray.tune.registry import register_env
 
-from trading_gym.trading_env import TradingEnv
+from trading_gym.trading_env import SimpleTradingEnv
 from configs.functions import init_data
 
 
@@ -238,5 +238,5 @@ if __name__ == "__main__":
         "keys": keys,
         "symbols": symbols
     }
-    register_env("TradingEnv", lambda _: TradingEnv(config))
+    register_env("TradingEnv-v1", lambda _: SimpleTradingEnv(config))
     run(args, parser)
