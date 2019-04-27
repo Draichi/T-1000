@@ -75,6 +75,16 @@
                 @click="calcReturns">Returns
               </v-btn>
             </v-layout>
+            <v-layout row>
+              <v-flex>
+                <v-layout justify-center>
+                  <v-btn
+                    :color="colors"
+                    @click.stop="showIndicators">Show data (WIP)
+                  </v-btn>
+                </v-layout>
+              </v-flex>
+            </v-layout>
           </v-flex>
         </v-layout>
       </v-container>
@@ -154,137 +164,6 @@
           </v-flex>
         </v-layout>
       </v-container>
-      <!-- ##### section 2 -->
-      <!-- <v-flex
-        sm6
-        xs12
-        md6
-        lg3
-      >
-        <material-stats-card
-          color="green"
-          icon="mdi-note-outline"
-          title="Sharpe ratio"
-          value="0.09"
-        />
-      </v-flex>
-      <v-flex
-        sm6
-        xs12
-        md6
-        lg3
-      >
-        <material-stats-card
-          color="orange"
-          icon="mdi-alpha"
-          title="Alpha"
-          value="1.00658"
-        />
-      </v-flex>
-      <v-flex
-        sm6
-        xs12
-        md6
-        lg3
-      >
-        <material-stats-card
-          color="red"
-          icon="mdi-beta"
-          title="Beta"
-          value="1.5"
-        />
-      </v-flex>
-      <v-flex
-        sm6
-        xs12
-        md6
-        lg3
-      >
-        <material-stats-card
-          color="info"
-          icon="mdi-asterisk"
-          title="Risk"
-          value="15%"
-        />
-      </v-flex> -->
-      <!-- ###### section 3 -->
-
-      <v-container
-        fluid
-        class="hidden-sm-and-down"
-      >
-        <v-layout row>
-          <v-flex>
-            <v-layout justify-center>
-              <h2>Show {{ symbolToShowIndicators }} data to feed the trading bot</h2>
-            </v-layout>
-            <v-layout justify-center>
-              <v-flex
-                xs12
-                md6
-              >
-                <v-layout >
-                  <v-select
-                    v-model="symbolToShowIndicators"
-                    :items="itemsCoins"
-                    :color="colors"
-                    outline
-                    label="Select symbol"
-                    return-object
-                    single-line
-                  />
-                </v-layout>
-              </v-flex>
-            </v-layout>
-            <v-layout justify-center>
-              <v-flex
-                xs12
-                md6
-              >
-                <v-layout >
-                  <v-select
-                    v-model="modeToShowIndicators"
-                    :items="['day', 'hour']"
-                    :color="colors"
-                    outline
-                    label="Select mode"
-                    return-object
-                    single-line
-                  />
-                </v-layout>
-              </v-flex>
-            </v-layout>
-            <v-layout justify-center>
-              <v-flex
-                xs12
-                md6
-              >
-                <v-layout >
-                  <v-slider
-                    v-model="daysToShowIndicators"
-                    :color="colors"
-                    :max="2000"
-                    :min="24"
-                    :label="modeToShowIndicators + 's'"
-                    thumb-label="always"
-                  />
-                </v-layout>
-              </v-flex>
-            </v-layout>
-            <v-layout row>
-              <v-flex>
-                <v-layout justify-center>
-                  <v-btn
-                    :color="colors"
-                    @click.stop="showIndicators">Show
-                  </v-btn>
-                </v-layout>
-              </v-flex>
-            </v-layout>
-          </v-flex>
-        </v-layout>
-      </v-container>
-
       <v-container class="hidden-md-and-up">
         <h3 class="text-xs-center">Portfolio functions only available on desktop</h3>
       </v-container>
