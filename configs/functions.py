@@ -1,3 +1,9 @@
+"""Functions used to preprocess the timeseries
+
+Lucas Draichi
+2019
+"""
+
 import datetime
 import talib
 import colorama
@@ -6,14 +12,26 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objs as go
 from termcolor import colored
+from configs.vars import WALLET_BTC, WALLET_SYMBOL
 
 colorama.init()
 
-def get_datasets(symbol, mode, limit):
+def get_datasets(symbol, to_symbol, mode, limit):
+    """Fetch the API and precess the desired pair
+
+    Arguments:
+        symbol {str} -- First pair
+        to_symbol {str} -- Second pair
+        mode {str ['day', 'hour']} -- Granularity
+        limit {int [100 - 2000]} -- [description]
+
+    Returns:
+        pandas.Dataframe -- The OHLCV and indicators dataframe
+    """
     headers = {'User-Agent': 'Mozilla/5.0', 'authorization': 'Apikey 3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'}
 
     # OHLC
-    url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym=BTC&e=Binance&limit={}'.format(mode, symbol, limit)
+    url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym={}&e=Binance&limit={}'.format(mode, symbol, to_symbol, limit)
     print(colored('> downloading ' + symbol + ' OHLCV', 'green'))
     response = requests.get(url, headers=headers)
     json_response = response.json()
@@ -88,8 +106,10 @@ def get_datasets(symbol, mode, limit):
     df.loc[:, 'ADOSC'] = talib.ADOSC(high, low, close, volume, fastperiod=3, slowperiod=10)
     df.loc[:, 'OBV'] = talib.OBV(close, volume)
     # wallet indicator to trading bot
-    df.loc[:, 'wallet_btc'] = 1.0
-    df.loc[:, 'wallet_symbol'] = 0.0
+    # df.loc[:, 'wallet_{}'.format(symbol)] = 1.0
+    df.loc[:, 'wallet_btc'] = WALLET_SYMBOL
+    df.loc[:, 'wallet_symbol'] = WALLET_SYMBOL
+    # df.loc[:, 'wallet_{}'.format(to_symbol)] = 0.0
 
     # df.fillna(df.mean(), inplace=True)
     df.dropna(inplace=True)
@@ -97,15 +117,25 @@ def get_datasets(symbol, mode, limit):
     train_size = round(len(df) * 0.5) # 50% to train -> test with different value
     df_train = df[:train_size]
     df_rollout = df[train_size:]
-    df_train.to_csv('datasets/bot_train_{}.csv'.format(symbol))
-    df_rollout.to_csv('datasets/bot_rollout_{}.csv'.format(symbol))
+    df_train.to_csv('datasets/bot_train_{}.csv'.format(symbol + to_symbol))
+    df_rollout.to_csv('datasets/bot_rollout_{}.csv'.format(symbol + to_symbol))
 
     return df
 
 #------------------------------------------------------------->
 
-def init_data(symbol, mode):
-    df = pd.read_csv('datasets/bot_{}_{}.csv'.format(mode, symbol))
+def init_data(pair, mode):
+    """Tranform the data from pandas.DataFrame to list to improve Ray's performance
+
+    Arguments:
+        pair {str} -- Pair
+        mode {str ['train', 'rollout]} -- Select the correct dataset,
+        train or rollout one.
+
+    Returns:
+        list, list -- The dataframe divided in two lists
+    """
+    df = pd.read_csv('datasets/bot_{}_{}.csv'.format(mode, pair))
     df.drop('Date', axis=1, inplace=True)
     df_array = df.values.tolist()
     keys = df.keys()
