@@ -1,13 +1,13 @@
-#!/usr/bin/env python
-
-"""
+"""Script to evaluate previourly trained agents
 
 Example:
-    python rollout.py /home/lucas/ray_results/test_ETH_1d_2018-11-01_2019-03-18/PPO_corridor_0_lr=1e-07_2019-04-22_06-26-33mu6oow2q/checkpoint_25/checkpoint-25 \
+    python rollout.py /path_to_checkpoint/file \
         --run PPO \
         --env TradingEnv-v1 \
-        --steps 200 \
-        --symbol ETH
+        --symbol XRP \
+        --to_symbol USDT
+
+Lucas Draichi 2019
 """
 
 
@@ -30,7 +30,7 @@ from ray.rllib.evaluation.sample_batch import DEFAULT_POLICY_ID
 from ray.tune.util import merge_dicts
 from ray.tune.registry import register_env
 
-from trading_gym.trading_env import SimpleTradingEnv
+from trading_env import SimpleTradingEnv
 from configs.functions import init_data
 
 
@@ -74,14 +74,16 @@ def create_parser(parser_creator=None):
         "--env", type=str, help="The gym environment to use.")
     required_named.add_argument(
         "--symbol", type=str, help="The coin symbol to use.")
+    required_named.add_argument(
+        "--to_symbol", type=str, help="The coin symbol to use.")
     parser.add_argument(
         "--no-render",
         default=False,
         action="store_const",
         const=True,
         help="Surpress rendering of the environment.")
-    parser.add_argument(
-        "--steps", default=10000, help="Number of steps to roll out.")
+    # parser.add_argument(
+    #     "--steps", default=10000, help="Number of steps to roll out.")
     parser.add_argument("--out", default=None, help="Output filename.")
     parser.add_argument(
         "--config",
@@ -92,9 +94,7 @@ def create_parser(parser_creator=None):
     return parser
 
 
-def run(args, parser):
-    # keys, symbols = init_data(args.symbol, 'rollout')
-
+def run(args, parser, num_steps):
     config = {}
     # Load configuration from file
     config_dir = os.path.dirname(args.checkpoint)
@@ -122,7 +122,7 @@ def run(args, parser):
     cls = get_agent_class(args.run)
     agent = cls(env=args.env, config=config)
     agent.restore(args.checkpoint)
-    num_steps = int(args.steps)
+    num_steps = int(len(num_steps))
     rollout(agent, args.env, num_steps, args.out, args.no_render)
 
 
@@ -232,10 +232,12 @@ if __name__ == "__main__":
     parser = create_parser()
     args = parser.parse_args()
     # config_function = lambda _: TradingEnv(config)
-    keys, symbols = init_data(args.symbol, 'rollout')
+    keys, symbols = init_data(args.symbol + args.to_symbol, 'rollout')
     config = {
         "keys": keys,
-        "symbols": symbols
+        "symbols": symbols,
+        'first_coin': args.symbol,
+        'second_coin': args.to_symbol
     }
-    register_env("TradingEnv-v1", lambda _: SimpleTradingEnv(config))
-    run(args, parser)
+    register_env("TradingEnv-v2", lambda _: SimpleTradingEnv(config))
+    run(args, parser, symbols)
