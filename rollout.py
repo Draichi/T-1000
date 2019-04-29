@@ -30,7 +30,7 @@ from ray.rllib.evaluation.sample_batch import DEFAULT_POLICY_ID
 from ray.tune.util import merge_dicts
 from ray.tune.registry import register_env
 
-from trading_env import SimpleTradingEnv
+from envs import SinglePairTradingEnv
 from configs.functions import init_data
 
 
@@ -239,5 +239,5 @@ if __name__ == "__main__":
         'first_coin': args.symbol,
         'second_coin': args.to_symbol
     }
-    register_env("TradingEnv-v2", lambda _: SimpleTradingEnv(config))
+    register_env("SinglePairTradingEnv-v0", lambda _: SinglePairTradingEnv(config))
     run(args, parser, symbols)
