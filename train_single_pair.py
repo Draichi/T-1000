@@ -24,7 +24,7 @@ from gym.spaces import Discrete, Box
 from sklearn.preprocessing import normalize
 from configs.vars import *
 from configs.functions import init_data, get_datasets
-from trading_env import SimpleTradingEnv
+from envs import SinglePairTradingEnv
 from ray.tune import run_experiments, grid_search
 from ray.tune.registry import register_env
 
@@ -39,30 +39,33 @@ if __name__ == "__main__":
     FLAGS = parser.parse_args()
     _ = get_datasets(FLAGS.symbol, FLAGS.to_symbol, FLAGS.histo, FLAGS.limit)
     keys, symbols = init_data(FLAGS.symbol + FLAGS.to_symbol, 'train')
-    # Can also register the env creator function explicitly with:
-    register_env("TradingEnv-v1", lambda config: SimpleTradingEnv(config))
+    register_env("SinglePairTradingEnv-v0", lambda config: SinglePairTradingEnv(config))
     ray.init()
     run_experiments({
-        "tradingv2_{}".format(FLAGS.symbol + FLAGS.to_symbol): {
+        "{}_rewardv2_SinglePairTradingEnv-v0".format(FLAGS.symbol + FLAGS.to_symbol): {
             "run": FLAGS.algo,
-            # "env": TradingEnv,  # or "corridor" if registered above
-            "env": "TradingEnv-v1",  # or "corridor" if registered above
+            "env": "SinglePairTradingEnv-v0",
             "stop": {
-                "timesteps_total": 1.2e6, #1e6 = 1M
+                "timesteps_total": 1e6, #1e6 = 1M
             },
             "checkpoint_freq": 100,
             "checkpoint_at_end": True,
             "config": {
                 "lr": grid_search([
+                    1e-4,
+                    5e-4,
                     1e-5,
-                    3e-5,
-                    6e-5
+                    5e-5,
+                    1e-6,
+                    5e-6
                 ]),
                 "num_workers": 3,  # parallelism
                 'observation_filter': 'MeanStdFilter',
                 "env_config": {
                     'keys': keys,
-                    'symbols': symbols
+                    'symbols': symbols,
+                    'first_coin': FLAGS.symbol,
+                    'second_coin': FLAGS.to_symbol
                 },
             }
         }
