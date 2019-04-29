@@ -35,6 +35,10 @@ def get_datasets(symbol, to_symbol, mode, limit):
     print(colored('> downloading ' + symbol + ' OHLCV', 'green'))
     response = requests.get(url, headers=headers)
     json_response = response.json()
+    status = json_response['Response']
+    if status == "Error":
+        print(colored('=== {} ==='.format(json_response['Message']), 'red'))
+        raise AssertionError()
     result = json_response['Data']
     df = pd.DataFrame(result)
     df['Date'] = pd.to_datetime(df['time'], utc=True, unit='s')
