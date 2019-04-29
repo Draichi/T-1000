@@ -110,7 +110,7 @@ htop
 ### Evaluate
 
 ```sh
-# It will automatically use a diffrent time period to evaluate
+# It will automatically use a different time period to evaluate
 python rollout.py /path_to_checkpoint_saved_before \
         --run PPO \
         --env TradingEnv-v1 \
