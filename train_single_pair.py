@@ -27,6 +27,7 @@ from configs.functions import init_data, get_datasets
 from envs import SinglePairTradingEnv
 from ray.tune import run_experiments, grid_search
 from ray.tune.registry import register_env
+from configs.vars import WALLET_FIRST_SYMBOL, WALLET_SECOND_SYMBOL
 
 if __name__ == "__main__":
     import argparse
@@ -38,13 +39,13 @@ if __name__ == "__main__":
     parser.add_argument('--algo', type=str, help='Choose algorithm to train')
     FLAGS = parser.parse_args()
     _ = get_datasets(FLAGS.symbol, FLAGS.to_symbol, FLAGS.histo, FLAGS.limit)
-    keys, symbols = init_data(FLAGS.symbol + FLAGS.to_symbol, 'train')
-    register_env("SinglePairTradingEnv-v0", lambda config: SinglePairTradingEnv(config))
+    keys, symbols = init_data(FLAGS.symbol + FLAGS.to_symbol, 'train', FLAGS.limit, FLAGS.histo)
+    register_env("SinglePairTrading-v0", lambda config: SinglePairTradingEnv(config))
     ray.init()
     run_experiments({
-        "{}_rewardv2_SinglePairTradingEnv-v0".format(FLAGS.symbol + FLAGS.to_symbol): {
+        "clipparam_{}_{}_{}_wallet-{}-{}".format(FLAGS.symbol + FLAGS.to_symbol, FLAGS.limit, FLAGS.histo, WALLET_FIRST_SYMBOL, WALLET_SECOND_SYMBOL): {
             "run": FLAGS.algo,
-            "env": "SinglePairTradingEnv-v0",
+            "env": "SinglePairTrading-v0",
             "stop": {
                 "timesteps_total": 1e6, #1e6 = 1M
             },
@@ -52,15 +53,12 @@ if __name__ == "__main__":
             "checkpoint_at_end": True,
             "config": {
                 "lr": grid_search([
-                    1e-4,
-                    5e-4,
-                    1e-5,
-                    5e-5,
-                    1e-6,
-                    5e-6
+                    1e-4
+                    # 1e-6
                 ]),
                 "num_workers": 3,  # parallelism
                 'observation_filter': 'MeanStdFilter',
+                "vf_clip_param": 10000000.0,
                 "env_config": {
                     'keys': keys,
                     'symbols': symbols,

@@ -5,7 +5,9 @@ Example:
         --run PPO \
         --env TradingEnv-v1 \
         --symbol XRP \
-        --to_symbol USDT
+        --to_symbol USDT \
+        --histo day \
+        --limit 180
 
 Lucas Draichi 2019
 """
@@ -74,6 +76,10 @@ def create_parser(parser_creator=None):
         "--env", type=str, help="The gym environment to use.")
     required_named.add_argument(
         "--symbol", type=str, help="The coin symbol to use.")
+    required_named.add_argument(
+        "--histo", type=str, help="day or hour")
+    required_named.add_argument(
+        "--limit", type=int, help="How many datapoints")
     required_named.add_argument(
         "--to_symbol", type=str, help="The coin symbol to use.")
     parser.add_argument(
@@ -232,12 +238,12 @@ if __name__ == "__main__":
     parser = create_parser()
     args = parser.parse_args()
     # config_function = lambda _: TradingEnv(config)
-    keys, symbols = init_data(args.symbol + args.to_symbol, 'rollout')
+    keys, symbols = init_data(args.symbol + args.to_symbol, 'rollout', args.limit, args.histo)
     config = {
         "keys": keys,
         "symbols": symbols,
         'first_coin': args.symbol,
         'second_coin': args.to_symbol
     }
-    register_env("SinglePairTradingEnv-v0", lambda _: SinglePairTradingEnv(config))
+    register_env("SinglePairTrading-v1", lambda _: SinglePairTradingEnv(config))
     run(args, parser, symbols)
