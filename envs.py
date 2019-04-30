@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 import gym
 from gym.spaces import Discrete, Box
-from configs.vars import WALLET_BTC, WALLET_SYMBOL, FEES
+from configs.vars import WALLET_FIRST_SYMBOL, WALLET_SECOND_SYMBOL, FEES
 
 plt.style.use('dark_background')
 mpl.rcParams.update(
@@ -36,8 +36,8 @@ class SinglePairTradingEnv(gym.Env):
         self._first_render = True
         self._spread_coefficients = [1]
         self.dicount_rate = 1 - FEES
-        self.wallet_btc = WALLET_BTC
-        self.wallet_symbol = WALLET_SYMBOL
+        self.wallet_first_symbol = WALLET_FIRST_SYMBOL
+        self.wallet_second_symbol = WALLET_SECOND_SYMBOL
         self.actual_price = 1.0
         self.portfolio_value = 1.0
         self.action_space = Discrete(3)
@@ -49,8 +49,8 @@ class SinglePairTradingEnv(gym.Env):
 
     def reset(self):
         self.index = 0
-        self.wallet_btc = WALLET_BTC
-        self.wallet_symbol = WALLET_SYMBOL
+        self.wallet_first_symbol = WALLET_FIRST_SYMBOL
+        self.wallet_second_symbol = WALLET_SECOND_SYMBOL
         self.portfolio_value = 1.0
         state = self.symbol_list[self.index]
         return state
@@ -59,39 +59,37 @@ class SinglePairTradingEnv(gym.Env):
         if action not in [0,1,2]:
             raise AssertionError()
         self.action = action
-        price_btc_index = list(self.keys).index('close')
-        wallet_btc_index = list(self.keys).index('wallet_btc')
-        wallet_symbol_index = list(self.keys).index('wallet_symbol')
+        price_index = list(self.keys).index('close')
+        wallet_first_symbol_index = list(self.keys).index('wallet_first_symbol')
+        wallet_second_symbol_index = list(self.keys).index('wallet_second_symbol')
         observable_state = self.symbol_list[self.index]
-        price_btc_before_action = observable_state[price_btc_index]
-        self.actual_price = price_btc_before_action
+        price_before_action = observable_state[price_index]
+        # self.actual_price = price_before_action
 
-        total_portfolio_value_before_action = self.wallet_btc * price_btc_before_action
+        total_portfolio_value_before_action = (self.wallet_first_symbol * price_before_action) + self.wallet_second_symbol
 
         if action == 0: # buy
-            self.wallet_btc -= price_btc_before_action
-            self.wallet_symbol += price_btc_before_action
+            self.wallet_first_symbol -= price_before_action
+            self.wallet_second_symbol += price_before_action
         elif action == 1: # sell
-            self.wallet_btc += price_btc_before_action
-            self.wallet_symbol -= price_btc_before_action
-
-        price_btc_after_action = observable_state[price_btc_index]
-        self.actual_price = price_btc_after_action
-        self.portfolio_value = (self.wallet_symbol * self.actual_price) + self.wallet_btc
-
-        total_portfolio_value_after_action = self.dicount_rate * (self.wallet_btc * price_btc_after_action)
-
-        # reward = total_portfolio_value_after_action - total_portfolio_value_before_action
-        reward = self.portfolio_value
+            self.wallet_first_symbol += price_before_action
+            self.wallet_second_symbol -= price_before_action
 
         self.index += 1
         next_observable_state = self.symbol_list[self.index]
 
-        next_observable_state[wallet_btc_index] = self.wallet_btc
-        next_observable_state[wallet_symbol_index] = self.wallet_symbol
+        price_after_action = next_observable_state[price_index]
 
-        # done = self.wallet_btc < 0.0 or self.index >= len(self.symbol_list)-1
-        done = self.wallet_btc < 0.0 or self.wallet_symbol < 0.0 or self.index >= len(self.symbol_list)-1
+        self.portfolio_value = (self.wallet_first_symbol * price_after_action) + self.wallet_second_symbol
+
+        total_portfolio_value_after_action = self.dicount_rate * self.portfolio_value
+
+        reward = total_portfolio_value_after_action - total_portfolio_value_before_action
+
+        next_observable_state[wallet_first_symbol_index] = self.wallet_first_symbol
+        next_observable_state[wallet_second_symbol_index] = self.wallet_second_symbol
+
+        done = self.index >= len(self.symbol_list)-1
 
         return next_observable_state, reward, done, {}
 
