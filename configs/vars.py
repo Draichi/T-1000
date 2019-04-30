@@ -3,8 +3,8 @@ import os
 import numpy as np
 #---------------------------------------------------------------------------------->
 ####### MARKET PARAMETERS: #########
-WALLET_BTC = 1.0
-WALLET_SYMBOL = 1.0
+WALLET_FIRST_SYMBOL = 2
+WALLET_SECOND_SYMBOL = 10000
 FEES = 0.002 # 0.2%
 #---------------------------------------------------------------------------------->
 TODAYS_MONTH = datetime.datetime.now().month
