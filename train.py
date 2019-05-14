@@ -1,7 +1,7 @@
 """Script to train an agent to operate into the market according to the pair
 
 Example:
-    python train_single_pair.py \
+    python train.py \
         --algo PPO \
         --pair XRP/USDT \
         --histo hour \
