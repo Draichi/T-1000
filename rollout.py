@@ -3,9 +3,8 @@
 Example:
     python rollout.py /path_to_checkpoint/file \
         --run PPO \
-        --env TradingEnv-v1 \
-        --symbol XRP \
-        --to_symbol USDT \
+        --env TradingEnv-v0 \
+        --pair XRP/BTC \
         --histo day \
         --limit 180
 
@@ -22,36 +21,23 @@ import collections
 import json
 import os
 import pickle
-
 import gym
 import ray
+from configs.functions import get_datasets
 from ray.rllib.agents.registry import get_agent_class
 from ray.rllib.env import MultiAgentEnv
 from ray.rllib.env.base_env import _DUMMY_AGENT_ID
 from ray.rllib.evaluation.sample_batch import DEFAULT_POLICY_ID
 from ray.tune.util import merge_dicts
 from ray.tune.registry import register_env
-
-from envs import SinglePairTradingEnv
-from configs.functions import init_data
+from env.TradingEnvV1 import TradingEnv
 
 
 
 EXAMPLE_USAGE = """
-Example Usage via RLlib CLI:
-    rllib rollout /tmp/ray/checkpoint_dir/checkpoint-0 --run DQN
-    --env CartPole-v0 --steps 1000000 --out rollouts.pkl
-
-Example Usage via executable:
     ./rollout.py /tmp/ray/checkpoint_dir/checkpoint-0 --run DQN
-    --env CartPole-v0 --steps 1000000 --out rollouts.pkl
+    --env CartPole-v0 --out rollouts.pkl
 """
-
-# Note: if you use any custom models or envs, register them here first, e.g.:
-#
-# ModelCatalog.register_custom_model("pa_model", ParametricActionsModel)
-# register_env("pa_cartpole", lambda _: ParametricActionCartpole(10))
-
 
 def create_parser(parser_creator=None):
     parser_creator = parser_creator or argparse.ArgumentParser
@@ -73,15 +59,13 @@ def create_parser(parser_creator=None):
         "user-defined trainable function or class registered in the "
         "tune registry.")
     required_named.add_argument(
-        "--env", type=str, help="The gym environment to use.")
+        "--env", type=str, required=True, help="The gym environment to use.")
     required_named.add_argument(
-        "--symbol", type=str, help="The coin symbol to use.")
+        "--pair", type=str, required=True, help="The pair ued to train.")
     required_named.add_argument(
-        "--histo", type=str, help="day or hour")
+        "--histo", type=str, required=True, help="day or hour")
     required_named.add_argument(
-        "--limit", type=int, help="How many datapoints")
-    required_named.add_argument(
-        "--to_symbol", type=str, help="The coin symbol to use.")
+        "--limit", type=int, required=True, help="How many datapoints")
     parser.add_argument(
         "--no-render",
         default=False,
@@ -237,13 +221,11 @@ def rollout(agent, env_name, num_steps, out=None, no_render=True):
 if __name__ == "__main__":
     parser = create_parser()
     args = parser.parse_args()
-    # config_function = lambda _: TradingEnv(config)
-    keys, symbols = init_data(args.symbol + args.to_symbol, 'rollout', args.limit, args.histo)
+    from_symbol, to_symbol = args.pair.split('/')
+    _, df = get_datasets(from_symbol, to_symbol, args.histo, args.limit)
     config = {
-        "keys": keys,
-        "symbols": symbols,
-        'first_coin': args.symbol,
-        'second_coin': args.to_symbol
+        "df": df,
+        "render_title": args.pair,
     }
-    register_env("SinglePairTrading-v1", lambda _: SinglePairTradingEnv(config))
-    run(args, parser, symbols)
+    register_env("TradingEnv-v0", lambda _: TradingEnv(config))
+    run(args, parser, df)
