@@ -17,6 +17,7 @@ class TradingEnv(gym.Env):
 
     def __init__(self, config):
         self.df = config['df']
+        self.df_features = self.df.loc[: , self.df.columns != 'Date']
         self.render_title = config['render_title']
         self.lookback_window_size = LOOKBACK_WINDOW_SIZE
         self.initial_balance = INITIAL_ACCOUNT_BALANCE
@@ -25,25 +26,10 @@ class TradingEnv(gym.Env):
         self.action_space = spaces.Box(
             low=np.array([0, 0]), high=np.array([3, 1]), dtype=np.float16)
         self.observation_space = spaces.Box(
-            low=-np.finfo(np.float32).max, high=np.finfo(np.float32).max, shape=(18, ), dtype=np.float16)
+            low=-np.finfo(np.float32).max, high=np.finfo(np.float32).max, shape=(len(self.df_features.columns) + 6, ), dtype=np.float16)
 
     def _next_observation(self):
-        frame = np.zeros(12)
-
-        np.put(frame, [0,1,2,3,4,5,6,7,8.9,10,11], [
-            self.df.loc[self.current_step: self.current_step + 1, 'open'].values,
-            self.df.loc[self.current_step: self.current_step + 1, 'high'].values,
-            self.df.loc[self.current_step: self.current_step + 1, 'low'].values,
-            self.df.loc[self.current_step: self.current_step + 1, 'close'].values,
-            self.df.loc[self.current_step: self.current_step + 1, 'volumefrom'].values,
-            self.df.loc[self.current_step: self.current_step + 1, 'MOM'].values,
-            self.df.loc[self.current_step: self.current_step + 1, 'RSI'].values,
-            self.df.loc[self.current_step: self.current_step + 1, 'HT_DCPERIOD'].values,
-            self.df.loc[self.current_step: self.current_step + 1, 'EMA'].values,
-            self.df.loc[self.current_step: self.current_step + 1, 'WILLR'].values,
-            self.df.loc[self.current_step: self.current_step + 1, 'BBANDS_upper'].values,
-            self.df.loc[self.current_step: self.current_step + 1, 'PPO'].values,
-        ])
+        frame = np.array(self.df_features.values[self.current_step])
 
         obs = np.append(frame, [
             [self.balance],
