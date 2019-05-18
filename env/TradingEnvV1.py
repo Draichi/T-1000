@@ -44,7 +44,7 @@ class TradingEnv(gym.Env):
 
     def _take_action(self, action):
         current_price = random.uniform(
-            self.df.loc[self.current_step, "open"], self.df.loc[self.current_step, "close"])
+            self.df_features.loc[self.current_step, "open"], self.df_features.loc[self.current_step, "close"])
 
         action_type = action[0]
         amount = action[1]
@@ -101,7 +101,7 @@ class TradingEnv(gym.Env):
         self.cost = 0
         self.sales = 0
         self.current_step = 0
-        self.first_price = self.df["close"][0]
+        self.first_price = self.df_features["close"][0]
         # self.first_price = self.df.loc[0, "close"]
 
         self.initial_bought = self.initial_balance / self.first_price
