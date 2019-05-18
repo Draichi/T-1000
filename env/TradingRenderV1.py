@@ -58,6 +58,16 @@ class StockTradingGraph:
     def _render_net_worth(self, current_step, net_worth, buy_and_hold, step_range, dates):
         # Clear the frame rendered last step
         self.net_worth_ax.clear()
+        
+        # compute performance
+        abs_diff = net_worth - buy_and_hold
+        avg = (net_worth + buy_and_hold) / 2
+        percentage_diff = abs_diff / avg * 100
+        # print performance
+        self.net_worth_ax.text(0.95, 0.01, '{0:.2f}%'.format(percentage_diff),
+                              verticalalignment='bottom', horizontalalignment='right',
+                              transform=self.net_worth_ax.transAxes,
+                              color='green' if percentage_diff > 0 else 'red', fontsize=15)
 
         # Plot net worths
         self.net_worth_ax.plot_date(
