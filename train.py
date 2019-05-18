@@ -43,13 +43,13 @@ if __name__ == "__main__":
             "run": args.algo,
             "env": "TradingEnv-v0",
             "stop": {
-                "timesteps_total": 3e4, #1e6 = 1M
+                "timesteps_total": 3e6, #1e6 = 1M
             },
             "checkpoint_freq": 100,
             "checkpoint_at_end": True,
             "config": {
                 "lr": grid_search([
-                    1e-4
+                    6.5e-5
                     # 1e-6
                 ]),
                 "num_workers": 3,  # parallelism
