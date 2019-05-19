@@ -26,7 +26,7 @@ class TradingEnv(gym.Env):
         self.action_space = spaces.Box(
             low=np.array([0, 0]), high=np.array([3, 1]), dtype=np.float16)
         self.observation_space = spaces.Box(
-            low=-np.finfo(np.float32).max, high=np.finfo(np.float32).max, shape=(len(self.df_features.columns) + 6, ), dtype=np.float16)
+            low=-np.finfo(np.float32).max, high=np.finfo(np.float32).max, shape=(len(self.df_features.columns) + 6, ), dtype=np.float16) # shape = len(df) + obs variables
 
     def _next_observation(self):
         frame = np.array(self.df_features.values[self.current_step])
@@ -38,6 +38,7 @@ class TradingEnv(gym.Env):
             [self.cost],
             [self.sales],
             [self.net_worth]
+            # add shares_held to obs
         ])
 
         return obs
@@ -49,29 +50,31 @@ class TradingEnv(gym.Env):
         action_type = action[0]
         amount = action[1]
 
-        self.btc_bought = 0
-        self.btc_sold = 0
-        self.cost = 0
-        self.sales = 0
+        if 0 < amount <= 1 and action_type > 0: # bounds of action_space doesn't seem to work, so this line is necessary to not overflow actions
 
-        if action_type < 1:
+            self.btc_bought = 0
+            self.btc_sold = 0
+            self.cost = 0
+            self.sales = 0
 
-            self.btc_bought = self.balance * amount / current_price
-            self.cost = self.btc_bought * current_price * (1 + self.commission)
-            self.shares_held += self.btc_bought
-            self.balance -= self.cost
+            if action_type < 1 and self.balance >= self.balance * amount * (1 + self.commission): # check if has enough money to trade
 
-        elif action_type < 2:
+                self.btc_bought = self.balance * amount / current_price
+                self.cost = self.btc_bought * current_price * (1 + self.commission)
+                self.shares_held += self.btc_bought
+                self.balance -= self.cost
 
-            self.btc_sold = self.shares_held * amount
-            self.sales = self.btc_sold * current_price * (1 - self.commission)
-            self.shares_held -= self.btc_sold
-            self.balance += self.sales
+            elif action_type < 2:
 
-        if self.btc_sold > 0 or self.btc_bought > 0:
-            self.trades.append({'step': self.current_step,
-                                'amount': self.btc_sold if self.btc_sold > 0 else self.btc_bought, 'total': self.sales if self.btc_sold > 0 else self.cost,
-                                'type': "sell" if self.btc_sold > 0 else "buy"})
+                self.btc_sold = self.shares_held * amount
+                self.sales = self.btc_sold * current_price * (1 - self.commission)
+                self.shares_held -= self.btc_sold
+                self.balance += self.sales
+
+            if self.btc_sold > 0 or self.btc_bought > 0:
+                self.trades.append({'step': self.current_step,
+                                    'amount': self.btc_sold if self.btc_sold > 0 else self.btc_bought, 'total': self.sales if self.btc_sold > 0 else self.cost,
+                                    'type': "sell" if self.btc_sold > 0 else "buy"})
 
         self.net_worth = self.balance + self.shares_held * current_price
         self.buy_and_hold = self.initial_bought * current_price
@@ -83,10 +86,7 @@ class TradingEnv(gym.Env):
 
         net_worth_and_buyhold_mean = (self.net_worth + self.buy_and_hold) / 2
         reward = (self.net_worth - self.buy_and_hold) / net_worth_and_buyhold_mean
-        # print('\nnet',self.net_worth,'buyandhold',self.buy_and_hold,'btc_bought',self.btc_bought,'balance',self.balance,'shares_held',self.shares_held,'balance on sold',self.balance,'reward', reward)
-        done = self.net_worth <= 0 or self.balance <= 0 or self.current_step >= len(
-            self.df.loc[:, 'open'].values)
-
+        done = self.net_worth <= 0 or self.balance <= 0 or self.current_step >= len(self.df_features.loc[:, 'open'].values) -1
         obs = self._next_observation()
 
         return obs, reward, done, {}
@@ -102,8 +102,6 @@ class TradingEnv(gym.Env):
         self.sales = 0
         self.current_step = 0
         self.first_price = self.df_features["close"][0]
-        # self.first_price = self.df.loc[0, "close"]
-
         self.initial_bought = self.initial_balance / self.first_price
         self.trades = []
 
@@ -133,9 +131,9 @@ class TradingEnv(gym.Env):
             if self.visualization == None:
                 self.visualization = StockTradingGraph(self.df, self.render_title)
 
-            if self.current_step > LOOKBACK_WINDOW_SIZE:
-                self.visualization.render(
-                self.current_step, self.net_worth, self.buy_and_hold, self.trades, window_size=LOOKBACK_WINDOW_SIZE)
+            # if self.current_step > LOOKBACK_WINDOW_SIZE:
+            self.visualization.render(
+            self.current_step, self.net_worth, self.buy_and_hold, self.trades, self.shares_held, self.balance, window_size=LOOKBACK_WINDOW_SIZE)
 
     def close(self):
         if self.visualization != None:
