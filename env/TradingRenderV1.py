@@ -6,17 +6,25 @@ from matplotlib import style
 
 # finance module is no longer part of matplotlib
 # see: https://github.com/matplotlib/mpl_finance
+# https://matplotlib.org/gallery/pyplots/text_commands.html#sphx-glr-gallery-pyplots-text-commands-py
 from mpl_finance import candlestick_ochl as candlestick
 
 style.use('dark_background')
 
 VOLUME_CHART_HEIGHT = 0.33
-
-UP_COLOR = '#27A59A'
-DOWN_COLOR = '#EF534F'
-UP_TEXT_COLOR = '#73D3CC'
-DOWN_TEXT_COLOR = '#DC2C27'
-
+INITIAL_ACCOUNT_BALANCE = 10000
+# style 1
+UP_COLOR = '#297fff'
+DOWN_COLOR = '#ffaa00'
+UP_TEXT_COLOR = '#297fff'
+DOWN_TEXT_COLOR = '#ffaa00'
+# style 2
+# UP_COLOR = '#00b909'
+# DOWN_COLOR = '#c60606'
+# UP_TEXT_COLOR = '#00b909'
+# DOWN_TEXT_COLOR = '#c60606'
+BOT_COLOR = '#ffffff'
+BUY_N_HOLD_COLOR = '#dcaba2'
 
 def date2num(date):
     converter = mdates.datestr2num(date)
@@ -30,12 +38,14 @@ class StockTradingGraph:
         self.df = df
         self.render_title = render_title
         self.net_worths = np.zeros(len(df['Date']))
+        self.net_worths[0] = INITIAL_ACCOUNT_BALANCE
         self.buy_and_holds = np.zeros(len(df['Date']))
+        self.buy_and_holds[0] = INITIAL_ACCOUNT_BALANCE
 
         # Create a figure on screen and set the title
         fig = plt.figure()
         # fig.suptitle('ETHBTC')
-        fig.suptitle(self.render_title)
+        fig.suptitle(self.render_title, fontsize=18)
 
         # Create top subplot for net worth axis
         self.net_worth_ax = plt.subplot2grid(
@@ -55,10 +65,12 @@ class StockTradingGraph:
         # Show the graph without blocking the rest of the program
         plt.show(block=False)
 
-    def _render_net_worth(self, current_step, net_worth, buy_and_hold, step_range, dates):
+    def _render_net_worth(self, current_step, net_worth, buy_and_hold, shares_held, balance, step_range, dates):
         # Clear the frame rendered last step
         self.net_worth_ax.clear()
-        
+        # set balance and shares held
+        first_coin, self.second_coin = self.render_title.split('/')
+        self.net_worth_ax.set_title('Holding {:.3f} {} and {:.3f} {}'.format(shares_held, first_coin, balance, self.second_coin))
         # compute performance
         abs_diff = net_worth - buy_and_hold
         avg = (net_worth + buy_and_hold) / 2
@@ -70,10 +82,8 @@ class StockTradingGraph:
                               color='green' if percentage_diff > 0 else 'red', fontsize=15)
 
         # Plot net worths
-        self.net_worth_ax.plot_date(
-            dates, self.net_worths[step_range], '-', label='Bot')
-        self.net_worth_ax.plot_date(
-            dates, self.buy_and_holds[step_range], '-', label='Buy and Hold')
+        self.net_worth_ax.plot_date(dates, self.net_worths[step_range], '-', label='Bot', color=BOT_COLOR)
+        self.net_worth_ax.plot_date(dates, self.buy_and_holds[step_range], '-', label='Buy and Hold', color=BUY_N_HOLD_COLOR)
         # Show legend, which uses the label we defined for the plot above
         self.net_worth_ax.legend()
         legend = self.net_worth_ax.legend(loc=2, ncol=2, prop={'size': 8})
@@ -162,20 +172,25 @@ class StockTradingGraph:
                 if trade['type'] == 'buy':
                     high_low = low
                     color = UP_TEXT_COLOR
+                    marker = '^'
                 else:
                     high_low = high
                     color = DOWN_TEXT_COLOR
+                    marker = 'v'
 
                 total = '{0:.5f}'.format(trade['total'])
 
+                # print icon
+                self.price_ax.scatter(date, high_low, color=color, marker=marker, s=50)
+
                 # Print the current price to the price axis
-                self.price_ax.annotate('${}'.format(total), (date, high_low),
+                self.price_ax.annotate('{} {}'.format(total, self.second_coin),
+                                       xy=(date, high_low),
                                        xytext=(date, high_low),
                                        color=color,
-                                       fontsize=8,
-                                       arrowprops=(dict(color=color)))
+                                       fontsize=8)
 
-    def render(self, current_step, net_worth, buy_and_hold, trades, window_size):
+    def render(self, current_step, net_worth, buy_and_hold, trades, shares_held, balance, window_size):
         self.net_worths[current_step] = net_worth
         self.buy_and_holds[current_step] = buy_and_hold
 
@@ -186,7 +201,7 @@ class StockTradingGraph:
         dates = np.array([date2num(x)
                           for x in self.df['Date'].values[step_range]])
 
-        self._render_net_worth(current_step, net_worth, buy_and_hold, step_range, dates)
+        self._render_net_worth(current_step, net_worth, buy_and_hold, shares_held, balance, step_range, dates)
         self._render_price(current_step, net_worth, dates, step_range)
         self._render_volume(current_step, net_worth, dates, step_range)
         self._render_trades(current_step, trades, step_range)
