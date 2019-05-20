@@ -6,7 +6,11 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ebdf89dcba744a3c8aafdda210d3aeb6)](https://app.codacy.com/app/Draichi/cryptocurrency_prediction?utm_source=github.com&utm_medium=referral&utm_content=Draichi/cryptocurrency_prediction&utm_campaign=Badge_Grade_Dashboard)
 
-Deep reinforcement learning library implemented with cryptocurrency markets
+Trainable deep reinforcement learning agents to operate in the cryptocurrency market
+
+![algorithms](imgs/LTCUSDT-7%.gif)
+
+> 7 % profit in 1 month trading LTC/USDT
 
 ## Prerequisites
 
@@ -80,6 +84,10 @@ python rollout.py /path_to_checkpoint/file \
 <div style="text-align:center">
   <img src="imgs/ETHUSDT.gif"/>
 </div>
+
+## Customizing
+
+Edit the commision and initial balance values in `/configs/vars.py`
 
 * * *
 
