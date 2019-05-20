@@ -2,17 +2,14 @@ import random
 import json
 import gym
 from gym import spaces
+from configs.vars import LOOKBACK_WINDOW_SIZE, INITIAL_ACCOUNT_BALANCE
 import pandas as pd
 import numpy as np
 from env.TradingRenderV1 import StockTradingGraph
 
-INITIAL_ACCOUNT_BALANCE = 10000
-LOOKBACK_WINDOW_SIZE = 40
-
-
 class TradingEnv(gym.Env):
     """A stock trading environment for OpenAI gym"""
-    metadata = {'render.modes': ['live', 'file', 'none']}
+    # metadata = {'render.modes': ['live', 'file', 'none']}
     visualization = None
 
     def __init__(self, config):
@@ -26,7 +23,7 @@ class TradingEnv(gym.Env):
         self.action_space = spaces.Box(
             low=np.array([0, 0]), high=np.array([3, 1]), dtype=np.float16)
         self.observation_space = spaces.Box(
-            low=-np.finfo(np.float32).max, high=np.finfo(np.float32).max, shape=(len(self.df_features.columns) + 6, ), dtype=np.float16) # shape = len(df) + obs variables
+            low=-np.finfo(np.float32).max, high=np.finfo(np.float32).max, shape=(len(self.df_features.columns) + 7, ), dtype=np.float16) # shape = len(df) + obs variables
 
     def _next_observation(self):
         frame = np.array(self.df_features.values[self.current_step])
@@ -37,8 +34,8 @@ class TradingEnv(gym.Env):
             [self.btc_sold],
             [self.cost],
             [self.sales],
-            [self.net_worth]
-            # add shares_held to obs
+            [self.net_worth],
+            [self.shares_held]
         ])
 
         return obs
