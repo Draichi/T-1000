@@ -2,7 +2,7 @@ import random
 import json
 import gym
 from gym import spaces
-from configs.vars import LOOKBACK_WINDOW_SIZE, INITIAL_ACCOUNT_BALANCE
+from configs.vars import LOOKBACK_WINDOW_SIZE, INITIAL_ACCOUNT_BALANCE, COMMISSION
 import pandas as pd
 import numpy as np
 from env.TradingRenderV1 import StockTradingGraph
@@ -18,7 +18,7 @@ class TradingEnv(gym.Env):
         self.render_title = config['render_title']
         self.lookback_window_size = LOOKBACK_WINDOW_SIZE
         self.initial_balance = INITIAL_ACCOUNT_BALANCE
-        self.commission = 0.00075
+        self.commission = COMMISSION
         self.serial = False
         self.action_space = spaces.Box(
             low=np.array([0, 0]), high=np.array([3, 1]), dtype=np.float16)
