@@ -3,6 +3,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib import style
+from configs.vars import *
 
 # finance module is no longer part of matplotlib
 # see: https://github.com/matplotlib/mpl_finance
@@ -10,21 +11,6 @@ from matplotlib import style
 from mpl_finance import candlestick_ochl as candlestick
 
 style.use('dark_background')
-
-VOLUME_CHART_HEIGHT = 0.33
-INITIAL_ACCOUNT_BALANCE = 10000
-# style 1
-UP_COLOR = '#297fff'
-DOWN_COLOR = '#ffaa00'
-UP_TEXT_COLOR = '#297fff'
-DOWN_TEXT_COLOR = '#ffaa00'
-# style 2
-# UP_COLOR = '#00b909'
-# DOWN_COLOR = '#c60606'
-# UP_TEXT_COLOR = '#00b909'
-# DOWN_TEXT_COLOR = '#c60606'
-BOT_COLOR = '#ffffff'
-BUY_N_HOLD_COLOR = '#dcaba2'
 
 def date2num(date):
     converter = mdates.datestr2num(date)
@@ -82,8 +68,8 @@ class StockTradingGraph:
                               color='green' if percentage_diff > 0 else 'red', fontsize=15)
 
         # Plot net worths
-        self.net_worth_ax.plot_date(dates, self.net_worths[step_range], '-', label='Bot', color=BOT_COLOR)
-        self.net_worth_ax.plot_date(dates, self.buy_and_holds[step_range], '-', label='Buy and Hold', color=BUY_N_HOLD_COLOR)
+        self.net_worth_ax.plot_date(dates, self.net_worths[step_range], '-', label="Bot's Net Worth", color=BOT_COLOR)
+        self.net_worth_ax.plot_date(dates, self.buy_and_holds[step_range], '-', label='Buy and Hold Strategy', color=BUY_N_HOLD_COLOR)
         # Show legend, which uses the label we defined for the plot above
         self.net_worth_ax.legend()
         legend = self.net_worth_ax.legend(loc=2, ncol=2, prop={'size': 8})
