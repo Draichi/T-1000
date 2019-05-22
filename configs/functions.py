@@ -27,12 +27,15 @@ def get_datasets(symbol, to_symbol, histo, limit):
     Returns:
         pandas.Dataframe -- The OHLCV and indicators dataframe
     """
-    if not os.path.exists('datasets/bot_train_{}_{}_{}.csv'.format(symbol + to_symbol, limit, histo)):
+    df_train_path = 'datasets/bot_train_{}_{}_{}.csv'.format(symbol + to_symbol, limit, histo)
+    df_rollout_path = 'datasets/bot_rollout_{}_{}_{}.csv'.format(symbol + to_symbol, limit, histo)
+
+    if not os.path.exists(df_train_path):
         headers = {'User-Agent': 'Mozilla/5.0', 'authorization': 'Apikey 3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'}
 
         # OHLC
         url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym={}&e=Binance&limit={}'.format(histo, symbol, to_symbol, limit)
-        print(colored('> downloading ' + symbol + ' OHLCV', 'green'))
+        print(colored('> downloading ' + symbol + '/' + to_symbol + ' OHLCV', 'green'))
         response = requests.get(url, headers=headers)
         json_response = response.json()
         status = json_response['Response']
@@ -55,37 +58,37 @@ def get_datasets(symbol, to_symbol, histo, limit):
         df.loc[:, 'HT_SINE_sine'], df.loc[:, 'HT_SINE_leadsine'] = talib.HT_SINE(close)
         df.loc[:, 'HT_TRENDMODE'] = talib.HT_TRENDMODE(close)
         # momemtum indicators
-        df.loc[:, 'ADX'] = talib.ADX(high, low, close, timeperiod=14)
-        df.loc[:, 'ADXR'] = talib.ADXR(high, low, close, timeperiod=14)
-        df.loc[:, 'APO'] = talib.APO(close, fastperiod=12, slowperiod=26, matype=0)
-        df.loc[:, 'AROON_down'], df.loc[:, 'AROON_up'] = talib.AROON(high, low, timeperiod=14)
-        df.loc[:, 'AROONOSC'] = talib.AROONOSC(high, low, timeperiod=14)
+        df.loc[:, 'ADX'] = talib.ADX(high, low, close, timeperiod=28)
+        df.loc[:, 'ADXR'] = talib.ADXR(high, low, close, timeperiod=29)
+        df.loc[:, 'APO'] = talib.APO(close, fastperiod=20, slowperiod=30, matype=0)
+        df.loc[:, 'AROON_down'], df.loc[:, 'AROON_up'] = talib.AROON(high, low, timeperiod=30)
+        df.loc[:, 'AROONOSC'] = talib.AROONOSC(high, low, timeperiod=32)
         df.loc[:, 'BOP'] = talib.BOP(open_price, high, low, close)
-        df.loc[:, 'CCI'] = talib.CCI(high, low, close, timeperiod=14)
-        df.loc[:, 'CMO'] = talib.CMO(close, timeperiod=14)
-        df.loc[:, 'DX'] = talib.DX(high, low, close, timeperiod=14)
-        df['MACD'], df['MACD_signal'], df['MACD_hist'] = talib.MACD(close, fastperiod=12, slowperiod=26, signalperiod=9)
-        df.loc[:, 'MFI'] = talib.MFI(high, low, close, volume, timeperiod=14)
-        df.loc[:, 'MINUS_DI'] = talib.MINUS_DI(high, low, close, timeperiod=14)
-        df.loc[:, 'MINUS_DM'] = talib.MINUS_DM(high, low, timeperiod=14)
-        df.loc[:, 'MOM'] = talib.MOM(close, timeperiod=10)
-        df.loc[:, 'PPO'] = talib.PPO(close, fastperiod=12, slowperiod=26, matype=0)
-        df.loc[:, 'ROC'] = talib.ROC(close, timeperiod=10)
-        df.loc[:, 'RSI'] = talib.RSI(close, timeperiod=14)
-        df.loc[:, 'STOCH_k'], df.loc[:, 'STOCH_d'] = talib.STOCH(high, low, close, fastk_period=5, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
-        df.loc[:, 'STOCHF_k'], df.loc[:, 'STOCHF_d'] = talib.STOCHF(high, low, close, fastk_period=5, fastd_period=3, fastd_matype=0)
-        df.loc[:, 'STOCHRSI_K'], df.loc[:, 'STOCHRSI_D'] = talib.STOCHRSI(close, timeperiod=30, fastk_period=14, fastd_period=10, fastd_matype=1)
+        df.loc[:, 'CCI'] = talib.CCI(high, low, close, timeperiod=30)
+        df.loc[:, 'CMO'] = talib.CMO(close, timeperiod=30)
+        df.loc[:, 'DX'] = talib.DX(high, low, close, timeperiod=33)
+        df['MACD'], df['MACD_signal'], df['MACD_hist'] = talib.MACD(close, fastperiod=17, slowperiod=30, signalperiod=20)
+        df.loc[:, 'MFI'] = talib.MFI(high, low, close, volume, timeperiod=29)
+        df.loc[:, 'MINUS_DI'] = talib.MINUS_DI(high, low, close, timeperiod=29)
+        df.loc[:, 'MINUS_DM'] = talib.MINUS_DM(high, low, timeperiod=29)
+        df.loc[:, 'MOM'] = talib.MOM(close, timeperiod=35)
+        df.loc[:, 'PPO'] = talib.PPO(close, fastperiod=17, slowperiod=35, matype=2)
+        df.loc[:, 'ROC'] = talib.ROC(close, timeperiod=35)
+        df.loc[:, 'RSI'] = talib.RSI(close, timeperiod=40)
+        df.loc[:, 'STOCH_k'], df.loc[:, 'STOCH_d'] = talib.STOCH(high, low, close, fastk_period=35, slowk_period=12, slowk_matype=0, slowd_period=7, slowd_matype=0)
+        df.loc[:, 'STOCHF_k'], df.loc[:, 'STOCHF_d'] = talib.STOCHF(high, low, close, fastk_period=28, fastd_period=14, fastd_matype=0)
+        df.loc[:, 'STOCHRSI_K'], df.loc[:, 'STOCHRSI_D'] = talib.STOCHRSI(close, timeperiod=35, fastk_period=12, fastd_period=10, fastd_matype=1)
         df.loc[:, 'TRIX'] = talib.TRIX(close, timeperiod=30)
-        df.loc[:, 'ULTOSC'] = talib.ULTOSC(high, low, close, timeperiod1=7, timeperiod2=14, timeperiod3=28)
-        df.loc[:, 'WILLR'] = talib.WILLR(high, low, close, timeperiod=14)
+        df.loc[:, 'ULTOSC'] = talib.ULTOSC(high, low, close, timeperiod1=14, timeperiod2=28, timeperiod3=35)
+        df.loc[:, 'WILLR'] = talib.WILLR(high, low, close, timeperiod=35)
         # overlap studies
-        df.loc[:, 'BBANDS_upper'], df.loc[:, 'BBANDS_middle'], df.loc[:, 'BBANDS_lower'] = talib.BBANDS(close, timeperiod=5, nbdevup=2, nbdevdn=2, matype=0)
+        df.loc[:, 'BBANDS_upper'], df.loc[:, 'BBANDS_middle'], df.loc[:, 'BBANDS_lower'] = talib.BBANDS(close, timeperiod=12, nbdevup=2, nbdevdn=2, matype=0)
         df.loc[:, 'DEMA'] = talib.DEMA(close, timeperiod=30)
-        df.loc[:, 'EMA'] = talib.EMA(close, timeperiod=30)
+        df.loc[:, 'EMA'] = talib.EMA(close, timeperiod=28)
         df.loc[:, 'HT_TRENDLINE'] = talib.HT_TRENDLINE(close)
         df.loc[:, 'KAMA'] = talib.KAMA(close, timeperiod=30)
         df.loc[:, 'MA'] = talib.MA(close, timeperiod=30, matype=0)
-        df.loc[:, 'MIDPOINT'] = talib.MIDPOINT(close, timeperiod=14)
+        df.loc[:, 'MIDPOINT'] = talib.MIDPOINT(close, timeperiod=20)
         df.loc[:, 'WMA'] = talib.WMA(close, timeperiod=30)
         df.loc[:, 'SMA'] = talib.SMA(close)
         # pattern recoginition
@@ -116,12 +119,14 @@ def get_datasets(symbol, to_symbol, histo, limit):
         train_size = round(len(df) * 0.5) # 50% to train -> test with different value
         df_train = df[:train_size]
         df_rollout = df[train_size:]
-        df_train.to_csv('datasets/bot_train_{}_{}_{}.csv'.format(symbol + to_symbol, limit, histo))
-        df_rollout.to_csv('datasets/bot_rollout_{}_{}_{}.csv'.format(symbol + to_symbol, limit, histo))
+        df_train.to_csv(df_train_path)
+        df_rollout.to_csv(df_rollout_path)
+        df_train = pd.read_csv(df_train_path) # re-read to avoid indexing issue w/ Ray
+        df_rollout = pd.read_csv(df_rollout_path)
     else:
-        print(colored('> feching ' + symbol + to_symbol + ' from cache OHLCV', 'magenta'))
-        df_train = pd.read_csv('datasets/bot_train_{}_{}_{}.csv'.format(symbol + to_symbol, limit, histo))
-        df_rollout = pd.read_csv('datasets/bot_rollout_{}_{}_{}.csv'.format(symbol + to_symbol, limit, histo))
+        print(colored('> feching ' + symbol + '/' + to_symbol + ' from cache OHLCV', 'magenta'))
+        df_train = pd.read_csv(df_train_path)
+        df_rollout = pd.read_csv(df_rollout_path)
         # df_train.set_index('Date', inplace=True)
         # df_rollout.set_index('Date', inplace=True)
 
