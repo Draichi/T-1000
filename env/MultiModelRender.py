@@ -25,9 +25,9 @@ class StockTradingGraph:
         self.df2 = df2
         self.df3 = df3
         self.render_title = render_title
-        self.net_worths = np.zeros(len(df['Date']))
+        self.net_worths = np.zeros(len(df1['Date']))
         self.net_worths[0] = INITIAL_ACCOUNT_BALANCE
-        self.buy_and_holds = np.zeros(len(df['Date']))
+        self.buy_and_holds = np.zeros(len(df1['Date']))
         self.buy_and_holds[0] = INITIAL_ACCOUNT_BALANCE
 
         # Create a figure on screen and set the title
@@ -36,6 +36,7 @@ class StockTradingGraph:
         fig.suptitle(self.render_title, fontsize=18)
 
         # https://matplotlib.org/users/gridspec.html
+        # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.subplot2grid.html?highlight=subplot2grid#matplotlib.pyplot.subplot2grid
         self.net_worth_ax = plt.subplot2grid(
             (6, 1), (0, 0), rowspan=2, colspan=1)
 
