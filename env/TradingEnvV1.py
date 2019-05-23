@@ -10,7 +10,6 @@ from env.TradingRenderV1 import StockTradingGraph
 class TradingEnv(gym.Env):
     """A stock trading environment for OpenAI gym"""
     # metadata = {'render.modes': ['live', 'file', 'none']}
-    visualization = None
 
     def __init__(self, config):
         self.df = config['df']
@@ -20,6 +19,8 @@ class TradingEnv(gym.Env):
         self.initial_balance = INITIAL_ACCOUNT_BALANCE
         self.commission = COMMISSION
         self.serial = False
+        self.visualization = None
+        self.total_steps = len(self.df_features.loc[:, 'open'].values) -1
         self.action_space = spaces.Box(
             low=np.array([0, 0]), high=np.array([3, 1]), dtype=np.float16)
         self.observation_space = spaces.Box(
@@ -41,8 +42,8 @@ class TradingEnv(gym.Env):
         return obs
 
     def _take_action(self, action):
-        current_price = random.uniform(
-            self.df_features.loc[self.current_step, "open"], self.df_features.loc[self.current_step, "close"])
+        current_price = random.uniform(self.df_features.loc[self.current_step, "open"],
+                                       self.df_features.loc[self.current_step, "close"])
 
         action_type = action[0]
         amount = action[1]
@@ -76,14 +77,18 @@ class TradingEnv(gym.Env):
         self.net_worth = self.balance + self.shares_held * current_price
         self.buy_and_hold = self.initial_bought * current_price
 
+    def _reward(self):
+        net_worth_and_buyhold_mean = (self.net_worth + self.buy_and_hold) / 2
+        reward = (self.net_worth - self.buy_and_hold) / net_worth_and_buyhold_mean
+        return reward
+
     def step(self, action):
         # Execute one time step within the environment
         self._take_action(action)
         self.current_step += 1
 
-        net_worth_and_buyhold_mean = (self.net_worth + self.buy_and_hold) / 2
-        reward = (self.net_worth - self.buy_and_hold) / net_worth_and_buyhold_mean
-        done = self.net_worth <= 0 or self.balance <= 0 or self.current_step >= len(self.df_features.loc[:, 'open'].values) -1
+        reward = self._reward()
+        done = self.net_worth <= 0 or self.balance <= 0 or self.current_step >= self.total_steps
         obs = self._next_observation()
 
         return obs, reward, done, {}
