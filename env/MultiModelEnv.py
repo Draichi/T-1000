@@ -13,6 +13,7 @@ class TradingEnv(gym.Env):
     visualization = None
 
     def __init__(self, config):
+        # print(config)
         self.df1 = config['df1']
         self.df1_features = self.df1.loc[: , self.df1.columns != 'Date']
         self.df2 = config['df2']
@@ -31,7 +32,7 @@ class TradingEnv(gym.Env):
         self.observation_space = spaces.Box(
             low=-np.finfo(np.float32).max,
             high=np.finfo(np.float32).max,
-            shape=(3, len(self.df_features.columns) + 7 ), # shape = 3 dfs , len(df) + obs variables
+            shape=(3, len(self.df1_features.columns) + 7 ), # shape = 3 dfs , len(df) + obs variables
             dtype=np.float16)
 
     def _next_observation(self):
@@ -133,15 +134,15 @@ class TradingEnv(gym.Env):
                 self.balance += self.sales
 
             if self.shares1_sold > 0 or self.shares1_bought > 0:
-                self.trades.append({'step': self.current_step,
+                self.trades1.append({'step': self.current_step,
                                     'amount': self.shares1_sold if self.shares1_sold > 0 else self.shares1_bought, 'total': self.sales if self.shares1_bought > 0 else self.cost,
                                     'type': "sell" if self.shares1_sold > 0 else "buy"})
             if self.shares2_sold > 0 or self.shares2_bought > 0:
-                self.trades.append({'step': self.current_step,
+                self.trades2.append({'step': self.current_step,
                                     'amount': self.shares2_sold if self.shares2_sold > 0 else self.shares2_bought, 'total': self.sales if self.shares2_bought > 0 else self.cost,
                                     'type': "sell" if self.shares2_sold > 0 else "buy"})
             if self.shares3_sold > 0 or self.shares3_bought > 0:
-                self.trades.append({'step': self.current_step,
+                self.trades3.append({'step': self.current_step,
                                     'amount': self.shares3_sold if self.shares3_sold > 0 else self.shares3_bought, 'total': self.sales if self.shares3_bought > 0 else self.cost,
                                     'type': "sell" if self.shares3_sold > 0 else "buy"})
 
@@ -182,7 +183,9 @@ class TradingEnv(gym.Env):
         self.initial_bought1 = 1/3 * self.initial_balance / self.first_price1
         self.initial_bought2 = 1/3 * self.initial_balance / self.first_price2
         self.initial_bought3 = 1/3 * self.initial_balance / self.first_price3
-        self.trades = []
+        self.trades1 = []
+        self.trades2 = []
+        self.trades3 = []
 
         return self._next_observation()
 
@@ -214,7 +217,7 @@ class TradingEnv(gym.Env):
 
             # if self.current_step > LOOKBACK_WINDOW_SIZE:
             self.visualization.render(
-            self.current_step, self.net_worth, self.buy_and_hold, self.trades, self.shares1_held, self.shares2_held, self.shares3_held, self.balance, window_size=LOOKBACK_WINDOW_SIZE)
+            self.current_step, self.net_worth, self.buy_and_hold, self.trades1, self.trades2, self.trades3, self.shares1_held, self.shares2_held, self.shares3_held, self.balance, window_size=LOOKBACK_WINDOW_SIZE)
 
     def close(self):
         if self.visualization != None:
