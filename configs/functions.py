@@ -12,6 +12,7 @@ import requests
 import pandas as pd
 import numpy as np
 from termcolor import colored
+from configs.vars import DF_TRAIN_SIZE
 
 colorama.init()
 
@@ -58,23 +59,23 @@ def get_datasets(symbol, to_symbol, histo, limit):
         df.loc[:, 'HT_SINE_sine'], df.loc[:, 'HT_SINE_leadsine'] = talib.HT_SINE(close)
         df.loc[:, 'HT_TRENDMODE'] = talib.HT_TRENDMODE(close)
         # momemtum indicators
-        df.loc[:, 'ADX'] = talib.ADX(high, low, close, timeperiod=28)
-        df.loc[:, 'ADXR'] = talib.ADXR(high, low, close, timeperiod=29)
-        df.loc[:, 'APO'] = talib.APO(close, fastperiod=20, slowperiod=30, matype=0)
-        df.loc[:, 'AROON_down'], df.loc[:, 'AROON_up'] = talib.AROON(high, low, timeperiod=30)
-        df.loc[:, 'AROONOSC'] = talib.AROONOSC(high, low, timeperiod=32)
+        df.loc[:, 'ADX'] = talib.ADX(high, low, close, timeperiod=12)
+        df.loc[:, 'ADXR'] = talib.ADXR(high, low, close, timeperiod=13)
+        df.loc[:, 'APO'] = talib.APO(close, fastperiod=5, slowperiod=10, matype=0)
+        df.loc[:, 'AROON_down'], df.loc[:, 'AROON_up'] = talib.AROON(high, low, timeperiod=15)
+        df.loc[:, 'AROONOSC'] = talib.AROONOSC(high, low, timeperiod=13)
         df.loc[:, 'BOP'] = talib.BOP(open_price, high, low, close)
-        df.loc[:, 'CCI'] = talib.CCI(high, low, close, timeperiod=30)
-        df.loc[:, 'CMO'] = talib.CMO(close, timeperiod=30)
-        df.loc[:, 'DX'] = talib.DX(high, low, close, timeperiod=33)
-        df['MACD'], df['MACD_signal'], df['MACD_hist'] = talib.MACD(close, fastperiod=17, slowperiod=30, signalperiod=20)
-        df.loc[:, 'MFI'] = talib.MFI(high, low, close, volume, timeperiod=29)
-        df.loc[:, 'MINUS_DI'] = talib.MINUS_DI(high, low, close, timeperiod=29)
-        df.loc[:, 'MINUS_DM'] = talib.MINUS_DM(high, low, timeperiod=29)
-        df.loc[:, 'MOM'] = talib.MOM(close, timeperiod=35)
+        df.loc[:, 'CCI'] = talib.CCI(high, low, close, timeperiod=13)
+        df.loc[:, 'CMO'] = talib.CMO(close, timeperiod=14)
+        df.loc[:, 'DX'] = talib.DX(high, low, close, timeperiod=10)
+        df['MACD'], df['MACD_signal'], df['MACD_hist'] = talib.MACD(close, fastperiod=5, slowperiod=10, signalperiod=20)
+        df.loc[:, 'MFI'] = talib.MFI(high, low, close, volume, timeperiod=12)
+        df.loc[:, 'MINUS_DI'] = talib.MINUS_DI(high, low, close, timeperiod=10)
+        df.loc[:, 'MINUS_DM'] = talib.MINUS_DM(high, low, timeperiod=14)
+        df.loc[:, 'MOM'] = talib.MOM(close, timeperiod=20)
         df.loc[:, 'PPO'] = talib.PPO(close, fastperiod=17, slowperiod=35, matype=2)
-        df.loc[:, 'ROC'] = talib.ROC(close, timeperiod=35)
-        df.loc[:, 'RSI'] = talib.RSI(close, timeperiod=40)
+        df.loc[:, 'ROC'] = talib.ROC(close, timeperiod=12)
+        df.loc[:, 'RSI'] = talib.RSI(close, timeperiod=25)
         df.loc[:, 'STOCH_k'], df.loc[:, 'STOCH_d'] = talib.STOCH(high, low, close, fastk_period=35, slowk_period=12, slowk_matype=0, slowd_period=7, slowd_matype=0)
         df.loc[:, 'STOCHF_k'], df.loc[:, 'STOCHF_d'] = talib.STOCHF(high, low, close, fastk_period=28, fastd_period=14, fastd_matype=0)
         df.loc[:, 'STOCHRSI_K'], df.loc[:, 'STOCHRSI_D'] = talib.STOCHRSI(close, timeperiod=35, fastk_period=12, fastd_period=10, fastd_matype=1)
@@ -84,12 +85,12 @@ def get_datasets(symbol, to_symbol, histo, limit):
         # overlap studies
         df.loc[:, 'BBANDS_upper'], df.loc[:, 'BBANDS_middle'], df.loc[:, 'BBANDS_lower'] = talib.BBANDS(close, timeperiod=12, nbdevup=2, nbdevdn=2, matype=0)
         df.loc[:, 'DEMA'] = talib.DEMA(close, timeperiod=30)
-        df.loc[:, 'EMA'] = talib.EMA(close, timeperiod=28)
+        df.loc[:, 'EMA'] = talib.EMA(close, timeperiod=7)
         df.loc[:, 'HT_TRENDLINE'] = talib.HT_TRENDLINE(close)
-        df.loc[:, 'KAMA'] = talib.KAMA(close, timeperiod=30)
-        df.loc[:, 'MA'] = talib.MA(close, timeperiod=30, matype=0)
+        df.loc[:, 'KAMA'] = talib.KAMA(close, timeperiod=5)
+        df.loc[:, 'MA'] = talib.MA(close, timeperiod=5, matype=0)
         df.loc[:, 'MIDPOINT'] = talib.MIDPOINT(close, timeperiod=20)
-        df.loc[:, 'WMA'] = talib.WMA(close, timeperiod=30)
+        df.loc[:, 'WMA'] = talib.WMA(close, timeperiod=15)
         df.loc[:, 'SMA'] = talib.SMA(close)
         # pattern recoginition
         df.loc[:, 'CDL2CROWS'] = talib.CDL2CROWS(open_price, high, low, close)
@@ -99,24 +100,24 @@ def get_datasets(symbol, to_symbol, histo, limit):
         # price transform
         df.loc[:, 'WCLPRICE'] = talib.WCLPRICE(high, low, close)
         # statistic funcitons
-        df.loc[:, 'BETA'] = talib.BETA(high, low, timeperiod=5)
-        df.loc[:, 'CORREL'] = talib.CORREL(high, low, timeperiod=30)
-        df.loc[:, 'STDDEV'] = talib.STDDEV(close, timeperiod=5, nbdev=1)
-        df.loc[:, 'TSF'] = talib.TSF(close, timeperiod=14)
-        df.loc[:, 'VAR'] = talib.VAR(close, timeperiod=5, nbdev=1)
+        df.loc[:, 'BETA'] = talib.BETA(high, low, timeperiod=20)
+        df.loc[:, 'CORREL'] = talib.CORREL(high, low, timeperiod=20)
+        df.loc[:, 'STDDEV'] = talib.STDDEV(close, timeperiod=20, nbdev=1)
+        df.loc[:, 'TSF'] = talib.TSF(close, timeperiod=20)
+        df.loc[:, 'VAR'] = talib.VAR(close, timeperiod=20, nbdev=1)
         # volatility indicators
-        df.loc[:, 'ATR'] = talib.ATR(high, low, close, timeperiod=14)
-        df.loc[:, 'NATR'] = talib.NATR(high, low, close, timeperiod=14)
+        df.loc[:, 'ATR'] = talib.ATR(high, low, close, timeperiod=7)
+        df.loc[:, 'NATR'] = talib.NATR(high, low, close, timeperiod=20)
         df.loc[:, 'TRANGE'] = talib.TRANGE(high, low, close)
         # volume indicators
         df.loc[:, 'AD'] = talib.AD(high, low, close, volume)
-        df.loc[:, 'ADOSC'] = talib.ADOSC(high, low, close, volume, fastperiod=3, slowperiod=10)
+        df.loc[:, 'ADOSC'] = talib.ADOSC(high, low, close, volume, fastperiod=10, slowperiod=20)
         df.loc[:, 'OBV'] = talib.OBV(close, volume)
 
         # df.fillna(df.mean(), inplace=True)
         df.dropna(inplace=True)
         df.set_index('Date', inplace=True)
-        train_size = round(len(df) * 0.5) # 50% to train -> test with different value
+        train_size = round(len(df) * DF_TRAIN_SIZE) # 75% to train -> test with different value
         df_train = df[:train_size]
         df_rollout = df[train_size:]
         df_train.to_csv(df_train_path)
