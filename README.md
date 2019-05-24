@@ -8,9 +8,15 @@
 
 Trainable deep reinforcement learning agents to operate in the cryptocurrency market
 
-![algorithms](imgs/LTCUSDT.gif)
+![ltcusdt](imgs/LTCUSDT.gif)
 
 > 7 % profit in 1 month trading LTC/USDT
+
+* * *
+
+![multimodel](imgs/multimodel.gif)
+
+> 5 % profit trading BTC/USDT ETH/USDT and LTC/USDT at the same time (wip)
 
 ## Prerequisites
 
