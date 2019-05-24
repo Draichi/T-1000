@@ -45,10 +45,11 @@ if __name__ == "__main__":
             "run": "PPO",
             "env": "MultiTradingEnv-v0",
             "stop": {
-                "timesteps_total": 3e6, #1e6 = 1M
+                "timesteps_total": .2e6, #1e6 = 1M
             },
             # "checkpoint_freq": 50,
             "checkpoint_at_end": True,
+            # "conv_filters": [3, 76],
             "config": {
                 "lr": grid_search([
                     5e-5,
@@ -60,8 +61,12 @@ if __name__ == "__main__":
                 ]),
                 "num_workers": 3,  # parallelism
                 'observation_filter': 'MeanStdFilter',
+                "model": {
+                    "dim": 4,
+                    "conv_filters": [[3, [1, 1], 1]],
+                    "use_lstm": True
+                },
                 'vf_share_layers': True, # testing
-                # "vf_clip_param": 10000000.0,
                 "env_config": {
                     'df1': df1,
                     'df2': df2,
