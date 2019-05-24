@@ -5,6 +5,9 @@ from gym import spaces
 from configs.vars import LOOKBACK_WINDOW_SIZE, INITIAL_ACCOUNT_BALANCE, COMMISSION
 import pandas as pd
 import numpy as np
+from termcolor import colored
+import colorama
+colorama.init()
 from env.MultiModelRenderRank1 import StockTradingGraph
 
 class TradingEnv(gym.Env):
@@ -116,7 +119,7 @@ class TradingEnv(gym.Env):
             elif action_type < 5 and self.balance >= self.balance * amount * (1 + self.commission): # check if has enough money to trade
                 self.shares3_bought = self.balance * amount / current_price3
                 self.cost = self.shares3_bought * current_price3 * (1 + self.commission)
-                self.shares1_held += self.shares3_bought
+                self.shares3_held += self.shares3_bought
                 self.balance -= self.cost
             # sell shares 3
             elif action_type < 6:
@@ -126,19 +129,23 @@ class TradingEnv(gym.Env):
                 self.balance += self.sales
 
             if self.shares1_sold > 0 or self.shares1_bought > 0:
+                # only print in rollout mode
+                # print(colored('{} BTC {} USDT - holding: {} BTC balance {} USDT'.format(self.shares1_bought, self.cost if self.shares1_bought > 0 else self.sales, self.shares1_held, self.balance), 'green' if self.shares1_bought > 0 else 'red'))
                 self.trades1.append({'step': self.current_step,
-                                    'amount': self.shares1_sold if self.shares1_sold > 0 else self.shares1_bought, 'total': self.sales if self.shares1_bought > 0 else self.cost,
+                                    'amount': self.shares1_sold if self.shares1_sold > 0 else self.shares1_bought, 'total': self.sales if self.shares1_sold > 0 else self.cost,
                                     'type': "sell" if self.shares1_sold > 0 else "buy"})
             if self.shares2_sold > 0 or self.shares2_bought > 0:
+                # print(colored('{} ETH {} USDT - holding {} ETH balance: {} USDT'.format(self.shares2_bought, self.cost if self.shares2_bought > 0 else self.sales, self.shares2_held, self.balance), 'green' if self.shares2_bought > 0 else 'red'))
                 self.trades2.append({'step': self.current_step,
-                                    'amount': self.shares2_sold if self.shares2_sold > 0 else self.shares2_bought, 'total': self.sales if self.shares2_bought > 0 else self.cost,
+                                    'amount': self.shares2_sold if self.shares2_sold > 0 else self.shares2_bought, 'total': self.sales if self.shares2_sold > 0 else self.cost,
                                     'type': "sell" if self.shares2_sold > 0 else "buy"})
             if self.shares3_sold > 0 or self.shares3_bought > 0:
+                # print(colored('{} LTC {} USDT - holding {} LTC balance: {} USDT'.format(self.shares3_bought, self.cost if self.shares3_bought > 0 else self.sales, self.shares3_held, self.balance), 'green' if self.shares3_bought > 0 else 'red'))
                 self.trades3.append({'step': self.current_step,
-                                    'amount': self.shares3_sold if self.shares3_sold > 0 else self.shares3_bought, 'total': self.sales if self.shares3_bought > 0 else self.cost,
+                                    'amount': self.shares3_sold if self.shares3_sold > 0 else self.shares3_bought, 'total': self.sales if self.shares3_sold > 0 else self.cost,
                                     'type': "sell" if self.shares3_sold > 0 else "buy"})
 
-        self.net_worth = self.balance + self.shares1_held * current_price1 + self.shares2_held * current_price2 + self.shares3_held * current_price3
+        self.net_worth = self.balance + (self.shares1_held * current_price1) + (self.shares2_held * current_price2) + (self.shares3_held * current_price3)
         self.buy_and_hold = self.initial_bought1 * current_price1 + self.initial_bought2 * current_price2 + self.initial_bought3 * current_price3
 
     def step(self, action):

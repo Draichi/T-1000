@@ -25,6 +25,7 @@ class StockTradingGraph:
         self.df2 = df2
         self.df3 = df3
         self.render_title = render_title
+        self.first_coin, self.second_coin, self.thrid_coin = 'BTC', 'ETH', 'LTC'
         self.net_worths = np.zeros(len(df1['Date']))
         self.net_worths[0] = INITIAL_ACCOUNT_BALANCE
         self.buy_and_holds = np.zeros(len(df1['Date']))
@@ -63,8 +64,7 @@ class StockTradingGraph:
         # Clear the frame rendered last step
         self.net_worth_ax.clear()
         # set balance and shares held
-        first_coin, self.second_coin = 'um', 'dois'
-        self.net_worth_ax.set_title('Holding {:.3f} {} and {:.3f} {}'.format(shares_held1, first_coin, balance, self.second_coin))
+        self.net_worth_ax.set_title('Holding {:.3f} {} and {:.3f} {} and {:.3f} {} and {:.3f} {}'.format(shares_held1, self.first_coin, shares_held2, self.second_coin, shares_held3, self.thrid_coin, balance, 'USDT'))
         # compute performance
         abs_diff = net_worth - buy_and_hold
         avg = (net_worth + buy_and_hold) / 2
@@ -77,7 +77,7 @@ class StockTradingGraph:
 
         # Plot net worths
         self.net_worth_ax.plot_date(dates, self.net_worths[step_range], '-', label="Bot's Net Worth", color=BOT_COLOR)
-        self.net_worth_ax.plot_date(dates, self.buy_and_holds[step_range], '-', label='Buy and Hold Strategy', color=BUY_N_HOLD_COLOR)
+        self.net_worth_ax.plot_date(dates, self.buy_and_holds[step_range], '--', label='Buy and Hold Strategy', color=BUY_N_HOLD_COLOR)
         # Show legend, which uses the label we defined for the plot above
         self.net_worth_ax.legend()
         legend = self.net_worth_ax.legend(loc=2, ncol=2, prop={'size': 8})
@@ -165,11 +165,9 @@ class StockTradingGraph:
 
         self.price_ax1.set_ylim(ylim1[0] - (ylim1[1] - ylim1[0])
                                * VOLUME_CHART_HEIGHT, ylim1[1])
-        self.price_ax1.set_xticklabels([])
         self.price_ax1.set_ylabel('BTC')
         self.price_ax2.set_ylim(ylim2[0] - (ylim2[1] - ylim2[0])
                                * VOLUME_CHART_HEIGHT, ylim2[1])
-        self.price_ax2.set_xticklabels([])
         self.price_ax2.set_ylabel('ETH')
         self.price_ax3.set_ylim(ylim3[0] - (ylim3[1] - ylim3[0])
                                * VOLUME_CHART_HEIGHT, ylim3[1])
@@ -237,12 +235,13 @@ class StockTradingGraph:
                     marker = 'v'
 
                 total = '{0:.5f}'.format(trade['total'])
+                # print(total)
 
                 # print icon
                 self.price_ax1.scatter(date, high_low, color=color, marker=marker, s=50)
 
                 # Print the current price to the price axis
-                self.price_ax1.annotate('{} {}'.format(total, self.second_coin),
+                self.price_ax1.annotate('{} {}'.format(total, 'USDT'),
                                        xy=(date, high_low),
                                        xytext=(date, high_low),
                                        color=color,
@@ -264,12 +263,13 @@ class StockTradingGraph:
                     marker = 'v'
 
                 total = '{0:.5f}'.format(trade['total'])
+                # print(total)
 
                 # print icon
                 self.price_ax2.scatter(date, high_low, color=color, marker=marker, s=50)
 
                 # Print the current price to the price axis
-                self.price_ax2.annotate('{} {}'.format(total, self.second_coin),
+                self.price_ax2.annotate('{} {}'.format(total, 'USDT'),
                                        xy=(date, high_low),
                                        xytext=(date, high_low),
                                        color=color,
@@ -291,12 +291,13 @@ class StockTradingGraph:
                     marker = 'v'
 
                 total = '{0:.5f}'.format(trade['total'])
+                # print(total)
 
                 # print icon
                 self.price_ax3.scatter(date, high_low, color=color, marker=marker, s=50)
 
                 # Print the current price to the price axis
-                self.price_ax3.annotate('{} {}'.format(total, self.second_coin),
+                self.price_ax3.annotate('{} {}'.format(total, 'USDT'),
                                        xy=(date, high_low),
                                        xytext=(date, high_low),
                                        color=color,
@@ -328,6 +329,10 @@ class StockTradingGraph:
 
         # Hide duplicate net worth date labels
         plt.setp(self.net_worth_ax.get_xticklabels(), visible=False)
+        plt.setp(self.volume_ax1.get_xticklabels(), visible=False)
+        plt.setp(self.volume_ax2.get_xticklabels(), visible=False)
+        plt.setp(self.price_ax1.get_xticklabels(), visible=False)
+        plt.setp(self.price_ax2.get_xticklabels(), visible=False)
 
         # Necessary to view frames before they are unrendered
         plt.pause(0.001)
