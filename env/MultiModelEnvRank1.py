@@ -33,6 +33,8 @@ class TradingEnv(gym.Env):
         self.df3 = config['df3']
         self.df3_features = self.df3.loc[: , self.df3.columns != 'Date']
         self.render_title = config['render_title']
+        self.s1, self.s2, self.s3 = config['s1'], config['s2'], config['s3']
+        self.trade_instrument = config['trade_instrument']
         self.lookback_window_size = LOOKBACK_WINDOW_SIZE
         self.initial_balance = INITIAL_ACCOUNT_BALANCE
         self.commission = COMMISSION
@@ -221,11 +223,27 @@ class TradingEnv(gym.Env):
 
         elif mode == 'live':
             if self.visualization == None:
-                self.visualization = StockTradingGraph(self.df1, self.df2, self.df3, self.render_title)
+                self.visualization = StockTradingGraph(self.df1,
+                                                       self.df2,
+                                                       self.df3,
+                                                       self.render_title,
+                                                       self.s1,
+                                                       self.s2,
+                                                       self.s3,
+                                                       self.trade_instrument)
 
             # if self.current_step > LOOKBACK_WINDOW_SIZE:
-            self.visualization.render(
-            self.current_step, self.net_worth, self.buy_and_hold, self.trades1, self.trades2, self.trades3, self.shares1_held, self.shares2_held, self.shares3_held, self.balance, window_size=LOOKBACK_WINDOW_SIZE)
+            self.visualization.render(self.current_step,
+                                      self.net_worth,
+                                      self.buy_and_hold,
+                                      self.trades1,
+                                      self.trades2,
+                                      self.trades3,
+                                      self.shares1_held,
+                                      self.shares2_held,
+                                      self.shares3_held,
+                                      self.balance,
+                                      window_size=LOOKBACK_WINDOW_SIZE)
 
     def close(self):
         if self.visualization != None:

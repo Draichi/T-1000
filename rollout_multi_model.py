@@ -30,6 +30,8 @@ from ray.rllib.env.base_env import _DUMMY_AGENT_ID
 from ray.rllib.evaluation.sample_batch import DEFAULT_POLICY_ID
 from ray.tune.util import merge_dicts
 from ray.tune.registry import register_env
+
+# from env.MultiModelEnv import TradingEnv
 from env.MultiModelEnvRank1 import TradingEnv
 
 
@@ -221,15 +223,21 @@ def rollout(agent, env_name, num_steps, out=None, no_render=True):
 if __name__ == "__main__":
     parser = create_parser()
     args = parser.parse_args()
+    s1, s2, s3 = 'BTC', 'ETH', 'LTC'
+    trade_instrument = 'USDT'
     # from_symbol, to_symbol = args.pair.split('/')
-    _ ,df1 = get_datasets('BTC', 'USDT', 'hour', 800)
-    _ ,df2 = get_datasets('ETH', 'USDT', 'hour', 800)
-    _ ,df3 = get_datasets('LTC', 'USDT', 'hour', 800)
+    _ ,df1 = get_datasets(s1, trade_instrument, 'hour', 800)
+    _ ,df2 = get_datasets(s2, trade_instrument, 'hour', 800)
+    _ ,df3 = get_datasets(s3, trade_instrument, 'hour', 800)
     config = {
         "df1": df1,
         "df2": df2,
         "df3": df3,
-        "render_title": 'Multi Model',
+        's1': s1,
+        's2': s2,
+        's3': s3,
+        'trade_instrument': trade_instrument,
+        "render_title": 'Multi Model'
     }
     register_env("TradingEnv-v0", lambda _: TradingEnv(config))
     run(args, parser, df1)

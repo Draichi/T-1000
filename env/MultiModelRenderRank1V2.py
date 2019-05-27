@@ -28,12 +28,13 @@ def date2num(date):
 class StockTradingGraph:
     """A stock trading visualization using matplotlib made to render OpenAI gym environments"""
 
-    def __init__(self, df1, df2, df3, render_title):
+    def __init__(self, df1, df2, df3, render_title, s1, s2, s3, trade_instrument):
         self.df1 = df1
         self.df2 = df2
         self.df3 = df3
         self.render_title = render_title
-        self.first_coin, self.second_coin, self.thrid_coin = 'BTC', 'ETH', 'LTC'
+        self.first_coin, self.second_coin, self.thrid_coin = s1, s2, s3
+        self.trade_instrument = trade_instrument
         self.net_worths = np.zeros(len(df1['Date']))
         self.net_worths[0] = INITIAL_ACCOUNT_BALANCE
         self.buy_and_holds = np.zeros(len(df1['Date']))
@@ -90,7 +91,7 @@ class StockTradingGraph:
         x = np.arange(2)
         y = [buy_and_hold, net_worth]
         self.net_worth_ax.bar(x, y, color=[BUY_N_HOLD_COLOR, BOT_COLOR])
-        self.net_worth_ax.set_title("Net Worth")
+        self.net_worth_ax.set_title("Net Worth ({})".format(self.trade_instrument))
         self.net_worth_ax.set_xticklabels(('', 'HODL', '', 'Bot'))
 
         # Annotate the current net worth on the net worth graph
@@ -125,7 +126,7 @@ class StockTradingGraph:
         y = [shares_held1, shares_held2, shares_held3, balance]
         self.balance_ax.bar(x, y, color=['green', 'cyan', 'red', 'b'])
         self.balance_ax.set_title("Balance")
-        self.balance_ax.set_xticklabels(('', 'BTC', 'ETH', 'LTC', 'USDT'))
+        self.balance_ax.set_xticklabels(('', self.first_coin, self.second_coin, self.thrid_coin, self.trade_instrument))
 
         # Annotate the current net worth on the net worth graph
         self.balance_ax.annotate("{0:.3f}".format(shares_held1),
@@ -216,13 +217,13 @@ class StockTradingGraph:
 
         self.price_ax1.set_ylim(ylim1[0] - (ylim1[1] - ylim1[0])
                                * VOLUME_CHART_HEIGHT, ylim1[1])
-        self.price_ax1.set_ylabel('BTC')
+        self.price_ax1.set_ylabel(self.first_coin)
         self.price_ax2.set_ylim(ylim2[0] - (ylim2[1] - ylim2[0])
                                * VOLUME_CHART_HEIGHT, ylim2[1])
-        self.price_ax2.set_ylabel('ETH')
+        self.price_ax2.set_ylabel(self.second_coin)
         self.price_ax3.set_ylim(ylim3[0] - (ylim3[1] - ylim3[0])
                                * VOLUME_CHART_HEIGHT, ylim3[1])
-        self.price_ax3.set_ylabel('LTC')
+        self.price_ax3.set_ylabel(self.thrid_coin)
 
 
     def _render_volume(self, current_step, net_worth, dates, step_range):
@@ -292,7 +293,7 @@ class StockTradingGraph:
                 self.price_ax1.scatter(date, high_low, color=color, marker=marker, s=50)
 
                 # Print the current price to the price axis
-                self.price_ax1.annotate('{} {}'.format(total, 'USDT'),
+                self.price_ax1.annotate('{} {}'.format(total, self.trade_instrument),
                                        xy=(date, high_low),
                                        xytext=(date, high_low),
                                        color=color,
@@ -320,7 +321,7 @@ class StockTradingGraph:
                 self.price_ax2.scatter(date, high_low, color=color, marker=marker, s=50)
 
                 # Print the current price to the price axis
-                self.price_ax2.annotate('{} {}'.format(total, 'USDT'),
+                self.price_ax2.annotate('{} {}'.format(total, self.trade_instrument),
                                        xy=(date, high_low),
                                        xytext=(date, high_low),
                                        color=color,
@@ -348,7 +349,7 @@ class StockTradingGraph:
                 self.price_ax3.scatter(date, high_low, color=color, marker=marker, s=50)
 
                 # Print the current price to the price axis
-                self.price_ax3.annotate('{} {}'.format(total, 'USDT'),
+                self.price_ax3.annotate('{} {}'.format(total, self.trade_instrument),
                                        xy=(date, high_low),
                                        xytext=(date, high_low),
                                        color=color,
@@ -357,8 +358,8 @@ class StockTradingGraph:
     def render(self, current_step, net_worth, buy_and_hold, trades1, trades2, trades3, shares_held1, shares_held2, shares_held3, balance, window_size):
         self.net_worths[current_step] = net_worth
         self.buy_and_holds[current_step] = buy_and_hold
-        self.shares_held1, self.shares_held2, self.shares_held3 = shares_held1, shares_held2, shares_held3
-        self.balance = balance
+        # self.shares_held1, self.shares_held2, self.shares_held3 = shares_held1, shares_held2, shares_held3
+        # self.balance = balance
 
         window_start = max(current_step - window_size, 0)
         step_range = range(window_start, current_step + 1)

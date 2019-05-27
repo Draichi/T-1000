@@ -22,9 +22,14 @@ import ray
 from datetime import date
 from gym.spaces import Discrete, Box
 from configs.functions import get_datasets
-from env.MultiModelEnv import TradingEnv
 from ray.tune import run_experiments, grid_search
 from ray.tune.registry import register_env
+
+# choose the multi model env
+# from env.MultiModelEnv import TradingEnv
+from env.MultiModelEnvRank1 import TradingEnv
+s1, s2, s3 = 'BTC', 'ETH', 'LTC'
+trade_instrument = 'USDT'
 
 if __name__ == "__main__":
     # import argparse
@@ -35,19 +40,19 @@ if __name__ == "__main__":
     # parser.add_argument('--algo', type=str, required=True, help='Choose algorithm to train')
     # args = parser.parse_args()
     # from_symbol, to_symbol = args.pair.split('/')
-    df1, _ = get_datasets('BTC', 'USDT', 'hour', 800)
-    df2, _ = get_datasets('ETH', 'USDT', 'hour', 800)
-    df3, _ = get_datasets('LTC', 'USDT', 'hour', 800)
+    df1, _ = get_datasets(s1, trade_instrument, 'hour', 800)
+    df2, _ = get_datasets(s2, trade_instrument, 'hour', 800)
+    df3, _ = get_datasets(s3, trade_instrument, 'hour', 800)
     register_env("MultiTradingEnv-v0", lambda config: TradingEnv(config))
     ray.init()
     run_experiments({
-        "Multimodel_test": {
+        "MultimodelRank1": {
             "run": "PPO",
             "env": "MultiTradingEnv-v0",
             "stop": {
-                "timesteps_total": .2e6, #1e6 = 1M
+                "timesteps_total": 2e6, #1e6 = 1M
             },
-            # "checkpoint_freq": 50,
+            "checkpoint_freq": 50,
             "checkpoint_at_end": True,
             # "conv_filters": [3, 76],
             "config": {
@@ -61,16 +66,20 @@ if __name__ == "__main__":
                 ]),
                 "num_workers": 3,  # parallelism
                 'observation_filter': 'MeanStdFilter',
-                "model": {
-                    "dim": 4,
-                    "conv_filters": [[3, [1, 1], 1]],
-                    "use_lstm": True
-                },
+                # "model": {
+                #     "dim": 4,
+                #     "conv_filters": [[1, [1, 1], 1]],
+                #     "use_lstm": True
+                # },
                 'vf_share_layers': True, # testing
                 "env_config": {
                     'df1': df1,
                     'df2': df2,
                     'df3': df3,
+                    's1': s1,
+                    's2': s2,
+                    's3': s3,
+                    'trade_instrument': trade_instrument,
                     'render_title': ''
                 },
             }
