@@ -217,13 +217,13 @@ class StockTradingGraph:
 
         self.price_ax1.set_ylim(ylim1[0] - (ylim1[1] - ylim1[0])
                                * VOLUME_CHART_HEIGHT, ylim1[1])
-        self.price_ax1.set_ylabel(self.first_coin)
+        self.price_ax1.set_ylabel('{}/{}'.format(self.first_coin, self.trade_instrument))
         self.price_ax2.set_ylim(ylim2[0] - (ylim2[1] - ylim2[0])
                                * VOLUME_CHART_HEIGHT, ylim2[1])
-        self.price_ax2.set_ylabel(self.second_coin)
+        self.price_ax2.set_ylabel('{}/{}'.format(self.second_coin, self.trade_instrument))
         self.price_ax3.set_ylim(ylim3[0] - (ylim3[1] - ylim3[0])
                                * VOLUME_CHART_HEIGHT, ylim3[1])
-        self.price_ax3.set_ylabel(self.thrid_coin)
+        self.price_ax3.set_ylabel('{}/{}'.format(self.thrid_coin, self.trade_instrument))
 
 
     def _render_volume(self, current_step, net_worth, dates, step_range):
