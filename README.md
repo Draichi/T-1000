@@ -14,9 +14,13 @@ Trainable deep reinforcement learning agents to operate in the cryptocurrency ma
 
 * * *
 
-![multimodel](imgs/multimodel.gif)
+<!-- ![multimodel](imgs/multimodel.gif)
 
-> 5 % profit trading BTC/USDT ETH/USDT and LTC/USDT at the same time (wip)
+> 5 % profit trading BTC/USDT ETH/USDT and LTC/USDT at the same time (wip) -->
+
+![multimodel](imgs/multimodelv2.gif)
+
+> 10 % profit trading BTC/USDT ETH/USDT and LTC/USDT at the same time (wip)
 
 ## Prerequisites
 
