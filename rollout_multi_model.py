@@ -223,7 +223,7 @@ def rollout(agent, env_name, num_steps, out=None, no_render=True):
 if __name__ == "__main__":
     parser = create_parser()
     args = parser.parse_args()
-    s1, s2, s3 = 'BTC', 'ETH', 'LTC'
+    s1, s2, s3 = 'OMG', 'ADA', 'BAT'
     trade_instrument = 'USDT'
     # from_symbol, to_symbol = args.pair.split('/')
     _ ,df1 = get_datasets(s1, trade_instrument, 'hour', 800)
