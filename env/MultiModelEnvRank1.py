@@ -16,7 +16,8 @@ import numpy as np
 from termcolor import colored
 import colorama
 colorama.init()
-from env.MultiModelRenderRank1 import StockTradingGraph
+from env.MultiModelRenderRank1V2 import StockTradingGraph
+# from env.MultiModelRenderRank1 import StockTradingGraph
 
 class TradingEnv(gym.Env):
     """A stock trading environment for OpenAI gym"""
