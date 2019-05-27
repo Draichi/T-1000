@@ -1,3 +1,11 @@
+"""Gym enrivornment to simulate trading operations with multi pairs.
+
+This environment use an array rank 1 with 220 items as it's observations space.
+
+Lucas Draichi
+2019
+"""
+
 import random
 import json
 import gym

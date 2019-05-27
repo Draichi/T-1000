@@ -1,3 +1,11 @@
+"""Render method of trading operations with multi pairs.
+
+This environment use an array rank 1 with 220 items as it's observations space.
+
+Lucas Draichi
+2019
+"""
+
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
