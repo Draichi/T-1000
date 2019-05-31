@@ -3,7 +3,7 @@
 Example:
     python rollout_multi_model.py ./tensorboard/LTC-ETH-OMG-USDT_minute_1500_2019-05-31/PPO_MultiTradingEnv-v1_0_lr_schedule=1100000_7e-05_3500000_7e-06_2019-05-31_09-45-52_jyp06hp/checkpoint_875/checkpoint-875 \
         --run PPO \
-        --env TradingEnv-v0 \
+        --env TradingEnv-v0
 
 Lucas Draichi 2019
 """

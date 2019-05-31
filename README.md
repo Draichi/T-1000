@@ -57,13 +57,24 @@ You can use one of these
 
 ### Train
 
+Go to `/configs/vars.py` and custumize it:
+
+```python
+SYMBOL_1, SYMBOL_2, SYMBOL_3 = 'LTC', 'ETH', 'OMG'
+TRADE_INTRUMENT = 'USDT'
+LIMIT = 1500
+HISTO = 'minute'
+...
+```
+
 ```sh
-# change the variables in `run_experiments` function to improve performance
+# multi model
+python train_multi_model.py
+
+# single pair
 python train.py \
         --algo PPO \
         --pair XRP/USDT \
-        --histo hour \
-        --limit 180
 ```
 
 ![algorithms](imgs/Screenshot_tensorflow.png)
@@ -72,7 +83,7 @@ python train.py \
 
 ```sh
 # to keep monitoring while the algo is trainning
-tensorboard --logdir=~/ray_results
+tensorboard --logdir=./tensorflow
 # or
 gpustat -i
 # or
@@ -81,8 +92,15 @@ htop
 
 ### Evaluate
 
+It will automatically use a different time period to evaluate
+
 ```sh
-# It will automatically use a different time period to evaluate
+# multi model
+python rollout_multi_model.py ./tensorboard/path_to_checkpoint-100 \
+        --run PPO \
+        --env TradingEnv-v0
+
+# single pair
 python rollout.py /path_to_checkpoint/file \
         --run PPO \
         --env TradingEnv-v0 \
