@@ -33,7 +33,7 @@ class StockTradingGraph:
         self.df2 = df2
         self.df3 = df3
         self.render_title = render_title
-        self.histo = histo
+        self.candlestick_width = CANDLESTICK_WIDTH.get(histo, 1)
         self.first_coin, self.second_coin, self.thrid_coin = s1, s2, s3
         self.trade_instrument = trade_instrument
         self.net_worths = np.zeros(len(df1['Date']))
@@ -86,9 +86,10 @@ class StockTradingGraph:
         percentage_diff = abs_diff / avg * 100
         # print performance
         self.net_worth_ax.text(0.95, 0.01, '{0:.2f}%'.format(percentage_diff),
-                              verticalalignment='bottom', horizontalalignment='right',
-                              transform=self.net_worth_ax.transAxes,
-                              color='green' if percentage_diff > 0 else 'red', fontsize=15)
+                               verticalalignment='bottom',
+                               horizontalalignment='right',
+                               transform=self.net_worth_ax.transAxes,
+                               color='green' if percentage_diff > 0 else 'red', fontsize=15)
         x = np.arange(2)
         y = [buy_and_hold, net_worth]
         self.net_worth_ax.bar(x, y, color=[BUY_N_HOLD_COLOR, BOT_COLOR])
@@ -125,7 +126,7 @@ class StockTradingGraph:
         #                       color='green' if percentage_diff > 0 else 'red', fontsize=15)
         x = np.arange(4)
         y = [shares_held1, shares_held2, shares_held3, balance]
-        self.balance_ax.bar(x, y, color=['green', 'cyan', 'red', 'b'])
+        self.balance_ax.bar(x, y, color=BALANCE_COLOR)
         self.balance_ax.set_title("Balance")
         self.balance_ax.set_xticklabels(('', self.first_coin, self.second_coin, self.thrid_coin, self.trade_instrument))
 
@@ -166,22 +167,37 @@ class StockTradingGraph:
         self.price_ax1.set_title('Candlesticks')
 
         candlesticks1 = zip(dates,
-                           self.df1['open'].values[step_range], self.df1['close'].values[step_range],
-                           self.df1['high'].values[step_range], self.df1['low'].values[step_range])
+                            self.df1['open'].values[step_range],
+                            self.df1['close'].values[step_range],
+                            self.df1['high'].values[step_range],
+                            self.df1['low'].values[step_range])
         candlesticks2 = zip(dates,
-                           self.df2['open'].values[step_range], self.df2['close'].values[step_range],
-                           self.df2['high'].values[step_range], self.df2['low'].values[step_range])
+                            self.df2['open'].values[step_range],
+                            self.df2['close'].values[step_range],
+                            self.df2['high'].values[step_range],
+                            self.df2['low'].values[step_range])
         candlesticks3 = zip(dates,
-                           self.df3['open'].values[step_range], self.df3['close'].values[step_range],
-                           self.df3['high'].values[step_range], self.df3['low'].values[step_range])
+                            self.df3['open'].values[step_range],
+                            self.df3['close'].values[step_range],
+                            self.df3['high'].values[step_range],
+                            self.df3['low'].values[step_range])
 
         # Plot price using candlestick graph from mpl_finance
-        candlestick(self.price_ax1, candlesticks1, width=.04 if self.histo == 'hour' else .0006,
-                    colorup=UP_COLOR, colordown=DOWN_COLOR)
-        candlestick(self.price_ax2, candlesticks2, width=.04 if self.histo == 'hour' else .0006,
-                    colorup=UP_COLOR, colordown=DOWN_COLOR)
-        candlestick(self.price_ax3, candlesticks3, width=.04 if self.histo == 'hour' else .0006,
-                    colorup=UP_COLOR, colordown=DOWN_COLOR)
+        candlestick(self.price_ax1,
+                    candlesticks1,
+                    width=self.candlestick_width,
+                    colorup=UP_COLOR,
+                    colordown=DOWN_COLOR)
+        candlestick(self.price_ax2,
+                    candlesticks2,
+                    width=self.candlestick_width,
+                    colorup=UP_COLOR,
+                    colordown=DOWN_COLOR)
+        candlestick(self.price_ax3,
+                    candlesticks3,
+                    width=self.candlestick_width,
+                    colorup=UP_COLOR,
+                    colordown=DOWN_COLOR)
 
         last_date = date2num(self.df1['Date'].values[current_step])
         last_close1 = self.df1['close'].values[current_step]
@@ -192,38 +208,45 @@ class StockTradingGraph:
         last_high3 = self.df3['high'].values[current_step]
 
         # Print the current price to the price axis
-        self.price_ax1.annotate('{0:.4f}'.format(last_close1), (last_date, last_close1),
-                               xytext=(last_date, last_high1),
-                               bbox=dict(boxstyle='round',
-                                         fc='w', ec='k', lw=1),
-                               color="black",
-                               fontsize="small")
-        self.price_ax2.annotate('{0:.4f}'.format(last_close2), (last_date, last_close2),
-                               xytext=(last_date, last_high2),
-                               bbox=dict(boxstyle='round',
-                                         fc='w', ec='k', lw=1),
-                               color="black",
-                               fontsize="small")
-        self.price_ax3.annotate('{0:.4f}'.format(last_close3), (last_date, last_close3),
-                               xytext=(last_date, last_high3),
-                               bbox=dict(boxstyle='round',
-                                         fc='w', ec='k', lw=1),
-                               color="black",
-                               fontsize="small")
+        self.price_ax1.annotate('{0:.4f}'.format(last_close1),
+                                xy=(last_date, last_close1),
+                                xytext=(last_date, last_high1),
+                                bbox=dict(boxstyle='round',
+                                          fc='w',
+                                          ec='k',
+                                          lw=1),
+                                color="black",
+                                fontsize="small")
+        self.price_ax2.annotate('{0:.4f}'.format(last_close2),
+                                xy=(last_date, last_close2),
+                                xytext=(last_date, last_high2),
+                                bbox=dict(boxstyle='round',
+                                          fc='w',
+                                          ec='k',
+                                          lw=1),
+                                color="black",
+                                fontsize="small")
+        self.price_ax3.annotate('{0:.4f}'.format(last_close3),
+                                xy=(last_date, last_close3),
+                                xytext=(last_date, last_high3),
+                                bbox=dict(boxstyle='round',
+                                          fc='w',
+                                          ec='k',
+                                          lw=1),
+                                color="black",
+                                fontsize="small")
 
         # Shift price axis up to give volume chart space
         ylim1 = self.price_ax1.get_ylim()
         ylim2 = self.price_ax2.get_ylim()
         ylim3 = self.price_ax3.get_ylim()
 
-        self.price_ax1.set_ylim(ylim1[0] - (ylim1[1] - ylim1[0])
-                               * VOLUME_CHART_HEIGHT, ylim1[1])
+        self.price_ax1.set_ylim(ylim1[0] - (ylim1[1] - ylim1[0]) * VOLUME_CHART_HEIGHT, ylim1[1])
+        self.price_ax2.set_ylim(ylim2[0] - (ylim2[1] - ylim2[0]) * VOLUME_CHART_HEIGHT, ylim2[1])
+        self.price_ax3.set_ylim(ylim3[0] - (ylim3[1] - ylim3[0]) * VOLUME_CHART_HEIGHT, ylim3[1])
+
         self.price_ax1.set_ylabel('{}/{}'.format(self.first_coin, self.trade_instrument))
-        self.price_ax2.set_ylim(ylim2[0] - (ylim2[1] - ylim2[0])
-                               * VOLUME_CHART_HEIGHT, ylim2[1])
         self.price_ax2.set_ylabel('{}/{}'.format(self.second_coin, self.trade_instrument))
-        self.price_ax3.set_ylim(ylim3[0] - (ylim3[1] - ylim3[0])
-                               * VOLUME_CHART_HEIGHT, ylim3[1])
         self.price_ax3.set_ylabel('{}/{}'.format(self.thrid_coin, self.trade_instrument))
 
 
@@ -236,48 +259,66 @@ class StockTradingGraph:
         volume2 = np.array(self.df2['volumefrom'].values[step_range])
         volume3 = np.array(self.df3['volumefrom'].values[step_range])
 
-        pos1 = self.df1['open'].values[step_range] - \
-            self.df1['close'].values[step_range] < 0
-        neg1 = self.df1['open'].values[step_range] - \
-            self.df1['close'].values[step_range] > 0
-        pos2 = self.df2['open'].values[step_range] - \
-            self.df2['close'].values[step_range] < 0
-        neg2 = self.df2['open'].values[step_range] - \
-            self.df2['close'].values[step_range] > 0
-        pos3 = self.df3['open'].values[step_range] - \
-            self.df3['close'].values[step_range] < 0
-        neg3 = self.df3['open'].values[step_range] - \
-            self.df3['close'].values[step_range] > 0
+        pos1 = self.df1['open'].values[step_range] - self.df1['close'].values[step_range] < 0
+        neg1 = self.df1['open'].values[step_range] - self.df1['close'].values[step_range] > 0
+        pos2 = self.df2['open'].values[step_range] - self.df2['close'].values[step_range] < 0
+        neg2 = self.df2['open'].values[step_range] - self.df2['close'].values[step_range] > 0
+        pos3 = self.df3['open'].values[step_range] - self.df3['close'].values[step_range] < 0
+        neg3 = self.df3['open'].values[step_range] - self.df3['close'].values[step_range] > 0
 
         # Color volume bars based on price direction on that date
-        self.volume_ax1.bar(dates[pos1], volume1[pos1], color=UP_COLOR,
-                           alpha=0.4, width=.04 if self.histo == 'hour' else .0006, align='center')
-        self.volume_ax1.bar(dates[neg1], volume1[neg1], color=DOWN_COLOR,
-                           alpha=0.4, width=.04 if self.histo == 'hour' else .0006, align='center')
-        self.volume_ax2.bar(dates[pos2], volume2[pos2], color=UP_COLOR,
-                           alpha=0.4, width=.04 if self.histo == 'hour' else .0006, align='center')
-        self.volume_ax2.bar(dates[neg2], volume2[neg2], color=DOWN_COLOR,
-                           alpha=0.4, width=.04 if self.histo == 'hour' else .0006, align='center')
-        self.volume_ax3.bar(dates[pos3], volume3[pos3], color=UP_COLOR,
-                           alpha=0.4, width=.04 if self.histo == 'hour' else .0006, align='center')
-        self.volume_ax3.bar(dates[neg3], volume3[neg3], color=DOWN_COLOR,
-                           alpha=0.4, width=.04 if self.histo == 'hour' else .0006, align='center')
+        self.volume_ax1.bar(dates[pos1],
+                            volume1[pos1],
+                            color=UP_COLOR,
+                            alpha=0.4,
+                            width=self.candlestick_width,
+                            align='center')
+        self.volume_ax1.bar(dates[neg1],
+                            volume1[neg1],
+                            color=DOWN_COLOR,
+                            alpha=0.4,
+                            width=self.candlestick_width,
+                            align='center')
+        self.volume_ax2.bar(dates[pos2],
+                            volume2[pos2],
+                            color=UP_COLOR,
+                            alpha=0.4,
+                            width=self.candlestick_width,
+                            align='center')
+        self.volume_ax2.bar(dates[neg2],
+                            volume2[neg2],
+                            color=DOWN_COLOR,
+                            alpha=0.4,
+                            width=self.candlestick_width,
+                            align='center')
+        self.volume_ax3.bar(dates[pos3],
+                            volume3[pos3],
+                            color=UP_COLOR,
+                            alpha=0.4,
+                            width=self.candlestick_width,
+                            align='center')
+        self.volume_ax3.bar(dates[neg3],
+                            volume3[neg3],
+                            color=DOWN_COLOR,
+                            alpha=0.4,
+                            width=self.candlestick_width,
+                            align='center')
 
         # Cap volume axis height below price chart and hide ticks
         self.volume_ax1.set_ylim(0, max(volume1) / VOLUME_CHART_HEIGHT)
-        self.volume_ax1.yaxis.set_ticks([])
         self.volume_ax2.set_ylim(0, max(volume2) / VOLUME_CHART_HEIGHT)
-        self.volume_ax2.yaxis.set_ticks([])
         self.volume_ax3.set_ylim(0, max(volume3) / VOLUME_CHART_HEIGHT)
+        self.volume_ax1.yaxis.set_ticks([])
+        self.volume_ax2.yaxis.set_ticks([])
         self.volume_ax3.yaxis.set_ticks([])
 
+    # repeated code, need to refactor
     def _render_trades(self, current_step, trades1, trades2, trades3, step_range):
         for trade in trades1:
             if trade['step'] in step_range:
                 date = date2num(self.df1['Date'].values[trade['step']])
                 high = self.df1['high'].values[trade['step']]
                 low = self.df1['low'].values[trade['step']]
-
                 if trade['type'] == 'buy':
                     high_low = low
                     color = UP_TEXT_COLOR
@@ -286,13 +327,8 @@ class StockTradingGraph:
                     high_low = high
                     color = DOWN_TEXT_COLOR
                     marker = 'v'
-
                 total = '{0:.5f}'.format(trade['total'])
-                # print(total)
-
-                # print icon
                 self.price_ax1.scatter(date, high_low, color=color, marker=marker, s=50)
-
                 # Print the current price to the price axis
                 self.price_ax1.annotate('{} {}'.format(total, self.trade_instrument),
                                        xy=(date, high_low),
@@ -305,7 +341,6 @@ class StockTradingGraph:
                 date = date2num(self.df1['Date'].values[trade['step']])
                 high = self.df2['high'].values[trade['step']]
                 low = self.df2['low'].values[trade['step']]
-
                 if trade['type'] == 'buy':
                     high_low = low
                     color = UP_TEXT_COLOR
@@ -314,13 +349,8 @@ class StockTradingGraph:
                     high_low = high
                     color = DOWN_TEXT_COLOR
                     marker = 'v'
-
                 total = '{0:.5f}'.format(trade['total'])
-                # print(total)
-
-                # print icon
                 self.price_ax2.scatter(date, high_low, color=color, marker=marker, s=50)
-
                 # Print the current price to the price axis
                 self.price_ax2.annotate('{} {}'.format(total, self.trade_instrument),
                                        xy=(date, high_low),
@@ -333,7 +363,6 @@ class StockTradingGraph:
                 date = date2num(self.df1['Date'].values[trade['step']])
                 high = self.df3['high'].values[trade['step']]
                 low = self.df3['low'].values[trade['step']]
-
                 if trade['type'] == 'buy':
                     high_low = low
                     color = UP_TEXT_COLOR
@@ -342,13 +371,8 @@ class StockTradingGraph:
                     high_low = high
                     color = DOWN_TEXT_COLOR
                     marker = 'v'
-
                 total = '{0:.5f}'.format(trade['total'])
-                # print(total)
-
-                # print icon
                 self.price_ax3.scatter(date, high_low, color=color, marker=marker, s=50)
-
                 # Print the current price to the price axis
                 self.price_ax3.annotate('{} {}'.format(total, self.trade_instrument),
                                        xy=(date, high_low),
@@ -359,8 +383,6 @@ class StockTradingGraph:
     def render(self, current_step, net_worth, buy_and_hold, trades1, trades2, trades3, shares_held1, shares_held2, shares_held3, balance, window_size):
         self.net_worths[current_step] = net_worth
         self.buy_and_holds[current_step] = buy_and_hold
-        # self.shares_held1, self.shares_held2, self.shares_held3 = shares_held1, shares_held2, shares_held3
-        # self.balance = balance
 
         window_start = max(current_step - window_size, 0)
         step_range = range(window_start, current_step + 1)
