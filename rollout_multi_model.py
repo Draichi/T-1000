@@ -1,12 +1,9 @@
 """Script to evaluate previourly trained agents
 
 Example:
-    python rollout.py /path_to_checkpoint/file \
+    python rollout_multi_model.py ./tensorboard/LTC-ETH-OMG-USDT_minute_1500_2019-05-31/PPO_MultiTradingEnv-v1_0_lr_schedule=1100000_7e-05_3500000_7e-06_2019-05-31_09-45-52_jyp06hp/checkpoint_875/checkpoint-875 \
         --run PPO \
         --env TradingEnv-v0 \
-        --pair XRP/BTC \
-        --histo day \
-        --limit 180
 
 Lucas Draichi 2019
 """
@@ -24,21 +21,18 @@ import pickle
 import gym
 import ray
 from configs.functions import get_datasets
+from configs.vars import *
 from ray.rllib.agents.registry import get_agent_class
 from ray.rllib.env import MultiAgentEnv
 from ray.rllib.env.base_env import _DUMMY_AGENT_ID
 from ray.rllib.evaluation.sample_batch import DEFAULT_POLICY_ID
 from ray.tune.util import merge_dicts
 from ray.tune.registry import register_env
-
-# from env.MultiModelEnv import TradingEnv
 from env.MultiModelEnvRank1 import TradingEnv
 
-
-
 EXAMPLE_USAGE = """
-    ./rollout.py /tmp/ray/checkpoint_dir/checkpoint-0 --run DQN
-    --env CartPole-v0 --out rollouts.pkl
+    rollout_multi_model.py /tmp/ray/checkpoint_dir/checkpoint-0 --run PPO
+    --env TradingEnv-v0
 """
 
 def create_parser(parser_creator=None):
@@ -62,12 +56,6 @@ def create_parser(parser_creator=None):
         "tune registry.")
     required_named.add_argument(
         "--env", type=str, required=True, help="The gym environment to use.")
-    # required_named.add_argument(
-    #     "--pair", type=str, required=True, help="The pair ued to train.")
-    # required_named.add_argument(
-    #     "--histo", type=str, required=True, help="day or hour")
-    # required_named.add_argument(
-    #     "--limit", type=int, required=True, help="How many datapoints")
     parser.add_argument(
         "--no-render",
         default=False,
@@ -223,21 +211,19 @@ def rollout(agent, env_name, num_steps, out=None, no_render=True):
 if __name__ == "__main__":
     parser = create_parser()
     args = parser.parse_args()
-    s1, s2, s3 = 'OMG', 'ADA', 'BAT'
-    trade_instrument = 'USDT'
-    # from_symbol, to_symbol = args.pair.split('/')
-    _ ,df1 = get_datasets(s1, trade_instrument, 'hour', 800)
-    _ ,df2 = get_datasets(s2, trade_instrument, 'hour', 800)
-    _ ,df3 = get_datasets(s3, trade_instrument, 'hour', 800)
+    _ ,df1 = get_datasets(SYMBOL_1, TRADE_INTRUMENT, HISTO, LIMIT)
+    _ ,df2 = get_datasets(SYMBOL_2, TRADE_INTRUMENT, HISTO, LIMIT)
+    _ ,df3 = get_datasets(SYMBOL_3, TRADE_INTRUMENT, HISTO, LIMIT)
     config = {
         "df1": df1,
         "df2": df2,
         "df3": df3,
-        's1': s1,
-        's2': s2,
-        's3': s3,
-        'trade_instrument': trade_instrument,
-        "render_title": 'Multi Model'
+        's1': SYMBOL_1,
+        's2': SYMBOL_2,
+        's3': SYMBOL_3,
+        'trade_instrument': TRADE_INTRUMENT,
+        "render_title": 'Back testing',
+        "histo": HISTO
     }
     register_env("TradingEnv-v0", lambda _: TradingEnv(config))
     run(args, parser, df1)
