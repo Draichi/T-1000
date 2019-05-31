@@ -28,11 +28,12 @@ def date2num(date):
 class StockTradingGraph:
     """A stock trading visualization using matplotlib made to render OpenAI gym environments"""
 
-    def __init__(self, df1, df2, df3, render_title, s1, s2, s3, trade_instrument):
+    def __init__(self, df1, df2, df3, render_title, histo, s1, s2, s3, trade_instrument):
         self.df1 = df1
         self.df2 = df2
         self.df3 = df3
         self.render_title = render_title
+        self.histo = histo
         self.first_coin, self.second_coin, self.thrid_coin = s1, s2, s3
         self.trade_instrument = trade_instrument
         self.net_worths = np.zeros(len(df1['Date']))
@@ -175,11 +176,11 @@ class StockTradingGraph:
                            self.df3['high'].values[step_range], self.df3['low'].values[step_range])
 
         # Plot price using candlestick graph from mpl_finance
-        candlestick(self.price_ax1, candlesticks1, width=.04,
+        candlestick(self.price_ax1, candlesticks1, width=.04 if self.histo == 'hour' else .0006,
                     colorup=UP_COLOR, colordown=DOWN_COLOR)
-        candlestick(self.price_ax2, candlesticks2, width=.04,
+        candlestick(self.price_ax2, candlesticks2, width=.04 if self.histo == 'hour' else .0006,
                     colorup=UP_COLOR, colordown=DOWN_COLOR)
-        candlestick(self.price_ax3, candlesticks3, width=.04,
+        candlestick(self.price_ax3, candlesticks3, width=.04 if self.histo == 'hour' else .0006,
                     colorup=UP_COLOR, colordown=DOWN_COLOR)
 
         last_date = date2num(self.df1['Date'].values[current_step])
@@ -250,17 +251,17 @@ class StockTradingGraph:
 
         # Color volume bars based on price direction on that date
         self.volume_ax1.bar(dates[pos1], volume1[pos1], color=UP_COLOR,
-                           alpha=0.4, width=.04, align='center')
+                           alpha=0.4, width=.04 if self.histo == 'hour' else .0006, align='center')
         self.volume_ax1.bar(dates[neg1], volume1[neg1], color=DOWN_COLOR,
-                           alpha=0.4, width=.04, align='center')
+                           alpha=0.4, width=.04 if self.histo == 'hour' else .0006, align='center')
         self.volume_ax2.bar(dates[pos2], volume2[pos2], color=UP_COLOR,
-                           alpha=0.4, width=.04, align='center')
+                           alpha=0.4, width=.04 if self.histo == 'hour' else .0006, align='center')
         self.volume_ax2.bar(dates[neg2], volume2[neg2], color=DOWN_COLOR,
-                           alpha=0.4, width=.04, align='center')
+                           alpha=0.4, width=.04 if self.histo == 'hour' else .0006, align='center')
         self.volume_ax3.bar(dates[pos3], volume3[pos3], color=UP_COLOR,
-                           alpha=0.4, width=.04, align='center')
+                           alpha=0.4, width=.04 if self.histo == 'hour' else .0006, align='center')
         self.volume_ax3.bar(dates[neg3], volume3[neg3], color=DOWN_COLOR,
-                           alpha=0.4, width=.04, align='center')
+                           alpha=0.4, width=.04 if self.histo == 'hour' else .0006, align='center')
 
         # Cap volume axis height below price chart and hide ticks
         self.volume_ax1.set_ylim(0, max(volume1) / VOLUME_CHART_HEIGHT)

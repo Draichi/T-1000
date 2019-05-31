@@ -33,6 +33,7 @@ class TradingEnv(gym.Env):
         self.df3 = config['df3']
         self.df3_features = self.df3.loc[: , self.df3.columns != 'Date']
         self.render_title = config['render_title']
+        self.histo = config['histo']
         self.s1, self.s2, self.s3 = config['s1'], config['s2'], config['s3']
         self.trade_instrument = config['trade_instrument']
         self.lookback_window_size = LOOKBACK_WINDOW_SIZE
@@ -227,6 +228,7 @@ class TradingEnv(gym.Env):
                                                        self.df2,
                                                        self.df3,
                                                        self.render_title,
+                                                       self.histo,
                                                        self.s1,
                                                        self.s2,
                                                        self.s3,
