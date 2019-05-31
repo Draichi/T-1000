@@ -35,7 +35,8 @@ def get_datasets(symbol, to_symbol, histo, limit):
         headers = {'User-Agent': 'Mozilla/5.0', 'authorization': 'Apikey 3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'}
 
         # OHLC
-        url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym={}&e=Binance&limit={}'.format(histo, symbol, to_symbol, limit)
+        # url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym={}&e=Binance&limit={}'.format(histo, symbol, to_symbol, limit)
+        url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym={}&limit={}'.format(histo, symbol, to_symbol, limit)
         print(colored('> downloading ' + symbol + '/' + to_symbol + ' OHLCV', 'green'))
         response = requests.get(url, headers=headers)
         json_response = response.json()
