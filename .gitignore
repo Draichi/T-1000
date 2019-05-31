@@ -1,6 +1,6 @@
-*.pkl
+# *.pkl
 # /docs/*.html
-*.csv
+/datasets/*.csv
 __pycache__
 .vscode
 /models
