@@ -28,12 +28,12 @@ from env.MultiModelEnvRank1 import TradingEnv
 # https://github.com/ray-project/ray/blob/master/python/ray/rllib/train.py
 
 if __name__ == "__main__":
-    df1, _ = get_datasets(SYMBOL_1, TRADE_INTRUMENT, HISTO, LIMIT)
-    df2, _ = get_datasets(SYMBOL_2, TRADE_INTRUMENT, HISTO, LIMIT)
-    df3, _ = get_datasets(SYMBOL_3, TRADE_INTRUMENT, HISTO, LIMIT)
+    df1, _ = get_datasets(SYMBOL_1, TRADE_INSTRUMENT, HISTO, LIMIT)
+    df2, _ = get_datasets(SYMBOL_2, TRADE_INSTRUMENT, HISTO, LIMIT)
+    df3, _ = get_datasets(SYMBOL_3, TRADE_INSTRUMENT, HISTO, LIMIT)
     register_env("MultiTradingEnv-v1", lambda config: TradingEnv(config))
     experiment_spec = {
-        "{}-{}-{}-{}_{}_{}_{}".format(SYMBOL_1, SYMBOL_2, SYMBOL_3, TRADE_INTRUMENT, HISTO, LIMIT, date.today()): {
+        "{}-{}-{}-{}_{}_{}_{}".format(SYMBOL_1, SYMBOL_2, SYMBOL_3, TRADE_INSTRUMENT, HISTO, LIMIT, date.today()): {
             "run": "PPO",
             "env": "MultiTradingEnv-v1",
             "stop": {

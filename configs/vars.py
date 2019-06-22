@@ -1,6 +1,6 @@
 ############ TRAIN VARIABLES ################
 SYMBOL_1, SYMBOL_2, SYMBOL_3 = 'LTC', 'ETH', 'OMG'
-TRADE_INTRUMENT = 'USDT'
+TRADE_INSTRUMENT = 'USDT'
 LIMIT = 1500 # how many datapoints (max 2000)
 HISTO = 'minute'
 TIMESTEPS_TOTAL = 3.5e6 #1e6 = 1M
