@@ -40,7 +40,7 @@ dependencies:
   - libpng=1.6.36=ha441bb4_1000
   - libprotobuf=3.6.0=hd9629dc_0
   - markdown=2.6.11=py35_0
-  - matplotlib=2.2.3=py35h0e0179f_0
+  - matplotlib=2.2.3
   - mkl=2018.0.3=1
   - mkl_fft=1.0.6=py35hb8a8100_0
   - mkl_random=1.0.1=py35h5d10147_1
