@@ -20,6 +20,7 @@ import ray
 from datetime import date
 from gym.spaces import Discrete, Box
 from configs.functions import get_datasets
+from configs.vars import *
 from ray.tune import run_experiments, grid_search
 from ray.tune.registry import register_env
 from env.MultiModelEnvRank1 import TradingEnv
@@ -40,7 +41,7 @@ if __name__ == "__main__":
             },
             "checkpoint_freq": CHECKPOINT_FREQUENCY,
             "checkpoint_at_end": True,
-            "local_dir": '/home/lucas/Documents/cryptocurrency_prediction/tensorboard',
+            "local_dir": '/home/lucas/Documents/cryptocurrency_prediction/tensorboard', # you can comment this line and your chapoints will be saved in ~/ray_results/
             "restore": RESTORE_PATH,
             "config": {
                 "lr_schedule": grid_search(LEARNING_RATE_SCHEDULE),
