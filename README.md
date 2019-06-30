@@ -4,6 +4,8 @@
 ![OS](https://img.shields.io/badge/OS-supported-000.svg?colorA=00cc25&longCache=true&style=for-the-badge "OS")
 ![windows](https://img.shields.io/badge/windows-not_supported-000.svg?colorA=d11431&longCache=true&style=for-the-badge "windows")
 
+##### Tested on Ubuntu 16.04
+
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ebdf89dcba744a3c8aafdda210d3aeb6)](https://app.codacy.com/app/Draichi/cryptocurrency_prediction?utm_source=github.com&utm_medium=referral&utm_content=Draichi/cryptocurrency_prediction&utm_campaign=Badge_Grade_Dashboard)
 
 Trainable deep reinforcement learning agents to operate in the cryptocurrency market
