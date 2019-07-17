@@ -16,28 +16,28 @@ from configs.vars import DF_TRAIN_SIZE
 
 colorama.init()
 
-def get_datasets(symbol, to_symbol, histo, limit):
+def get_datasets(asset, currency, granularity, datapoints):
     """Fetch the API and precess the desired pair
 
     Arguments:
-        symbol {str} -- First pair
-        to_symbol {str} -- Second pair
-        histo {str ['day', 'hour']} -- Granularity
-        limit {int [100 - 2000]} -- [description]
+        asset {str} -- First pair
+        currency {str} -- Second pair
+        granularity {str ['day', 'hour']} -- Granularity
+        datapoints {int [100 - 2000]} -- [description]
 
     Returns:
         pandas.Dataframe -- The OHLCV and indicators dataframe
     """
-    df_train_path = 'datasets/bot_train_{}_{}_{}.csv'.format(symbol + to_symbol, limit, histo)
-    df_rollout_path = 'datasets/bot_rollout_{}_{}_{}.csv'.format(symbol + to_symbol, limit, histo)
+    df_train_path = 'datasets/bot_train_{}_{}_{}.csv'.format(asset + currency, datapoints, granularity)
+    df_rollout_path = 'datasets/bot_rollout_{}_{}_{}.csv'.format(asset + currency, datapoints, granularity)
 
-    if not os.path.exists(df_train_path):
+    if not os.path.exists(df_rollout_path):
         headers = {'User-Agent': 'Mozilla/5.0', 'authorization': 'Apikey 3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'}
 
         # OHLC
-        # url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym={}&e=Binance&limit={}'.format(histo, symbol, to_symbol, limit)
-        url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym={}&limit={}'.format(histo, symbol, to_symbol, limit)
-        print(colored('> downloading ' + symbol + '/' + to_symbol + ' OHLCV', 'green'))
+        # url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym={}&e=Binance&limit={}'.format(granularity, asset, currency, datapoints)
+        url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym={}&limit={}'.format(granularity, asset, currency, datapoints)
+        print(colored('> downloading ' + asset + '/' + currency, 'green'))
         response = requests.get(url, headers=headers)
         json_response = response.json()
         status = json_response['Response']
@@ -46,6 +46,7 @@ def get_datasets(symbol, to_symbol, histo, limit):
             raise AssertionError()
         result = json_response['Data']
         df = pd.DataFrame(result)
+        print(df.tail())
         df['Date'] = pd.to_datetime(df['time'], utc=True, unit='s')
         df.drop('time', axis=1, inplace=True)
 
@@ -118,6 +119,7 @@ def get_datasets(symbol, to_symbol, histo, limit):
         # df.fillna(df.mean(), inplace=True)
         df.dropna(inplace=True)
         df.set_index('Date', inplace=True)
+        print(colored('> caching :)', 'cyan'))
         train_size = round(len(df) * DF_TRAIN_SIZE) # 75% to train -> test with different value
         df_train = df[:train_size]
         df_rollout = df[train_size:]
@@ -126,7 +128,7 @@ def get_datasets(symbol, to_symbol, histo, limit):
         df_train = pd.read_csv(df_train_path) # re-read to avoid indexing issue w/ Ray
         df_rollout = pd.read_csv(df_rollout_path)
     else:
-        print(colored('> feching ' + symbol + '/' + to_symbol + ' from cache OHLCV', 'magenta'))
+        print(colored('> feching ' + asset + '/' + currency + ' from cache OHLCV', 'magenta'))
         df_train = pd.read_csv(df_train_path)
         df_rollout = pd.read_csv(df_rollout_path)
         # df_train.set_index('Date', inplace=True)
