@@ -1,0 +1,20 @@
+# TODO
+
+# YES-MAN class
+# 1 env
+# pypi
+# juntar os 2 rollouts como der
+# um argparse que verifica os argumentoos e importa e chama a função correta
+# criar um outra branch com os arquivos de backup
+
+
+
+
+
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser(description='\n Cryptocurrency algotrader using deep RL')
+    parser.add_argument('--sigle', type=str, required=False, help='Train single pair e.g.: ETH/BTC')
+    parser.add_argument('--multi', type=str, required=False, help='Train multi pair e.g.: BTC/USDT ETH/USDT LTC/USDT')
+    args = parser.parse_args()
