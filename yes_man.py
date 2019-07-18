@@ -3,7 +3,7 @@ from configs.functions import get_datasets
 class Trade:
     """Fertile environment to trade cryptos via algorithm"""
 
-    def __init__(self, assets=['BTC','LTC','ETH'], currency='USDT', granularity='day', datapoints=600, algo='PPO'):
+    def __init__(self, assets=['BTC','LTC','ETH'], currency='USDT', granularity='day', datapoints=600):
         """Create a trade environment
 
         Arguments:
@@ -17,9 +17,12 @@ class Trade:
         self.currency = currency
         self.granularity = granularity
         self.datapoints = datapoints
-        self.algo = algo
         self.df = {}
+        self.populate_dfs()
 
+    def populate_dfs(self):
+        if type(self.assets) != list or len(self.assets) == 0:
+            raise ValueError("Incorrect 'assets' value")
         for asset in self.assets:
             df_train = asset + '_train'
             df_rollout = asset + '_rollout'
@@ -27,6 +30,6 @@ class Trade:
                                                                   currency=self.currency,
                                                                   granularity=self.granularity,
                                                                   datapoints=self.datapoints)
-
-    def train(self):
-        print(self.df)
+    def train(self, algo='PPO', timesteps=3e10, checkpoint_freq=100, lr_schedule=[[[0, 7e-5], [3e10, 7e-6]]]):
+        # print(self.df)
+        pass

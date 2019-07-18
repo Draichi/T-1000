@@ -119,7 +119,7 @@ def get_datasets(asset, currency, granularity, datapoints):
         # df.fillna(df.mean(), inplace=True)
         df.dropna(inplace=True)
         df.set_index('Date', inplace=True)
-        print(colored('> caching :)', 'cyan'))
+        print(colored('> caching' + asset + '/' + currency + ':)', 'cyan'))
         train_size = round(len(df) * DF_TRAIN_SIZE) # 75% to train -> test with different value
         df_train = df[:train_size]
         df_rollout = df[train_size:]
@@ -128,7 +128,7 @@ def get_datasets(asset, currency, granularity, datapoints):
         df_train = pd.read_csv(df_train_path) # re-read to avoid indexing issue w/ Ray
         df_rollout = pd.read_csv(df_rollout_path)
     else:
-        print(colored('> feching ' + asset + '/' + currency + ' from cache OHLCV', 'magenta'))
+        print(colored('> feching ' + asset + '/' + currency + ' from cache :)', 'magenta'))
         df_train = pd.read_csv(df_train_path)
         df_rollout = pd.read_csv(df_rollout_path)
         # df_train.set_index('Date', inplace=True)
