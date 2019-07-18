@@ -1,4 +1,7 @@
 from configs.functions import get_datasets
+from ray.tune.registry import register_env
+from env.MultiModelEnvRank1 import TradingEnv
+
 
 class Trade:
     """Fertile environment to trade cryptos via algorithm"""
@@ -18,11 +21,20 @@ class Trade:
         self.granularity = granularity
         self.datapoints = datapoints
         self.df = {}
+        self.check_variables_integrity()
         self.populate_dfs()
 
-    def populate_dfs(self):
+    def check_variables_integrity(self):
         if type(self.assets) != list or len(self.assets) == 0:
             raise ValueError("Incorrect 'assets' value")
+        if type(self.currency) != str:
+            raise ValueError("Incorrect 'currency' value")
+        if type(self.granularity) != str:
+            raise ValueError("Incorrect 'granularity' value")
+        if type(self.datapoints) != int or 1 > self.datapoints > 2000:
+            raise ValueError("Incorrect 'datapoints' value")
+
+    def populate_dfs(self):
         for asset in self.assets:
             df_train = asset + '_train'
             df_rollout = asset + '_rollout'
@@ -30,6 +42,7 @@ class Trade:
                                                                   currency=self.currency,
                                                                   granularity=self.granularity,
                                                                   datapoints=self.datapoints)
+
     def train(self, algo='PPO', timesteps=3e10, checkpoint_freq=100, lr_schedule=[[[0, 7e-5], [3e10, 7e-6]]]):
         # print(self.df)
         pass
