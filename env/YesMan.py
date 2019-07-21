@@ -6,6 +6,7 @@ Lucas Draichi
 2019
 """
 
+from env.MultiModelRenderRank1V2 import StockTradingGraph
 import random
 import json
 import gym
@@ -15,9 +16,11 @@ import pandas as pd
 import numpy as np
 from termcolor import colored
 import colorama
+from configs.functions import get_datasets
+
 colorama.init()
-from env.MultiModelRenderRank1V2 import StockTradingGraph
 # from env.MultiModelRenderRank1 import StockTradingGraph
+
 
 class TradingEnv(gym.Env):
     """A stock trading environment for OpenAI gym"""
@@ -25,13 +28,23 @@ class TradingEnv(gym.Env):
     visualization = None
 
     def __init__(self, config):
-        # print(config)
+        self.assets = config['assets'],
+        self.currency = config['currency'],
+        self.granularity = config['granularity'],
+        self.datapoints = config['datapoints']
+        self.df = config['df']
+        print(self.df)
+        # print(self.assets)
+        # print(config['assets'])
+        # print(self.currency)
+        # print(config['currency'])
+        quit()
         self.df1 = config['df1']
-        self.df1_features = self.df1.loc[: , self.df1.columns != 'Date']
+        self.df1_features = self.df1.loc[:, self.df1.columns != 'Date']
         self.df2 = config['df2']
-        self.df2_features = self.df2.loc[: , self.df2.columns != 'Date']
+        self.df2_features = self.df2.loc[:, self.df2.columns != 'Date']
         self.df3 = config['df3']
-        self.df3_features = self.df3.loc[: , self.df3.columns != 'Date']
+        self.df3_features = self.df3.loc[:, self.df3.columns != 'Date']
         self.render_title = config['render_title']
         self.histo = config['histo']
         self.s1, self.s2, self.s3 = config['s1'], config['s2'], config['s3']
@@ -42,13 +55,16 @@ class TradingEnv(gym.Env):
         self.serial = False
         self.action_space = spaces.Box(
             low=np.array([0, 0]),
-            high=np.array([7, 1]), # buy and sell each of these 3 coins and hold position = 7 posible actions
+            # buy and sell each of these 3 coins and hold position = 7 posible actions
+            high=np.array([7, 1]),
             dtype=np.float16)
         self.observation_space = spaces.Box(
             low=-np.finfo(np.float32).max,
             high=np.finfo(np.float32).max,
-            shape=(len(self.df1_features.columns) * 3 + 13, ), # shape = 3 dfs * len(df) + obs variables
+            # shape = 3 dfs * len(df) + obs variables
+            shape=(len(self.df1_features.columns) * 3 + 13, ),
             dtype=np.float16)
+
 
     def _next_observation(self):
         frame1 = np.array(self.df1_features.values[self.current_step])
@@ -90,7 +106,8 @@ class TradingEnv(gym.Env):
         action_type = action[0]
         amount = action[1]
 
-        if 0 < amount <= 1 and action_type > 0: # bounds of action_space doesn't seem to work, so this line is necessary to not overflow actions
+        # bounds of action_space doesn't seem to work, so this line is necessary to not overflow actions
+        if 0 < amount <= 1 and action_type > 0:
 
             self.shares1_bought = 0
             self.shares2_bought = 0
@@ -102,41 +119,50 @@ class TradingEnv(gym.Env):
             self.sales = 0
 
             # buy shares1
-            if action_type < 1 and self.balance >= self.balance * amount * (1 + self.commission): # check if has enough money to trade
+            # check if has enough money to trade
+            if action_type < 1 and self.balance >= self.balance * amount * (1 + self.commission):
                 self.shares1_bought = self.balance * amount / current_price1
-                self.cost = self.shares1_bought * current_price1 * (1 + self.commission)
+                self.cost = self.shares1_bought * \
+                    current_price1 * (1 + self.commission)
                 self.shares1_held += self.shares1_bought
                 self.balance -= self.cost
             # sell shares1
             elif action_type < 2:
                 self.shares1_sold = self.shares1_held * amount
-                self.sales = self.shares1_sold * current_price1 * (1 - self.commission)
+                self.sales = self.shares1_sold * \
+                    current_price1 * (1 - self.commission)
                 self.shares1_held -= self.shares1_sold
                 self.balance += self.sales
 
             # buy shares 2
-            elif action_type < 3 and self.balance >= self.balance * amount * (1 + self.commission): # check if has enough money to trade
+            # check if has enough money to trade
+            elif action_type < 3 and self.balance >= self.balance * amount * (1 + self.commission):
                 self.shares2_bought = self.balance * amount / current_price2
-                self.cost = self.shares2_bought * current_price2 * (1 + self.commission)
+                self.cost = self.shares2_bought * \
+                    current_price2 * (1 + self.commission)
                 self.shares2_held += self.shares2_bought
                 self.balance -= self.cost
             # sell shares 2
             elif action_type < 4:
                 self.shares2_sold = self.shares2_held * amount
-                self.sales = self.shares2_sold * current_price2 * (1 - self.commission)
+                self.sales = self.shares2_sold * \
+                    current_price2 * (1 - self.commission)
                 self.shares2_held -= self.shares2_sold
                 self.balance += self.sales
 
             # buy shares 3
-            elif action_type < 5 and self.balance >= self.balance * amount * (1 + self.commission): # check if has enough money to trade
+            # check if has enough money to trade
+            elif action_type < 5 and self.balance >= self.balance * amount * (1 + self.commission):
                 self.shares3_bought = self.balance * amount / current_price3
-                self.cost = self.shares3_bought * current_price3 * (1 + self.commission)
+                self.cost = self.shares3_bought * \
+                    current_price3 * (1 + self.commission)
                 self.shares3_held += self.shares3_bought
                 self.balance -= self.cost
             # sell shares 3
             elif action_type < 6:
                 self.shares3_sold = self.shares3_held * amount
-                self.sales = self.shares3_sold * current_price3 * (1 - self.commission)
+                self.sales = self.shares3_sold * \
+                    current_price3 * (1 - self.commission)
                 self.shares3_held -= self.shares3_sold
                 self.balance += self.sales
 
@@ -144,21 +170,23 @@ class TradingEnv(gym.Env):
                 # only print in rollout mode
                 # print(colored('{} BTC {} USDT - holding: {} BTC balance {} USDT'.format(self.shares1_bought, self.cost if self.shares1_bought > 0 else self.sales, self.shares1_held, self.balance), 'green' if self.shares1_bought > 0 else 'red'))
                 self.trades1.append({'step': self.current_step,
-                                    'amount': self.shares1_sold if self.shares1_sold > 0 else self.shares1_bought, 'total': self.sales if self.shares1_sold > 0 else self.cost,
-                                    'type': "sell" if self.shares1_sold > 0 else "buy"})
+                                     'amount': self.shares1_sold if self.shares1_sold > 0 else self.shares1_bought, 'total': self.sales if self.shares1_sold > 0 else self.cost,
+                                     'type': "sell" if self.shares1_sold > 0 else "buy"})
             if self.shares2_sold > 0 or self.shares2_bought > 0:
                 # print(colored('{} ETH {} USDT - holding {} ETH balance: {} USDT'.format(self.shares2_bought, self.cost if self.shares2_bought > 0 else self.sales, self.shares2_held, self.balance), 'green' if self.shares2_bought > 0 else 'red'))
                 self.trades2.append({'step': self.current_step,
-                                    'amount': self.shares2_sold if self.shares2_sold > 0 else self.shares2_bought, 'total': self.sales if self.shares2_sold > 0 else self.cost,
-                                    'type': "sell" if self.shares2_sold > 0 else "buy"})
+                                     'amount': self.shares2_sold if self.shares2_sold > 0 else self.shares2_bought, 'total': self.sales if self.shares2_sold > 0 else self.cost,
+                                     'type': "sell" if self.shares2_sold > 0 else "buy"})
             if self.shares3_sold > 0 or self.shares3_bought > 0:
                 # print(colored('{} LTC {} USDT - holding {} LTC balance: {} USDT'.format(self.shares3_bought, self.cost if self.shares3_bought > 0 else self.sales, self.shares3_held, self.balance), 'green' if self.shares3_bought > 0 else 'red'))
                 self.trades3.append({'step': self.current_step,
-                                    'amount': self.shares3_sold if self.shares3_sold > 0 else self.shares3_bought, 'total': self.sales if self.shares3_sold > 0 else self.cost,
-                                    'type': "sell" if self.shares3_sold > 0 else "buy"})
+                                     'amount': self.shares3_sold if self.shares3_sold > 0 else self.shares3_bought, 'total': self.sales if self.shares3_sold > 0 else self.cost,
+                                     'type': "sell" if self.shares3_sold > 0 else "buy"})
 
-        self.net_worth = self.balance + (self.shares1_held * current_price1) + (self.shares2_held * current_price2) + (self.shares3_held * current_price3)
-        self.buy_and_hold = self.initial_bought1 * current_price1 + self.initial_bought2 * current_price2 + self.initial_bought3 * current_price3
+        self.net_worth = self.balance + (self.shares1_held * current_price1) + (
+            self.shares2_held * current_price2) + (self.shares3_held * current_price3)
+        self.buy_and_hold = self.initial_bought1 * current_price1 + \
+            self.initial_bought2 * current_price2 + self.initial_bought3 * current_price3
 
     def step(self, action):
         # Execute one time step within the environment
@@ -166,8 +194,10 @@ class TradingEnv(gym.Env):
         self.current_step += 1
 
         net_worth_and_buyhold_mean = (self.net_worth + self.buy_and_hold) / 2
-        reward = (self.net_worth - self.buy_and_hold) / net_worth_and_buyhold_mean
-        done = self.net_worth <= 0 or self.balance <= 0 or self.current_step >= len(self.df1_features.loc[:, 'open'].values) -1
+        reward = (self.net_worth - self.buy_and_hold) / \
+            net_worth_and_buyhold_mean
+        done = self.net_worth <= 0 or self.balance <= 0 or self.current_step >= len(
+            self.df1_features.loc[:, 'open'].values) - 1
         obs = self._next_observation()
 
         return obs, reward, done, {}

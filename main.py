@@ -1,4 +1,5 @@
 if __name__ == '__main__':
+    print('> loading...')
     import yes_man
     env = yes_man.Trade(assets=['OMG','BTC','ETH'],
                         currency='USDT',
