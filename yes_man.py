@@ -4,8 +4,10 @@ from ray.tune.registry import register_env
 from ray.tune import grid_search, run
 from env.YesMan import TradingEnv
 
-# ! ray 0.7.2 => user o run() e nao mais o run_experiments()
+# ! ray 0.7.2 => user o run() e nao mais o run_experiments() https://ray.readthedocs.io/en/latest/tune-package-ref.html
 
+
+# ? ja mandar as dfs separadas por asset para o GymEnv
 
 class Trade:
     """Fertile environment to trade cryptos via algorithm"""
@@ -41,21 +43,28 @@ class Trade:
     def train(self, algo='PPO', timesteps=3e10, checkpoint_freq=100, lr_schedule=[[[0, 7e-5], [3e10, 7e-6]]]):
         register_env("YesMan-v1", lambda config: TradingEnv(config))
         ray.init()
+        config_spec = {
+            "lr_schedule": grid_search(lr_schedule),
+            "env": "YesMan-v1",
+            "num_workers": 3,  # parallelism
+            'observation_filter': 'MeanStdFilter',
+            'vf_share_layers': True,  # testing
+            "env_config": {
+                'assets': self.assets,
+                'currency': self.currency,
+                'granularity': self.granularity,
+                'datapoints': self.datapoints,
+                'df': self.df
+            },
+        }
+
+        #  ! popular o env_config dinamicamente com as dfs separadas
+        for asset in self.assets:
+            config_spec['env_config'][asset] = dataset de cada asset sem a Data
+        print(config_spec)
+        quit()
         run(name="experiment_name",
             run_or_experiment="PPO",
             stop={'timesteps_total': timesteps},
             checkpoint_freq=100,
-            config={
-                "lr_schedule": grid_search(lr_schedule),
-                "env": "YesMan-v1",
-                "num_workers": 3,  # parallelism
-                'observation_filter': 'MeanStdFilter',
-                'vf_share_layers': True,  # testing
-                "env_config": {
-                    'assets': self.assets,
-                    'currency': self.currency,
-                    'granularity': self.granularity,
-                    'datapoints': self.datapoints,
-                    'df': self.df
-                },
-            })
+            config=config_spec)

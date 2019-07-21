@@ -33,12 +33,10 @@ class TradingEnv(gym.Env):
         self.granularity = config['granularity'],
         self.datapoints = config['datapoints']
         self.df = config['df']
+
         print(self.df)
-        # print(self.assets)
-        # print(config['assets'])
-        # print(self.currency)
-        # print(config['currency'])
         quit()
+
         self.df1 = config['df1']
         self.df1_features = self.df1.loc[:, self.df1.columns != 'Date']
         self.df2 = config['df2']
