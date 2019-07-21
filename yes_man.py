@@ -1,8 +1,10 @@
 import ray
 from configs.functions import get_datasets
 from ray.tune.registry import register_env
-from ray.tune import run_experiments, grid_search
+from ray.tune import grid_search, run
 from env.YesMan import TradingEnv
+
+# ! ray 0.7.2 => user o run() e nao mais o run_experiments()
 
 
 class Trade:
@@ -17,8 +19,6 @@ class Trade:
         self.df = {}
         self.check_variables_integrity()
         self.populate_dfs()
-        print(self.df)
-        quit()
 
     def check_variables_integrity(self):
         if type(self.assets) != list or len(self.assets) == 0:
@@ -39,53 +39,23 @@ class Trade:
                                                                               datapoints=self.datapoints)
 
     def train(self, algo='PPO', timesteps=3e10, checkpoint_freq=100, lr_schedule=[[[0, 7e-5], [3e10, 7e-6]]]):
-        # print(self.df)
-        # quit()
-
         register_env("YesMan-v1", lambda config: TradingEnv(config))
-        experiment_spec = {
-            "experiment_name": {
-                "run": algo,
-                "env": "YesMan-v1",
-                "stop": {
-                    "timesteps_total": timesteps,  # 1e6 = 1M
-                },
-                "checkpoint_freq": checkpoint_freq,
-                "checkpoint_at_end": True,
-                # you can comment this line and your chapoints will be saved in ~/ray_results/
-                "local_dir": '~/yes_man/',
-                # "restore": RESTORE_PATH,
-                "config": {
-                    "lr_schedule": grid_search(lr_schedule),
-                    "num_workers": 3,  # parallelism
-                    'observation_filter': 'MeanStdFilter',
-                    'vf_share_layers': True,  # testing
-                    "env_config": {
-                        'assets': self.assets,
-                        'currency': self.currency,
-                        'granularity': self.granularity,
-                        'datapoints': self.datapoints,
-                        'df': self.df
-                    },
-                }
-            }
-        }
         ray.init()
-        run_experiments(experiments=experiment_spec)
-        # ray.tune.run(name="experiment_name",
-        #              run="PPO",
-        #              env="YesMan-v1",
-        #              stop={'timesteps_total': timesteps},
-        #              checkpoint_freq=100,
-        #              config={
-        #                  "lr_schedule": grid_search(lr_schedule),
-        #                  "num_workers": 3,  # parallelism
-        #                  'observation_filter': 'MeanStdFilter',
-        #                  'vf_share_layers': True,  # testing
-        #                  "env_config": {
-        #                      'assets': self.assets,
-        #                      'currency': self.currency,
-        #                      'granularity': self.granularity,
-        #                      'datapoints': self.datapoints
-        #                  },
-        #              })
+        run(name="experiment_name",
+            run_or_experiment="PPO",
+            stop={'timesteps_total': timesteps},
+            checkpoint_freq=100,
+            config={
+                "lr_schedule": grid_search(lr_schedule),
+                "env": "YesMan-v1",
+                "num_workers": 3,  # parallelism
+                'observation_filter': 'MeanStdFilter',
+                'vf_share_layers': True,  # testing
+                "env_config": {
+                    'assets': self.assets,
+                    'currency': self.currency,
+                    'granularity': self.granularity,
+                    'datapoints': self.datapoints,
+                    'df': self.df
+                },
+            })
