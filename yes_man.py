@@ -40,27 +40,32 @@ class Trade:
                                                                               granularity=self.granularity,
                                                                               datapoints=self.datapoints)
 
-    def train(self, algo='PPO', timesteps=3e10, checkpoint_freq=100, lr_schedule=[[[0, 7e-5], [3e10, 7e-6]]]):
-        register_env("YesMan-v1", lambda config: TradingEnv(config))
-        ray.init()
+    def generate_config_spec():
         config_spec = {
             "lr_schedule": grid_search(lr_schedule),
             "env": "YesMan-v1",
             "num_workers": 3,  # parallelism
             'observation_filter': 'MeanStdFilter',
-            'vf_share_layers': True,  # testing
+            'vf_share_layers': True,
             "env_config": {
                 'assets': self.assets,
                 'currency': self.currency,
                 'granularity': self.granularity,
                 'datapoints': self.datapoints,
-                'df': self.df
+                # 'df': self.df
             },
         }
-
-        #  ! popular o env_config dinamicamente com as dfs separadas
         for asset in self.assets:
-            config_spec['env_config'][asset] = dataset de cada asset sem a Data
+            config_spec['env_config'][asset] = self.df[asset]
+
+        return config_spec
+
+    def train(self, algo='PPO', timesteps=3e10, checkpoint_freq=100, lr_schedule=[[[0, 7e-5], [3e10, 7e-6]]]):
+        register_env("YesMan-v1", lambda config: TradingEnv(config))
+        ray.init()
+
+        config_spec = self.generate_config_spec()
+
         print(config_spec)
         quit()
         run(name="experiment_name",
