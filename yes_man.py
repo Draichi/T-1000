@@ -40,7 +40,7 @@ class Trade:
                                                                               granularity=self.granularity,
                                                                               datapoints=self.datapoints)
 
-    def generate_config_spec():
+    def generate_config_spec(self, lr_schedule):
         config_spec = {
             "lr_schedule": grid_search(lr_schedule),
             "env": "YesMan-v1",
@@ -64,7 +64,7 @@ class Trade:
         register_env("YesMan-v1", lambda config: TradingEnv(config))
         ray.init()
 
-        config_spec = self.generate_config_spec()
+        config_spec = self.generate_config_spec(lr_schedule)
 
         print(config_spec)
         quit()
