@@ -32,9 +32,11 @@ class TradingEnv(gym.Env):
         self.currency = config['currency'],
         self.granularity = config['granularity'],
         self.datapoints = config['datapoints']
-        self.df = config['df']
+        self.df_complete = config['df_complete']
+        self.df_features = config['df_features']
 
-        print(self.df)
+        # ! colocar apenas data relevante aqui
+        print(config)
         quit()
 
         self.df1 = config['df1']

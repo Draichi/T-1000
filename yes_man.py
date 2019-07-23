@@ -1,4 +1,5 @@
 import ray
+import pandas as pd
 from configs.functions import get_datasets
 from ray.tune.registry import register_env
 from ray.tune import grid_search, run
@@ -19,6 +20,7 @@ class Trade:
         self.granularity = granularity
         self.datapoints = datapoints
         self.df = {}
+        self.config_spec = {}
         self.check_variables_integrity()
         self.populate_dfs()
 
@@ -41,7 +43,7 @@ class Trade:
                                                                               datapoints=self.datapoints)
 
     def generate_config_spec(self, lr_schedule):
-        config_spec = {
+        self.config_spec = {
             "lr_schedule": grid_search(lr_schedule),
             "env": "YesMan-v1",
             "num_workers": 3,  # parallelism
@@ -52,24 +54,26 @@ class Trade:
                 'currency': self.currency,
                 'granularity': self.granularity,
                 'datapoints': self.datapoints,
-                # 'df': self.df
+                'df_complete': {},
+                'df_features': {}
             },
         }
-        for asset in self.assets:
-            config_spec['env_config'][asset] = self.df[asset]
+        self.add_dfs_to_config_spec(df_type='train')
 
-        return config_spec
+    def add_dfs_to_config_spec(self, df_type):
+        for asset in self.assets:
+            self.config_spec['env_config']['df_complete'][asset] = self.df[asset][df_type]
+            self.config_spec['env_config']['df_features'][asset] = self.df[asset][df_type].loc[:, self.df[asset][df_type].columns != 'Date']
+
 
     def train(self, algo='PPO', timesteps=3e10, checkpoint_freq=100, lr_schedule=[[[0, 7e-5], [3e10, 7e-6]]]):
         register_env("YesMan-v1", lambda config: TradingEnv(config))
         ray.init()
 
-        config_spec = self.generate_config_spec(lr_schedule)
+        self.generate_config_spec(lr_schedule)
 
-        print(config_spec)
-        quit()
         run(name="experiment_name",
             run_or_experiment="PPO",
             stop={'timesteps_total': timesteps},
             checkpoint_freq=100,
-            config=config_spec)
+            config=self.config_spec)
