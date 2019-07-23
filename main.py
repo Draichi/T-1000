@@ -19,4 +19,4 @@ if __name__ == '__main__':
                   ]
               ],
               algo='PPO')
-    # env.rollout(checkpoint_file='../../file')
+    # env.backtest(checkpoint_file='../../file')

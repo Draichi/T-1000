@@ -36,33 +36,34 @@ class TradingEnv(gym.Env):
         self.df_features = config['df_features']
 
         # ! colocar apenas data relevante aqui
-        print(config)
-        quit()
 
-        self.df1 = config['df1']
-        self.df1_features = self.df1.loc[:, self.df1.columns != 'Date']
-        self.df2 = config['df2']
-        self.df2_features = self.df2.loc[:, self.df2.columns != 'Date']
-        self.df3 = config['df3']
-        self.df3_features = self.df3.loc[:, self.df3.columns != 'Date']
-        self.render_title = config['render_title']
-        self.histo = config['histo']
-        self.s1, self.s2, self.s3 = config['s1'], config['s2'], config['s3']
-        self.trade_instrument = config['trade_instrument']
-        self.lookback_window_size = LOOKBACK_WINDOW_SIZE
-        self.initial_balance = INITIAL_ACCOUNT_BALANCE
-        self.commission = COMMISSION
-        self.serial = False
+        # self.render_title = config['render_title']
+        # self.lookback_window_size = LOOKBACK_WINDOW_SIZE
+        # self.initial_balance = INITIAL_ACCOUNT_BALANCE
+        # self.commission = COMMISSION
+        # self.serial = False
+
+        # action space = buy and sell for each asset, pĺus hold position
+        assets_list = self.assets[0]
+        action_space = 1 + len(assets_list) * 2
+
         self.action_space = spaces.Box(
             low=np.array([0, 0]),
-            # buy and sell each of these 3 coins and hold position = 7 posible actions
-            high=np.array([7, 1]),
+            high=np.array([action_space, 1]),
             dtype=np.float16)
+
+        first_asset_of_list = self.assets[0][0]
+        # obs space = (number of columns * number of assets) + 4 (balance, cost, sales, net_worth) + (number of assets * 3 (shares bought, shares sold, shares held))
+        observation_space = (len(self.df_features[first_asset_of_list].columns) * len(assets_list)) + 4 + (len(assets_list) * 3) 
+
+
+        print(observation_space)
+        quit()
+
         self.observation_space = spaces.Box(
             low=-np.finfo(np.float32).max,
             high=np.finfo(np.float32).max,
-            # shape = 3 dfs * len(df) + obs variables
-            shape=(len(self.df1_features.columns) * 3 + 13, ),
+            shape=(observation_space, ),
             dtype=np.float16)
 
 
