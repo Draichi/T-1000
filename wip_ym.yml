@@ -147,5 +147,6 @@ dependencies:
     - scipy==1.2.1
     - setproctitle==1.1.10
     - typing==3.6.6
-prefix: /home/draichi/miniconda3/envs/ym
+    - opencv-python==3.4.2
+
 
