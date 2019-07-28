@@ -34,6 +34,10 @@ class TradingEnv(gym.Env):
         self.datapoints = config['datapoints']
         self.df_complete = config['df_complete']
         self.df_features = config['df_features']
+        self.shares_hold = {}
+        self.shares_bought = {}
+        self.shares_sold = {}
+        self.first_prices = {}
 
         # ! colocar apenas data relevante aqui
 
@@ -53,12 +57,9 @@ class TradingEnv(gym.Env):
             dtype=np.float16)
 
         first_asset_of_list = self.assets[0][0]
+        first_df_columns = self.df_features[first_asset_of_list].columns
         # obs space = (number of columns * number of assets) + 4 (balance, cost, sales, net_worth) + (number of assets * 3 (shares bought, shares sold, shares held))
-        observation_space = (len(self.df_features[first_asset_of_list].columns) * len(assets_list)) + 4 + (len(assets_list) * 3) 
-
-
-        print(observation_space)
-        quit()
+        observation_space = (len(first_df_columns) * len(assets_list)) + 4 + (len(assets_list) * 3)
 
         self.observation_space = spaces.Box(
             low=-np.finfo(np.float32).max,
@@ -67,6 +68,41 @@ class TradingEnv(gym.Env):
             dtype=np.float16)
 
 
+    def reset(self):
+        # Reset the state of the environment to an initial state
+        self._reset_balance()
+
+        self.current_step = 0
+
+        for asset in self.assets[0]:
+            self.first_prices[asset] = self.df_features[asset]['close'][0]
+        print('\n\nself.first_prices')
+        print(self.first_prices)
+        print('\n\n')
+        quit()
+        self.first_price1 = self.df1_features["close"][0]
+        self.first_price2 = self.df2_features["close"][0]
+        self.first_price3 = self.df3_features["close"][0]
+        self.initial_bought1 = 1/3 * self.initial_balance / self.first_price1
+        self.initial_bought2 = 1/3 * self.initial_balance / self.first_price2
+        self.initial_bought3 = 1/3 * self.initial_balance / self.first_price3
+        self.trades1 = []
+        self.trades2 = []
+        self.trades3 = []
+
+        return self._next_observation()
+
+    def _reset_balance(self):
+        self.cost = 0
+        self.sales = 0
+        self.balance = INITIAL_ACCOUNT_BALANCE
+        self.net_worth = INITIAL_ACCOUNT_BALANCE
+        for asset in self.assets[0]:
+            # print(asset)
+            self.shares_hold[asset] = 0
+            self.shares_bought[asset] = 0
+            self.shares_sold[asset] = 0
+        # quit()
     def _next_observation(self):
         frame1 = np.array(self.df1_features.values[self.current_step])
         frame2 = np.array(self.df2_features.values[self.current_step])
@@ -202,34 +238,6 @@ class TradingEnv(gym.Env):
         obs = self._next_observation()
 
         return obs, reward, done, {}
-
-    def reset(self):
-        # Reset the state of the environment to an initial state
-        self.balance = INITIAL_ACCOUNT_BALANCE
-        self.net_worth = INITIAL_ACCOUNT_BALANCE
-        self.shares1_held = 0
-        self.shares2_held = 0
-        self.shares3_held = 0
-        self.shares1_bought = 0
-        self.shares2_bought = 0
-        self.shares3_bought = 0
-        self.shares1_sold = 0
-        self.shares2_sold = 0
-        self.shares3_sold = 0
-        self.cost = 0
-        self.sales = 0
-        self.current_step = 0
-        self.first_price1 = self.df1_features["close"][0]
-        self.first_price2 = self.df2_features["close"][0]
-        self.first_price3 = self.df3_features["close"][0]
-        self.initial_bought1 = 1/3 * self.initial_balance / self.first_price1
-        self.initial_bought2 = 1/3 * self.initial_balance / self.first_price2
-        self.initial_bought3 = 1/3 * self.initial_balance / self.first_price3
-        self.trades1 = []
-        self.trades2 = []
-        self.trades3 = []
-
-        return self._next_observation()
 
     def _render_to_file(self, filename='render.txt'):
         profit = self.net_worth - INITIAL_ACCOUNT_BALANCE
