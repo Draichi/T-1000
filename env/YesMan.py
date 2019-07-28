@@ -29,6 +29,7 @@ class TradingEnv(gym.Env):
 
     def __init__(self, config):
         self.assets = config['assets'],
+        self.assets_list = self.assets[0]
         self.currency = config['currency'],
         self.granularity = config['granularity'],
         self.datapoints = config['datapoints']
@@ -38,18 +39,19 @@ class TradingEnv(gym.Env):
         self.shares_bought = {}
         self.shares_sold = {}
         self.first_prices = {}
+        self.initial_bought = {}
+        self.trades = {}
 
         # ! colocar apenas data relevante aqui
 
         # self.render_title = config['render_title']
         # self.lookback_window_size = LOOKBACK_WINDOW_SIZE
-        # self.initial_balance = INITIAL_ACCOUNT_BALANCE
+        self.initial_balance = INITIAL_ACCOUNT_BALANCE
         # self.commission = COMMISSION
         # self.serial = False
 
         # action space = buy and sell for each asset, pĺus hold position
-        assets_list = self.assets[0]
-        action_space = 1 + len(assets_list) * 2
+        action_space = 1 + len(self.assets_list) * 2
 
         self.action_space = spaces.Box(
             low=np.array([0, 0]),
@@ -59,7 +61,8 @@ class TradingEnv(gym.Env):
         first_asset_of_list = self.assets[0][0]
         first_df_columns = self.df_features[first_asset_of_list].columns
         # obs space = (number of columns * number of assets) + 4 (balance, cost, sales, net_worth) + (number of assets * 3 (shares bought, shares sold, shares held))
-        observation_space = (len(first_df_columns) * len(assets_list)) + 4 + (len(assets_list) * 3)
+        observation_space = (len(first_df_columns) *
+                             len(self.assets_list)) + 4 + (len(self.assets_list) * 3)
 
         self.observation_space = spaces.Box(
             low=-np.finfo(np.float32).max,
@@ -67,70 +70,71 @@ class TradingEnv(gym.Env):
             shape=(observation_space, ),
             dtype=np.float16)
 
-
     def reset(self):
         # Reset the state of the environment to an initial state
         self._reset_balance()
 
         self.current_step = 0
-
-        for asset in self.assets[0]:
-            self.first_prices[asset] = self.df_features[asset]['close'][0]
-        print('\n\nself.first_prices')
-        print(self.first_prices)
-        print('\n\n')
-        quit()
-        self.first_price1 = self.df1_features["close"][0]
-        self.first_price2 = self.df2_features["close"][0]
-        self.first_price3 = self.df3_features["close"][0]
-        self.initial_bought1 = 1/3 * self.initial_balance / self.first_price1
-        self.initial_bought2 = 1/3 * self.initial_balance / self.first_price2
-        self.initial_bought3 = 1/3 * self.initial_balance / self.first_price3
-        self.trades1 = []
-        self.trades2 = []
-        self.trades3 = []
+        self._get_first_prices()
+        self._compute_initial_bought()
+        # self.initial_bought1 = 1/3 * self.initial_balance / self.first_price1
+        # self.initial_bought2 = 1/3 * self.initial_balance / self.first_price2
+        # self.initial_bought3 = 1/3 * self.initial_balance / self.first_price3
+        self._reset_trades()
+        # self.trades1 = []
+        # self.trades2 = []
+        # self.trades3 = []
 
         return self._next_observation()
+
+    def _reset_trades(self):
+        for asset in self.assets_list:
+            self.trades[asset] = []
+
+    def _compute_initial_bought(self):
+        """spread the initial account balance through all assets"""
+        for asset in self.assets_list:
+            self.initial_bought[asset] = 1/len(self.assets_list) * \
+                self.initial_balance / self.first_prices[asset]
+
+    def _get_first_prices(self):
+        for asset in self.assets_list:
+            self.first_prices[asset] = self.df_features[asset]['close'][0]
 
     def _reset_balance(self):
         self.cost = 0
         self.sales = 0
         self.balance = INITIAL_ACCOUNT_BALANCE
         self.net_worth = INITIAL_ACCOUNT_BALANCE
-        for asset in self.assets[0]:
-            # print(asset)
-            self.shares_hold[asset] = 0
-            self.shares_bought[asset] = 0
-            self.shares_sold[asset] = 0
-        # quit()
+        for asset in self.assets_list:
+            self.shares_hold[asset] = 0.0
+            self.shares_bought[asset] = 0.0
+            self.shares_sold[asset] = 0.0
+
     def _next_observation(self):
-        frame1 = np.array(self.df1_features.values[self.current_step])
-        frame2 = np.array(self.df2_features.values[self.current_step])
-        frame3 = np.array(self.df3_features.values[self.current_step])
-        # frame = frame1 + frame2 + frame3
-        frame = np.concatenate((frame1, frame2, frame3))
-        # print('============ \n',len(frame))
-        # print(frame)
-        obs = np.append(frame, [
-            [self.balance],
-            [self.shares1_bought],
-            [self.shares2_bought],
-            [self.shares3_bought],
-            [self.shares1_sold],
-            [self.shares2_sold],
-            [self.shares3_sold],
-            [self.shares1_held],
-            [self.shares2_held],
-            [self.shares3_held],
-            [self.cost],
-            [self.sales],
-            [self.net_worth]
+        shares_bought = np.array([self.shares_bought[asset]
+                                  for asset in self.assets_list])
+        shares_sold = np.array([self.shares_sold[asset]
+                                for asset in self.assets_list])
+        shares_hold = np.array([self.shares_hold[asset]
+                                for asset in self.assets_list])
+
+        current_row_of_all_dfs = np.concatenate([np.array(
+            self.df_features[asset].values[self.current_step]) for asset in self.assets_list])
+
+        observation_without_shares = np.append(current_row_of_all_dfs, [
+            self.balance,
+            self.cost,
+            self.sales,
+            self.net_worth
         ])
-        # print('============ \n',len(self.df1_features.columns) * 3 + 13)
-        # print('\n', len(obs))
-        # print(obs)
-        # print('==============\n')
-        return obs
+        observation = np.append(observation_without_shares, [
+                                shares_bought, shares_hold, shares_sold])
+        print('\n', len(observation))
+        print(observation)
+        print('==============\n')
+        quit()
+        return observation
 
     def _take_action(self, action):
         current_price1 = random.uniform(
