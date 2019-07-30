@@ -87,6 +87,20 @@ class TradingEnv(gym.Env):
 
         return self._next_observation()
 
+    def step(self, action):
+        # Execute one time step within the environment
+        self._take_action(action)
+        self.current_step += 1
+
+        net_worth_and_buyhold_mean = (self.net_worth + self.buy_and_hold) / 2
+        reward = (self.net_worth - self.buy_and_hold) / \
+            net_worth_and_buyhold_mean
+        done = self.net_worth <= 0 or self.balance <= 0 or self.current_step >= len(
+            self.df1_features.loc[:, 'open'].values) - 1
+        obs = self._next_observation()
+
+        return obs, reward, done, {}
+
     def _reset_trades(self):
         for asset in self.assets_list:
             self.trades[asset] = []
@@ -229,19 +243,7 @@ class TradingEnv(gym.Env):
         self.buy_and_hold = self.initial_bought1 * current_price1 + \
             self.initial_bought2 * current_price2 + self.initial_bought3 * current_price3
 
-    def step(self, action):
-        # Execute one time step within the environment
-        self._take_action(action)
-        self.current_step += 1
 
-        net_worth_and_buyhold_mean = (self.net_worth + self.buy_and_hold) / 2
-        reward = (self.net_worth - self.buy_and_hold) / \
-            net_worth_and_buyhold_mean
-        done = self.net_worth <= 0 or self.balance <= 0 or self.current_step >= len(
-            self.df1_features.loc[:, 'open'].values) - 1
-        obs = self._next_observation()
-
-        return obs, reward, done, {}
 
     def _render_to_file(self, filename='render.txt'):
         profit = self.net_worth - INITIAL_ACCOUNT_BALANCE
