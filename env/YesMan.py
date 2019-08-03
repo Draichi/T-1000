@@ -41,6 +41,7 @@ class TradingEnv(gym.Env):
         self.first_prices = {}
         self.initial_bought = {}
         self.trades = {}
+        self.current_price = {}
 
         # ! colocar apenas data relevante aqui
 
@@ -73,17 +74,10 @@ class TradingEnv(gym.Env):
     def reset(self):
         # Reset the state of the environment to an initial state
         self._reset_balance()
-
         self.current_step = 0
         self._get_first_prices()
         self._compute_initial_bought()
-        # self.initial_bought1 = 1/3 * self.initial_balance / self.first_price1
-        # self.initial_bought2 = 1/3 * self.initial_balance / self.first_price2
-        # self.initial_bought3 = 1/3 * self.initial_balance / self.first_price3
         self._reset_trades()
-        # self.trades1 = []
-        # self.trades2 = []
-        # self.trades3 = []
 
         return self._next_observation()
 
@@ -144,32 +138,32 @@ class TradingEnv(gym.Env):
         ])
         observation = np.append(observation_without_shares, [
                                 shares_bought, shares_hold, shares_sold])
-        print('\n', len(observation))
-        print(observation)
-        print('==============\n')
-        quit()
+        # print('\n', len(observation))
+        # print(observation)
+        # print('==============\n')
+        # quit()/
         return observation
 
+    def _compute_current_price(self):
+        for asset in self.assets_list:
+            self.current_price[asset] = random.uniform(self.df_features[asset].loc[self.current_step, 'open'],
+                                                       self.df_features[asset].loc[self.current_step, 'close'])
+
     def _take_action(self, action):
-        current_price1 = random.uniform(
-            self.df1_features.loc[self.current_step, "open"], self.df1_features.loc[self.current_step, "close"])
-        current_price2 = random.uniform(
-            self.df2_features.loc[self.current_step, "open"], self.df2_features.loc[self.current_step, "close"])
-        current_price3 = random.uniform(
-            self.df3_features.loc[self.current_step, "open"], self.df3_features.loc[self.current_step, "close"])
+        self._compute_current_price()
 
         action_type = action[0]
         amount = action[1]
+#  ! parei aqui
 
         # bounds of action_space doesn't seem to work, so this line is necessary to not overflow actions
         if 0 < amount <= 1 and action_type > 0:
 
-            self.shares1_bought = 0
-            self.shares2_bought = 0
-            self.shares3_bought = 0
-            self.shares1_sold = 0
-            self.shares2_sold = 0
-            self.shares3_sold = 0
+# ? func that just reset shares bought and sold
+            for asset in self.assets_list:
+                self.shares_bought[asset] = 0.0
+                self.shares_sold[asset] = 0.0
+# ? funtion that just rest cost and sales
             self.cost = 0
             self.sales = 0
 
@@ -242,8 +236,6 @@ class TradingEnv(gym.Env):
             self.shares2_held * current_price2) + (self.shares3_held * current_price3)
         self.buy_and_hold = self.initial_bought1 * current_price1 + \
             self.initial_bought2 * current_price2 + self.initial_bought3 * current_price3
-
-
 
     def _render_to_file(self, filename='render.txt'):
         profit = self.net_worth - INITIAL_ACCOUNT_BALANCE
