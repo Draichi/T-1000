@@ -109,9 +109,17 @@ class TradingEnv(gym.Env):
         for asset in self.assets_list:
             self.first_prices[asset] = self.df_features[asset]['close'][0]
 
-    def _reset_balance(self):
+    def _reset_shares_bought_n_sold(self):
+        for asset in self.assets_list:
+            self.shares_bought[asset] = 0.0
+            self.shares_sold[asset] = 0.0
+
+    def _reset_cost_n_sales(self):
         self.cost = 0
         self.sales = 0
+
+    def _reset_balance(self):
+        self._reset_cost_n_sales()
         self.balance = INITIAL_ACCOUNT_BALANCE
         self.net_worth = INITIAL_ACCOUNT_BALANCE
         for asset in self.assets_list:
@@ -159,13 +167,8 @@ class TradingEnv(gym.Env):
         # bounds of action_space doesn't seem to work, so this line is necessary to not overflow actions
         if 0 < amount <= 1 and action_type > 0:
 
-# ? func that just reset shares bought and sold
-            for asset in self.assets_list:
-                self.shares_bought[asset] = 0.0
-                self.shares_sold[asset] = 0.0
-# ? funtion that just rest cost and sales
-            self.cost = 0
-            self.sales = 0
+            self._reset_shares_bought_n_sold()
+            self._reset_cost_n_sales()
 
             # buy shares1
             # check if has enough money to trade
