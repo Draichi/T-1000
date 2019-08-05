@@ -35,7 +35,7 @@ class TradingEnv(gym.Env):
         self.datapoints = config['datapoints']
         self.df_complete = config['df_complete']
         self.df_features = config['df_features']
-        self.shares_hold = {}
+        self.shares_held = {}
         self.shares_bought = {}
         self.shares_sold = {}
         self.first_prices = {}
@@ -48,7 +48,7 @@ class TradingEnv(gym.Env):
         # self.render_title = config['render_title']
         # self.lookback_window_size = LOOKBACK_WINDOW_SIZE
         self.initial_balance = INITIAL_ACCOUNT_BALANCE
-        # self.commission = COMMISSION
+        self.commission = COMMISSION
         # self.serial = False
 
         # action space = buy and sell for each asset, pĺus hold position
@@ -123,7 +123,7 @@ class TradingEnv(gym.Env):
         self.balance = INITIAL_ACCOUNT_BALANCE
         self.net_worth = INITIAL_ACCOUNT_BALANCE
         for asset in self.assets_list:
-            self.shares_hold[asset] = 0.0
+            self.shares_held[asset] = 0.0
             self.shares_bought[asset] = 0.0
             self.shares_sold[asset] = 0.0
 
@@ -132,7 +132,7 @@ class TradingEnv(gym.Env):
                                   for asset in self.assets_list])
         shares_sold = np.array([self.shares_sold[asset]
                                 for asset in self.assets_list])
-        shares_hold = np.array([self.shares_hold[asset]
+        shares_held = np.array([self.shares_held[asset]
                                 for asset in self.assets_list])
 
         current_row_of_all_dfs = np.concatenate([np.array(
@@ -145,7 +145,7 @@ class TradingEnv(gym.Env):
             self.net_worth
         ])
         observation = np.append(observation_without_shares, [
-                                shares_bought, shares_hold, shares_sold])
+                                shares_bought, shares_held, shares_sold])
         # print('\n', len(observation))
         # print(observation)
         # print('==============\n')
@@ -170,6 +170,27 @@ class TradingEnv(gym.Env):
             self._reset_shares_bought_n_sold()
             self._reset_cost_n_sales()
 
+# ! --
+            1 + len(self.assets_list) * 2
+# ! --      
+            not_bought_yet = True
+            not_sold_yet = True
+            for index, asset in enumerate(self.assets_list*2):
+                # buy
+                if action_type < index / 2 + 1 and self.balance >= self.balance * amount * (1 + self.commission) and not_bought_yet:
+                    self.shares_bought[asset] = self.balance * amount / self.current_price[asset]
+                    self.cost = self.shares_bought[asset] * self.current_price[asset] * (1 + self.commission)
+                    self.shares_held[asset] += self.shares_bought[asset]
+                    self.balance -= self.cost
+                    not_bought_yet = False
+                # sell
+                elif action_type < index + 1 and not_sold_yet:
+                    self.shares_sold[asset] = self.shares_held * amount
+                    self.sales = self.shares_sold[asset] * self.current_price[asset] * (1 - self.commission)
+                    self.shares_held[asset] -= self.shares_sold[asset]
+                    self.balance += self.sales
+                    not_sold_yet = False
+# ? revisar esse codigo acima
             # buy shares1
             # check if has enough money to trade
             if action_type < 1 and self.balance >= self.balance * amount * (1 + self.commission):
