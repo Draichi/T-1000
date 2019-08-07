@@ -146,10 +146,6 @@ class TradingEnv(gym.Env):
         ])
         observation = np.append(observation_without_shares, [
                                 shares_bought, shares_held, shares_sold])
-        # print('\n', len(observation))
-        # print(observation)
-        # print('==============\n')
-        # quit()/
         return observation
 
     def _compute_current_price(self):
@@ -192,15 +188,15 @@ class TradingEnv(gym.Env):
 
         action_type = action[0]
         amount = action[1]
-#  ! parei aqui
 
         # bounds of action_space doesn't seem to work, so this line is necessary to not overflow actions
         if 0 < amount <= 1 and action_type > 0:
 
             self._reset_shares_bought_n_sold()
             self._reset_cost_n_sales()
-
             self._buy_or_sell(action_type=action_type, amount=amount)
+
+            # ! continue
 
             if self.shares1_sold > 0 or self.shares1_bought > 0:
                 # only print in rollout mode
