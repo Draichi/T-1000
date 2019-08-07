@@ -183,6 +183,17 @@ class TradingEnv(gym.Env):
             elif action_type < index + 1 and not sold:
                 sold = self._sell(asset=asset, amount=amount)
 
+    def _compute_trade():
+        for asset in self.assets_list:
+            if self.shares_sold[asset] > 0 or self.shares_bought[asset] > 0:
+                self.trades[asset].append({
+                    'step': self.current_step,
+                    'amount': self.shares_sold[asset] if self.shares_sold[asset] > 0 else self.shares_bought[asset],
+                    'total': self.sales if self.shares_sold[asset] > 0 else self.cost,
+                    'type': 'sell' if self.shares_sold[asset] > 0 else 'buy'
+                })
+
+
     def _take_action(self, action):
         self._compute_current_price()
 
@@ -197,23 +208,7 @@ class TradingEnv(gym.Env):
             self._buy_or_sell(action_type=action_type, amount=amount)
 
             # ! continue
-
-            if self.shares1_sold > 0 or self.shares1_bought > 0:
-                # only print in rollout mode
-                # print(colored('{} BTC {} USDT - holding: {} BTC balance {} USDT'.format(self.shares1_bought, self.cost if self.shares1_bought > 0 else self.sales, self.shares1_held, self.balance), 'green' if self.shares1_bought > 0 else 'red'))
-                self.trades1.append({'step': self.current_step,
-                                     'amount': self.shares1_sold if self.shares1_sold > 0 else self.shares1_bought, 'total': self.sales if self.shares1_sold > 0 else self.cost,
-                                     'type': "sell" if self.shares1_sold > 0 else "buy"})
-            if self.shares2_sold > 0 or self.shares2_bought > 0:
-                # print(colored('{} ETH {} USDT - holding {} ETH balance: {} USDT'.format(self.shares2_bought, self.cost if self.shares2_bought > 0 else self.sales, self.shares2_held, self.balance), 'green' if self.shares2_bought > 0 else 'red'))
-                self.trades2.append({'step': self.current_step,
-                                     'amount': self.shares2_sold if self.shares2_sold > 0 else self.shares2_bought, 'total': self.sales if self.shares2_sold > 0 else self.cost,
-                                     'type': "sell" if self.shares2_sold > 0 else "buy"})
-            if self.shares3_sold > 0 or self.shares3_bought > 0:
-                # print(colored('{} LTC {} USDT - holding {} LTC balance: {} USDT'.format(self.shares3_bought, self.cost if self.shares3_bought > 0 else self.sales, self.shares3_held, self.balance), 'green' if self.shares3_bought > 0 else 'red'))
-                self.trades3.append({'step': self.current_step,
-                                     'amount': self.shares3_sold if self.shares3_sold > 0 else self.shares3_bought, 'total': self.sales if self.shares3_sold > 0 else self.cost,
-                                     'type': "sell" if self.shares3_sold > 0 else "buy"})
+            self._compute_trade()
 
         self.net_worth = self.balance + (self.shares1_held * current_price1) + (
             self.shares2_held * current_price2) + (self.shares3_held * current_price3)
