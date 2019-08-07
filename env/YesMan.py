@@ -157,6 +157,36 @@ class TradingEnv(gym.Env):
             self.current_price[asset] = random.uniform(self.df_features[asset].loc[self.current_step, 'open'],
                                                        self.df_features[asset].loc[self.current_step, 'close'])
 
+    def _buy(asset, amount):
+        self.shares_bought[asset] = self.balance * amount / self.current_price[asset]
+        self.cost = self.shares_bought[asset] * self.current_price[asset] * (1 + self.commission)
+        self.shares_held[asset] += self.shares_bought[asset]
+        self.balance -= self.cost
+        return True
+
+    def _sell(asset, amount):
+        self.shares_sold[asset] = self.shares_held * amount
+        self.sales = self.shares_sold[asset] * self.current_price[asset] * (1 - self.commission)
+        self.shares_held[asset] -= self.shares_sold[asset]
+        self.balance += self.sales
+        return True
+
+    def _can_buy(amount):
+        if self.balance >= self.balance * amount * (1 + self.commission):
+            return True
+        else:
+            return False
+
+    def _buy_or_sell(action_type, amount):
+        bought = False
+        sold = False
+        can_buy = self._can_buy(amount=amount)
+        for index, asset in enumerate(self.assets_list*2):
+            if action_type < index / 2 + 1 and can_buy and not bought:
+                bought = self._buy(asset=asset, amount=amount)
+            elif action_type < index + 1 and not sold:
+                sold = self._sell(asset=asset, amount=amount)
+
     def _take_action(self, action):
         self._compute_current_price()
 
@@ -170,74 +200,7 @@ class TradingEnv(gym.Env):
             self._reset_shares_bought_n_sold()
             self._reset_cost_n_sales()
 
-# ! --
-            1 + len(self.assets_list) * 2
-# ! --      
-            not_bought_yet = True
-            not_sold_yet = True
-            for index, asset in enumerate(self.assets_list*2):
-                # buy
-                if action_type < index / 2 + 1 and self.balance >= self.balance * amount * (1 + self.commission) and not_bought_yet:
-                    self.shares_bought[asset] = self.balance * amount / self.current_price[asset]
-                    self.cost = self.shares_bought[asset] * self.current_price[asset] * (1 + self.commission)
-                    self.shares_held[asset] += self.shares_bought[asset]
-                    self.balance -= self.cost
-                    not_bought_yet = False
-                # sell
-                elif action_type < index + 1 and not_sold_yet:
-                    self.shares_sold[asset] = self.shares_held * amount
-                    self.sales = self.shares_sold[asset] * self.current_price[asset] * (1 - self.commission)
-                    self.shares_held[asset] -= self.shares_sold[asset]
-                    self.balance += self.sales
-                    not_sold_yet = False
-# ? revisar esse codigo acima
-            # buy shares1
-            # check if has enough money to trade
-            if action_type < 1 and self.balance >= self.balance * amount * (1 + self.commission):
-                self.shares1_bought = self.balance * amount / current_price1
-                self.cost = self.shares1_bought * \
-                    current_price1 * (1 + self.commission)
-                self.shares1_held += self.shares1_bought
-                self.balance -= self.cost
-            # sell shares1
-            elif action_type < 2:
-                self.shares1_sold = self.shares1_held * amount
-                self.sales = self.shares1_sold * \
-                    current_price1 * (1 - self.commission)
-                self.shares1_held -= self.shares1_sold
-                self.balance += self.sales
-
-            # buy shares 2
-            # check if has enough money to trade
-            elif action_type < 3 and self.balance >= self.balance * amount * (1 + self.commission):
-                self.shares2_bought = self.balance * amount / current_price2
-                self.cost = self.shares2_bought * \
-                    current_price2 * (1 + self.commission)
-                self.shares2_held += self.shares2_bought
-                self.balance -= self.cost
-            # sell shares 2
-            elif action_type < 4:
-                self.shares2_sold = self.shares2_held * amount
-                self.sales = self.shares2_sold * \
-                    current_price2 * (1 - self.commission)
-                self.shares2_held -= self.shares2_sold
-                self.balance += self.sales
-
-            # buy shares 3
-            # check if has enough money to trade
-            elif action_type < 5 and self.balance >= self.balance * amount * (1 + self.commission):
-                self.shares3_bought = self.balance * amount / current_price3
-                self.cost = self.shares3_bought * \
-                    current_price3 * (1 + self.commission)
-                self.shares3_held += self.shares3_bought
-                self.balance -= self.cost
-            # sell shares 3
-            elif action_type < 6:
-                self.shares3_sold = self.shares3_held * amount
-                self.sales = self.shares3_sold * \
-                    current_price3 * (1 - self.commission)
-                self.shares3_held -= self.shares3_sold
-                self.balance += self.sales
+            self._buy_or_sell(action_type=action_type, amount=amount)
 
             if self.shares1_sold > 0 or self.shares1_bought > 0:
                 # only print in rollout mode
