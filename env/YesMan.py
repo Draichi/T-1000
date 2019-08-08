@@ -6,7 +6,7 @@ Lucas Draichi
 2019
 """
 
-from env.MultiModelRenderRank1V2 import StockTradingGraph
+from env.YesManRender import StockTradingGraph
 import random
 import json
 import gym
@@ -153,27 +153,30 @@ class TradingEnv(gym.Env):
             self.current_price[asset] = random.uniform(self.df_features[asset].loc[self.current_step, 'open'],
                                                        self.df_features[asset].loc[self.current_step, 'close'])
 
-    def _buy(asset, amount):
-        self.shares_bought[asset] = self.balance * amount / self.current_price[asset]
-        self.cost = self.shares_bought[asset] * self.current_price[asset] * (1 + self.commission)
+    def _buy(self, asset, amount):
+        self.shares_bought[asset] = self.balance * \
+            amount / self.current_price[asset]
+        self.cost = self.shares_bought[asset] * \
+            self.current_price[asset] * (1 + self.commission)
         self.shares_held[asset] += self.shares_bought[asset]
         self.balance -= self.cost
         return True
 
-    def _sell(asset, amount):
+    def _sell(self, asset, amount):
         self.shares_sold[asset] = self.shares_held * amount
-        self.sales = self.shares_sold[asset] * self.current_price[asset] * (1 - self.commission)
+        self.sales = self.shares_sold[asset] * \
+            self.current_price[asset] * (1 - self.commission)
         self.shares_held[asset] -= self.shares_sold[asset]
         self.balance += self.sales
         return True
 
-    def _can_buy(amount):
+    def _can_buy(self, amount):
         if self.balance >= self.balance * amount * (1 + self.commission):
             return True
         else:
             return False
 
-    def _buy_or_sell(action_type, amount):
+    def _buy_or_sell(self, action_type, amount):
         bought = False
         sold = False
         can_buy = self._can_buy(amount=amount)
@@ -183,7 +186,7 @@ class TradingEnv(gym.Env):
             elif action_type < index + 1 and not sold:
                 sold = self._sell(asset=asset, amount=amount)
 
-    def _compute_trade():
+    def _compute_trade(self):
         for asset in self.assets_list:
             if self.shares_sold[asset] > 0 or self.shares_bought[asset] > 0:
                 self.trades[asset].append({
@@ -193,27 +196,32 @@ class TradingEnv(gym.Env):
                     'type': 'sell' if self.shares_sold[asset] > 0 else 'buy'
                 })
 
+    def _compute_net_worth(self):
+        self.net_worth = self.balance
+        for asset in self.assets_list:
+            self.net_worth += self.shares_held[asset] * \
+                self.current_price[asset]
+
+    def _compute_buy_n_hold_strategy(self):
+        buy_and_hold = 0
+        for asset in self.assets_list:
+            buy_n_hold += self.initial_bought[asset] * \
+                self.current_price[asset]
+        self.buy_and_hold = buy_and_hold
 
     def _take_action(self, action):
         self._compute_current_price()
-
         action_type = action[0]
         amount = action[1]
-
         # bounds of action_space doesn't seem to work, so this line is necessary to not overflow actions
         if 0 < amount <= 1 and action_type > 0:
-
             self._reset_shares_bought_n_sold()
             self._reset_cost_n_sales()
             self._buy_or_sell(action_type=action_type, amount=amount)
-
-            # ! continue
             self._compute_trade()
 
-        self.net_worth = self.balance + (self.shares1_held * current_price1) + (
-            self.shares2_held * current_price2) + (self.shares3_held * current_price3)
-        self.buy_and_hold = self.initial_bought1 * current_price1 + \
-            self.initial_bought2 * current_price2 + self.initial_bought3 * current_price3
+        self._compute_net_worth()
+        self._compute_buy_n_hold_strategy()
 
     def _render_to_file(self, filename='render.txt'):
         profit = self.net_worth - INITIAL_ACCOUNT_BALANCE
@@ -222,9 +230,7 @@ class TradingEnv(gym.Env):
 
         file.write('Step: {}\n'.format(self.current_step))
         file.write('Balance: {}\n'.format(self.balance))
-        file.write('Shares1 held: {}\n'.format(self.shares1_held))
-        file.write('Shares2 held: {}\n'.format(self.shares2_held))
-        file.write('Shares3 held: {}\n'.format(self.shares3_held))
+        file.write('Shares held: {}\n'.format(self.shares_held))
         file.write('Avg cost for held shares: {}\n'.format(self.cost))
         file.write('Net worth: {}\n'.format(self.net_worth))
         file.write('Buy and hold strategy: {}\n'.format(self.buy_and_hold))
@@ -239,6 +245,8 @@ class TradingEnv(gym.Env):
 
         elif mode == 'live':
             if self.visualization == None:
+                # ! continuear
+                self.visualization = StockTradingGraph(df_complete=self.df_complete)
                 self.visualization = StockTradingGraph(self.df1,
                                                        self.df2,
                                                        self.df3,
