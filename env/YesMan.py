@@ -59,8 +59,8 @@ class TradingEnv(gym.Env):
             high=np.array([action_space, 1]),
             dtype=np.float16)
 
-        first_asset_of_list = self.assets[0][0]
-        first_df_columns = self.df_features[first_asset_of_list].columns
+        # first_asset_of_list = self.assets[0][0]
+        first_df_columns = self.df_features[self.assets_list[0]].columns
         # obs space = (number of columns * number of assets) + 4 (balance, cost, sales, net_worth) + (number of assets * 3 (shares bought, shares sold, shares held))
         observation_space = (len(first_df_columns) *
                              len(self.assets_list)) + 4 + (len(self.assets_list) * 3)
@@ -90,7 +90,7 @@ class TradingEnv(gym.Env):
         reward = (self.net_worth - self.buy_and_hold) / \
             net_worth_and_buyhold_mean
         done = self.net_worth <= 0 or self.balance <= 0 or self.current_step >= len(
-            self.df1_features.loc[:, 'open'].values) - 1
+            self.df_features[self.assets_list[0]].loc[:, 'open'].values) - 1
         obs = self._next_observation()
 
         return obs, reward, done, {}
@@ -163,7 +163,7 @@ class TradingEnv(gym.Env):
         return True
 
     def _sell(self, asset, amount):
-        self.shares_sold[asset] = self.shares_held * amount
+        self.shares_sold[asset] = self.shares_held[asset] * amount
         self.sales = self.shares_sold[asset] * \
             self.current_price[asset] * (1 - self.commission)
         self.shares_held[asset] -= self.shares_sold[asset]
@@ -205,7 +205,7 @@ class TradingEnv(gym.Env):
     def _compute_buy_n_hold_strategy(self):
         buy_and_hold = 0
         for asset in self.assets_list:
-            buy_n_hold += self.initial_bought[asset] * \
+            buy_and_hold += self.initial_bought[asset] * \
                 self.current_price[asset]
         self.buy_and_hold = buy_and_hold
 
