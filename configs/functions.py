@@ -9,6 +9,8 @@ import talib
 import os
 import colorama
 import requests
+import emoji
+import random
 import pandas as pd
 import numpy as np
 from termcolor import colored
@@ -30,6 +32,7 @@ def get_datasets(asset, currency, granularity, datapoints):
     """
     df_train_path = 'datasets/bot_train_{}_{}_{}.csv'.format(asset + currency, datapoints, granularity)
     df_rollout_path = 'datasets/bot_rollout_{}_{}_{}.csv'.format(asset + currency, datapoints, granularity)
+    emojis = [':moneybag:', ':yen:', ':dollar:', ':pound:', ':euro:', ':credit_card:', ':money_with_wings:', ':gem:']
 
     if not os.path.exists(df_rollout_path):
         headers = {'User-Agent': 'Mozilla/5.0', 'authorization': 'Apikey 3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'}
@@ -37,7 +40,9 @@ def get_datasets(asset, currency, granularity, datapoints):
         # OHLC
         # url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym={}&e=Binance&limit={}'.format(granularity, asset, currency, datapoints)
         url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym={}&limit={}'.format(granularity, asset, currency, datapoints)
-        print(colored('> downloading ' + asset + '/' + currency, 'green'))
+        # print(emoji.emojize(':dizzy: :large_blue_diamond: :gem: :bar_chart: :crystal_ball: :chart_with_downwards_trend: :chart_with_upwards_trend: :large_orange_diamond: loading...', use_aliases=True))
+        print(colored(emoji.emojize('> ' + random.choice(emojis) + ' downloading ' + asset + '/' + currency, use_aliases=True), 'green'))
+        # print(colored('> downloading ' + asset + '/' + currency, 'green'))
         response = requests.get(url, headers=headers)
         json_response = response.json()
         status = json_response['Response']
@@ -128,7 +133,10 @@ def get_datasets(asset, currency, granularity, datapoints):
         df_train = pd.read_csv(df_train_path) # re-read to avoid indexing issue w/ Ray
         df_rollout = pd.read_csv(df_rollout_path)
     else:
-        print(colored('> feching ' + asset + '/' + currency + ' from cache :)', 'magenta'))
+
+        print(colored(emoji.emojize('> '+ random.choice(emojis) + ' feching ' + asset + '/' + currency + ' from cache', use_aliases=True), 'magenta'))
+
+        # print(colored('> feching ' + asset + '/' + currency + ' from cache :)', 'magenta'))
         df_train = pd.read_csv(df_train_path)
         df_rollout = pd.read_csv(df_rollout_path)
         # df_train.set_index('Date', inplace=True)

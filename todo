@@ -9,7 +9,7 @@
 
 
 
-
+share yes man env https://docs.anaconda.com/anaconda-cloud/user-guide/tasks/work-with-environments/
 
 
 if __name__ == '__main__':
