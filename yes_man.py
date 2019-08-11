@@ -91,16 +91,17 @@ class Trade:
         #     stop={'timesteps_total': timesteps},
         #     checkpoint_freq=100,
         #     config=self.config_spec)
-
+        experiment_name = 'agora_vai'
         config_spec = {
-            "vai": {
+            experiment_name: {
                 "run": "PPO",
                 "env": "YesMan-v1",
                 "stop": {
                     "timesteps_total": 1e6,  # 1e6 = 1M
                 },
-                "checkpoint_freq": 100,
+                "checkpoint_freq": 10,
                 "checkpoint_at_end": True,
+                "local_dir": os.getcwd() + '/logs',
                 "config": {
                     "lr_schedule": grid_search(lr_schedule),
                     'num_workers': 1,  # parallelism
@@ -119,9 +120,9 @@ class Trade:
         }
 
         for asset in self.assets:
-            config_spec['vai']['config']['env_config']['df_complete'][asset] = self.df[asset]['train']
-            config_spec['vai']['config']['env_config']['df_features'][asset] = self.df[asset]['train'].loc[:,
-                                                                                                 self.df[asset]['train'].columns != 'Date']
+            config_spec[experiment_name]['config']['env_config']['df_complete'][asset] = self.df[asset]['train']
+            config_spec[experiment_name]['config']['env_config']['df_features'][asset] = self.df[asset]['train'].loc[:,
+                                                                                                           self.df[asset]['train'].columns != 'Date']
         run_experiments(experiments=config_spec)
 
     def run(self, args, num_steps):
@@ -151,25 +152,16 @@ class Trade:
 
         cls = get_agent_class(args['run'])
         agent = cls(env=args['env'], config=config)
+        print(args['checkpoint'])
         agent.restore(args['checkpoint'])
         num_steps = int(len(num_steps))
-        rollout(agent, args['env'], num_steps, args['out'], args['no_render'])
+        self.rollout(agent, args['env'], num_steps)
 
-
-    class DefaultMapping(collections.defaultdict):
-        """default_factory now takes as an argument the missing key."""
-
-        def __missing__(self, key):
-            self[key] = value = self.default_factory(key)
-            return value
-
-
-    def default_policy_agent_mapping(unused_agent_id):
+    def default_policy_agent_mapping(self):
         return DEFAULT_POLICY_ID
 
-
-    def rollout(agent, env_name, num_steps, out=None, no_render=True):
-        policy_agent_mapping = default_policy_agent_mapping
+    def rollout(self, agent, env_name, num_steps, out=None, no_render=True):
+        policy_agent_mapping = self.default_policy_agent_mapping()
 
         if hasattr(agent, "local_evaluator"):
             env = agent.local_evaluator.env
@@ -179,7 +171,8 @@ class Trade:
                     "policy_mapping_fn"]
 
             policy_map = agent.local_evaluator.policy_map
-            state_init = {p: m.get_initial_state() for p, m in policy_map.items()}
+            state_init = {p: m.get_initial_state()
+                          for p, m in policy_map.items()}
             use_lstm = {p: len(s) > 0 for p, s in state_init.items()}
             action_init = {
                 p: m.action_space.sample()
@@ -263,7 +256,7 @@ class Trade:
             'currency': self.currency,
             'granularity': self.granularity,
             'datapoints': self.datapoints,
-            'df_complete': self.df,
+            'df_complete': {},
             'df_features': {},
             # "df1": df1,
             # "df2": df2,
@@ -275,6 +268,10 @@ class Trade:
             # "render_title": 'Back testing',
             # "histo": HISTO
         }
+        for asset in self.assets:
+            config['df_complete'][asset] = self.df[asset]['rollout']
+            config['df_features'][asset] = self.df[asset]['rollout'].loc[:,
+                                                                         self.df[asset]['rollout'].columns != 'Date']
         # ! error here
         # !   File "/home/lucas/Documents/cryptocurrency_prediction/env/YesMan.py", line 63, in __init__
             # ! first_df_columns = self.df_features[self.assets_list[0]].columns
@@ -287,3 +284,10 @@ class Trade:
             'config': {}
         }
         self.run(args, self.df[self.assets[0]]['rollout'])
+
+class DefaultMapping(collections.defaultdict):
+    """default_factory now takes as an argument the missing key."""
+
+    def __missing__(self, key):
+        self[key] = value = self.default_factory(key)
+        return value

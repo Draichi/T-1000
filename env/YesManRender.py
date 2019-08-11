@@ -29,6 +29,7 @@ class StockTradingGraph:
     """A stock trading visualization using matplotlib made to render OpenAI gym environments"""
 
     def __init__(self, df1, df2, df3, render_title, histo, s1, s2, s3, trade_instrument):
+        print('oiii')
         self.df1 = df1
         self.df2 = df2
         self.df3 = df3

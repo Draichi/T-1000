@@ -26,4 +26,4 @@ if __name__ == '__main__':
     #               ]
     #           ],
     #           algo='PPO')
-    env.backtest(checkpoint_file='/home/lucas/ray_results/vai/PPO_YesMan-v1_1_lr_schedule=[[0, 6e-05], [100, 6e-06]]_2019-08-10_13-14-42nsy2n_63')
+    env.backtest(checkpoint_file='logs/agora_vai/PPO_YesMan-v1_1_lr_schedule=_2019-08-10_22-07-544zdnasyx/checkpoint_20/checkpoint-20')
