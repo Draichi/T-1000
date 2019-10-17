@@ -1,20 +1,14 @@
 if __name__ == '__main__':
-    import emoji
-    import random
-    from termcolor import colored
-    emojis = [':fire:', ':moneybag:', ':yen:', ':dollar:', ':pound:', ':floppy_disk:', ':euro:', ':credit_card:', ':money_with_wings:', ':large_blue_diamond:', ':gem:', ':bar_chart:', ':crystal_ball:', ':chart_with_downwards_trend:', ':chart_with_upwards_trend:', ':large_orange_diamond:']
+    from utils import random_emojis
+    random_emojis()
+    from core_main import Nostradamus
+    env = Nostradamus(assets=['OMG','BTC','ETH'],
+                      currency='USDT',
+                      granularity='day',
+                      datapoints=600)
 
-
-    print(colored('> ' + emoji.emojize(random.choice(emojis) + ' loading...', use_aliases=True), 'green'))
-    # print(emoji.emojize(':fire: :moneybag: :yen: :dollar: :pound: :floppy_disk: :euro: :credit_card: :money_with_wings:', use_aliases=True))
-    import yes_man
-    env = yes_man.Trade(assets=['OMG','BTC','ETH'],
-                        currency='USDT',
-                        granularity='hour',
-                        datapoints=100)
-
-    # env.train(timesteps=3e10,
-    #           checkpoint_freq=30,
+    # env.train(timesteps=5e4,
+    #           checkpoint_freq=10,
     #           lr_schedule=[
     #               [
     #                   [0, 7e-5],  # [timestep, lr]
@@ -26,4 +20,4 @@ if __name__ == '__main__':
     #               ]
     #           ],
     #           algo='PPO')
-    env.backtest(checkpoint_file='logs/agora_vai/PPO_YesMan-v1_1_lr_schedule=_2019-08-10_22-07-544zdnasyx/checkpoint_20/checkpoint-20')
+    env.backtest(checkpoint_path='/home/lucas/Documents/new_nostradamus/results/teste_do_rollout/1_2019-10-05_20-45-58nxzjv1tc/checkpoint_10/checkpoint-10')

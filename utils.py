@@ -1,24 +1,24 @@
-"""Functions used to preprocess the timeseries
-
-Lucas Draichi
-2019
-"""
+import emoji
+import random
+from termcolor import colored
 
 import datetime
 import talib
 import os
 import colorama
 import requests
-import emoji
-import random
 import pandas as pd
 import numpy as np
-from termcolor import colored
-from configs.vars import DF_TRAIN_SIZE
-
+emojis = [':fire:', ':moneybag:', ':yen:', ':dollar:', ':pound:', ':floppy_disk:', ':euro:', ':credit_card:', ':money_with_wings:', ':large_blue_diamond:', ':gem:', ':bar_chart:', ':crystal_ball:', ':chart_with_downwards_trend:', ':chart_with_upwards_trend:', ':large_orange_diamond:']
 colorama.init()
 
-def get_datasets(asset, currency, granularity, datapoints):
+def random_emojis():
+    print(colored('> ' + emoji.emojize(random.choice(emojis) + ' loading...', use_aliases=True), 'green'))
+    # print(emoji.emojize(':fire: :moneybag: :yen: :dollar: :pound: :floppy_disk: :euro: :credit_card: :money_with_wings:', use_aliases=True))
+
+
+
+def get_datasets(asset, currency, granularity, datapoints, df_train_size=0.75):
     """Fetch the API and precess the desired pair
 
     Arguments:
@@ -125,7 +125,7 @@ def get_datasets(asset, currency, granularity, datapoints):
         df.dropna(inplace=True)
         df.set_index('Date', inplace=True)
         print(colored('> caching' + asset + '/' + currency + ':)', 'cyan'))
-        train_size = round(len(df) * DF_TRAIN_SIZE) # 75% to train -> test with different value
+        train_size = round(len(df) * df_train_size) # 75% to train -> test with different value
         df_train = df[:train_size]
         df_rollout = df[train_size:]
         df_train.to_csv(df_train_path)
@@ -143,33 +143,3 @@ def get_datasets(asset, currency, granularity, datapoints):
         # df_rollout.set_index('Date', inplace=True)
 
     return df_train, df_rollout
-
-#------------------------------------------------------------->
-
-def print_dollar():
-    print(chr(27) + "[2J")
-    print(colored("""
-||====================================================================||
-||//$\\\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\//$\\\||
-||(100)==================| FEDERAL RESERVE NOTE |================(100)||
-||\\\$//        ~         '------========--------'                \\\$//||
-||<< /        /$\              // ____ \\\                         \ >>||
-||>>|  12    //L\\\            // ///..) \\\         L38036133B   12 |<<||
-||<<|        \\\ //           || <||  >\  ||                        |>>||
-||>>|         \$/            ||  $$ --/  ||        One Hundred     |<<||
-||====================================================================||>||
-||//$\\\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\//$\\\||<||
-||(100)==================| FEDERAL RESERVE NOTE |================(100)||>||
-||\\\$//        ~         '------========--------'                \\\$//||\||
-||<< /        /$\              // ____ \\\                         \ >>||)||
-||>>|  12    //L\\\            // ///..) \\\         L38036133B   12 |<<||/||
-||<<|        \\\ //           || <||  >\  ||                        |>>||=||
-||>>|         \$/            ||  $$ --/  ||        One Hundred     |<<||
-||<<|      L38036133B        *\\\  |\_/  //* series                 |>>||
-||>>|  12                     *\\\/___\_//*   1989                  |<<||
-||<<\      Treasurer     ______/Franklin\________     Secretary 12 />>||
-||//$\                 ~|UNITED STATES OF AMERICA|~               /$\\\||
-||(100)===================  ONE HUNDRED DOLLARS =================(100)||
-||\\\$//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\$//||
-||====================================================================||
-    """, 'green', attrs=['bold']))

@@ -1,7 +1,4 @@
-# *.pkl
-# /docs/*.html
-/datasets/*.csv
-__pycache__
-.vscode
-/models
-/logs/**
+**/__pycache__
+*.csv
+/.vscode
+/results/*
