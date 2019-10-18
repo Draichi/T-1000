@@ -10,19 +10,17 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ebdf89dcba744a3c8aafdda210d3aeb6)](https://app.codacy.com/app/Draichi/cryptocurrency_prediction?utm_source=github.com&utm_medium=referral&utm_content=Draichi/cryptocurrency_prediction&utm_campaign=Badge_Grade_Dashboard)
 
-![gif](<>)
+![gif](assets/t-1000.gif)
 
-Deep reinforcement learning multi-agent algorithmic trading framework
+Deep reinforcement learning multi-agent algorithmic trading framework that learns to trade from experience and then evaluate with brand new data
 
 * * *
-
-![t-1000 illustration](<>)
-
-> "It just needs to touch something to mimic it." - Sarah Connor, about the T-1000
 
 ## Prerequisites
 
 -   [Miniconda](https://conda.io/docs/user-guide/install/index.html) or Anaconda
+
+* * *
 
 ## Setup
 
@@ -79,10 +77,24 @@ T_1000 = CreateEnv(assets=['OMG','BTC','ETH'],
 T_1000.backtest(checkpoint_path='path/to/checkpoint_file/checkpoint-400')
 ```
 
+* * *
 
-![algorithms](imgs/Screenshot_tensorflow.png)
+## Features
+<img src="assets/t-1000.png" align="right"
+     title="T-1000 from terminator" width="100">
 
-### Monitoring
+- state of the art [agents](https://ray.readthedocs.io/en/latest/rllib-algorithms.html)
+- hyperparam grid search
+- multi agent parallelization
+- learning rate schedule
+- result [analysis](https://ray.readthedocs.io/en/latest/tune-package-ref.html#ray.tune.Analysis)
+
+
+> "It just needs to touch something to mimic it." - [Sarah Connor, about the T-1000](https://terminator.fandom.com/wiki/T-1000)
+* * *
+
+
+## Monitoring
 
 Some nice tools to keep an eye while your agent train are (of course) `tensorboard`, `gpustat` and `htop`
 
@@ -91,11 +103,12 @@ Some nice tools to keep an eye while your agent train are (of course) `tensorboa
 $ tensorboard --logdir=./results
 
 # show how your gpu is going
-gpustat -i
+$ gpustat -i
 
 # show how your cpu and ram are going
-htop
+$ htop
 ```
+* * *
 
 ## Customizing
 
@@ -109,9 +122,13 @@ Edit the commision and initial balance values in `/variables.json`
 -   [Analyzing cryptocurrency markets using python](https://blog.patricktriest.com/analyzing-cryptocurrencies-python/)
 -   [Q-trader](https://github.com/edwardhdlu/q-trader)
 -   [Trading-Gym](https://github.com/thedimlebowski/Trading-Gym)
--   [Adam King](https://towardsdatascience.com/@notadamking)
+-   [Tensor Trade](https://github.com/notadamking/tensortrade)
 
 * * *
+
+## To do
+
+- [ ] Bind the agent's output with an exchange place order API
 
 <div style="text-align:center">
   <img src="https://img.shields.io/badge/fork_it,_fix_it-open_pull_request-101947.svg?colorA=104047&longCache=true&style=for-the-badge"/>

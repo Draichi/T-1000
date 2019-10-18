@@ -94,7 +94,7 @@ class GraphGenerator:
         self.net_worth_ax.bar(x, y, color=[BUY_N_HOLD_COLOR, BOT_COLOR])
         self.net_worth_ax.set_title(
             "Net Worth ({})".format(self.currency))
-        self.net_worth_ax.set_xticklabels(('oi', 'HODL', 'oi', 'Bot'))
+        self.net_worth_ax.set_xticklabels(('', 'HODL', '', 'T-1000'))
 
         # Annotate the current net worth on the net worth graph
         self.net_worth_ax.annotate("{0:.2f}".format(buy_and_hold),
