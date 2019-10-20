@@ -83,16 +83,15 @@ T_1000.backtest(checkpoint_path='path/to/checkpoint_file/checkpoint-400')
 <img src="assets/t-1000.png" align="right"
      title="T-1000 from terminator" width="100">
 
-- state of the art [agents](https://ray.readthedocs.io/en/latest/rllib-algorithms.html)
-- hyperparam grid search
-- multi agent parallelization
-- learning rate schedule
-- result [analysis](https://ray.readthedocs.io/en/latest/tune-package-ref.html#ray.tune.Analysis)
-
+-   state of the art [agents](https://ray.readthedocs.io/en/latest/rllib-algorithms.html)
+-   hyperparam grid search
+-   multi agent parallelization
+-   learning rate schedule
+-   result [analysis](https://ray.readthedocs.io/en/latest/tune-package-ref.html#ray.tune.Analysis)
 
 > "It just needs to touch something to mimic it." - [Sarah Connor, about the T-1000](https://terminator.fandom.com/wiki/T-1000)
-* * *
 
+* * *
 
 ## Monitoring
 
@@ -128,7 +127,7 @@ Edit the commision and initial balance values in `/variables.json`
 
 ## To do
 
-- [ ] Bind the agent's output with an exchange place order API
+-   [ ] Bind the agent's output with an exchange place order API
 
 <div style="text-align:center">
   <img src="https://img.shields.io/badge/fork_it,_fix_it-open_pull_request-101947.svg?colorA=104047&longCache=true&style=for-the-badge"/>
