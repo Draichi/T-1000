@@ -23,7 +23,7 @@ def trial_name_string(trial):
     return str('1')
 
 
-def default_policy_agent_mapping():
+def default_policy_agent_mapping(_):
     return DEFAULT_POLICY_ID
 
 
@@ -174,13 +174,13 @@ class Nostradamus:
         self.populate_dfs()
 
     def check_variables_integrity(self):
-        if isinstance(self.assets) != list or len(self.assets) == 0:
+        if type(self.assets) != list or len(self.assets) == 0:
             raise ValueError("Incorrect 'assets' value")
-        if isinstance(self.currency) != str:
+        if type(self.currency) != str:
             raise ValueError("Incorrect 'currency' value")
-        if isinstance(self.granularity) != str:
+        if type(self.granularity) != str:
             raise ValueError("Incorrect 'granularity' value")
-        if isinstance(self.datapoints) != int or 1 > self.datapoints > 2000:
+        if type(self.datapoints) != int or 1 > self.datapoints > 2000:
             raise ValueError("Incorrect 'datapoints' value")
 
     def populate_dfs(self):
@@ -270,7 +270,7 @@ class Nostradamus:
 
         self.generate_config_spec(lr_schedule=lr_schedule, df_type='train')
 
-        run(name="teste_do_rollout",
+        run(name="t-100_test",
             run_or_experiment=algo,
             stop={'timesteps_total': timesteps},
             checkpoint_freq=checkpoint_freq,

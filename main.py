@@ -12,12 +12,12 @@ if __name__ == '__main__':
     #           lr_schedule=[
     #               [
     #                   [0, 7e-5],  # [timestep, lr]
-    #                   [100, 7e-6],
+    #                   [5e4, 7e-6],
     #               ],
     #               [
     #                   [0, 6e-5],
-    #                   [100, 6e-6],
+    #                   [5e4, 6e-6],
     #               ]
     #           ],
     #           algo='PPO')
-    env.backtest(checkpoint_path='/home/lucas/Documents/new_nostradamus/results/teste_do_rollout/1_2019-10-05_20-45-58nxzjv1tc/checkpoint_10/checkpoint-10')
+    env.backtest(checkpoint_path='results/t-100_test/1_2019-10-22_23-26-05tgaq0nft/checkpoint_10/checkpoint-10')
