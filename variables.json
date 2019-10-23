@@ -1,0 +1,9 @@
+{
+  "candlestick_width": {
+    "day": 1,
+    "hour": 0.4,
+    "minute": 0.0006
+  },
+  "initial_account_balance": 1000,
+  "commission": 0.00075
+}

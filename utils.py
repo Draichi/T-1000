@@ -1,8 +1,6 @@
-"""Functions used to preprocess the timeseries
-
-Lucas Draichi
-2019
-"""
+import emoji
+import random
+from termcolor import colored
 
 import datetime
 import talib
@@ -11,33 +9,40 @@ import colorama
 import requests
 import pandas as pd
 import numpy as np
-from termcolor import colored
-from configs.vars import DF_TRAIN_SIZE
-
+emojis = [':fire:', ':moneybag:', ':yen:', ':dollar:', ':pound:', ':floppy_disk:', ':euro:', ':credit_card:', ':money_with_wings:', ':large_blue_diamond:', ':gem:', ':bar_chart:', ':crystal_ball:', ':chart_with_downwards_trend:', ':chart_with_upwards_trend:', ':large_orange_diamond:']
 colorama.init()
 
-def get_datasets(symbol, to_symbol, histo, limit):
+def random_emojis():
+    print(colored('> ' + emoji.emojize(random.choice(emojis) + ' loading...', use_aliases=True), 'green'))
+    # print(emoji.emojize(':fire: :moneybag: :yen: :dollar: :pound: :floppy_disk: :euro: :credit_card: :money_with_wings:', use_aliases=True))
+
+
+
+def get_datasets(asset, currency, granularity, datapoints, df_train_size=0.75):
     """Fetch the API and precess the desired pair
 
     Arguments:
-        symbol {str} -- First pair
-        to_symbol {str} -- Second pair
-        histo {str ['day', 'hour']} -- Granularity
-        limit {int [100 - 2000]} -- [description]
+        asset {str} -- First pair
+        currency {str} -- Second pair
+        granularity {str ['day', 'hour']} -- Granularity
+        datapoints {int [100 - 2000]} -- [description]
 
     Returns:
         pandas.Dataframe -- The OHLCV and indicators dataframe
     """
-    df_train_path = 'datasets/bot_train_{}_{}_{}.csv'.format(symbol + to_symbol, limit, histo)
-    df_rollout_path = 'datasets/bot_rollout_{}_{}_{}.csv'.format(symbol + to_symbol, limit, histo)
+    df_train_path = 'datasets/bot_train_{}_{}_{}.csv'.format(asset + currency, datapoints, granularity)
+    df_rollout_path = 'datasets/bot_rollout_{}_{}_{}.csv'.format(asset + currency, datapoints, granularity)
+    emojis = [':moneybag:', ':yen:', ':dollar:', ':pound:', ':euro:', ':credit_card:', ':money_with_wings:', ':gem:']
 
-    if not os.path.exists(df_train_path):
+    if not os.path.exists(df_rollout_path):
         headers = {'User-Agent': 'Mozilla/5.0', 'authorization': 'Apikey 3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'}
 
         # OHLC
-        # url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym={}&e=Binance&limit={}'.format(histo, symbol, to_symbol, limit)
-        url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym={}&limit={}'.format(histo, symbol, to_symbol, limit)
-        print(colored('> downloading ' + symbol + '/' + to_symbol + ' OHLCV', 'green'))
+        # url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym={}&e=Binance&limit={}'.format(granularity, asset, currency, datapoints)
+        url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym={}&limit={}'.format(granularity, asset, currency, datapoints)
+        # print(emoji.emojize(':dizzy: :large_blue_diamond: :gem: :bar_chart: :crystal_ball: :chart_with_downwards_trend: :chart_with_upwards_trend: :large_orange_diamond: loading...', use_aliases=True))
+        print(colored(emoji.emojize('> ' + random.choice(emojis) + ' downloading ' + asset + '/' + currency, use_aliases=True), 'green'))
+        # print(colored('> downloading ' + asset + '/' + currency, 'green'))
         response = requests.get(url, headers=headers)
         json_response = response.json()
         status = json_response['Response']
@@ -46,6 +51,7 @@ def get_datasets(symbol, to_symbol, histo, limit):
             raise AssertionError()
         result = json_response['Data']
         df = pd.DataFrame(result)
+        print(df.tail())
         df['Date'] = pd.to_datetime(df['time'], utc=True, unit='s')
         df.drop('time', axis=1, inplace=True)
 
@@ -118,7 +124,8 @@ def get_datasets(symbol, to_symbol, histo, limit):
         # df.fillna(df.mean(), inplace=True)
         df.dropna(inplace=True)
         df.set_index('Date', inplace=True)
-        train_size = round(len(df) * DF_TRAIN_SIZE) # 75% to train -> test with different value
+        print(colored('> caching' + asset + '/' + currency + ':)', 'cyan'))
+        train_size = round(len(df) * df_train_size) # 75% to train -> test with different value
         df_train = df[:train_size]
         df_rollout = df[train_size:]
         df_train.to_csv(df_train_path)
@@ -126,40 +133,13 @@ def get_datasets(symbol, to_symbol, histo, limit):
         df_train = pd.read_csv(df_train_path) # re-read to avoid indexing issue w/ Ray
         df_rollout = pd.read_csv(df_rollout_path)
     else:
-        print(colored('> feching ' + symbol + '/' + to_symbol + ' from cache OHLCV', 'magenta'))
+
+        print(colored(emoji.emojize('> '+ random.choice(emojis) + ' feching ' + asset + '/' + currency + ' from cache', use_aliases=True), 'magenta'))
+
+        # print(colored('> feching ' + asset + '/' + currency + ' from cache :)', 'magenta'))
         df_train = pd.read_csv(df_train_path)
         df_rollout = pd.read_csv(df_rollout_path)
         # df_train.set_index('Date', inplace=True)
         # df_rollout.set_index('Date', inplace=True)
 
     return df_train, df_rollout
-
-#------------------------------------------------------------->
-
-def print_dollar():
-    print(chr(27) + "[2J")
-    print(colored("""
-||====================================================================||
-||//$\\\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\//$\\\||
-||(100)==================| FEDERAL RESERVE NOTE |================(100)||
-||\\\$//        ~         '------========--------'                \\\$//||
-||<< /        /$\              // ____ \\\                         \ >>||
-||>>|  12    //L\\\            // ///..) \\\         L38036133B   12 |<<||
-||<<|        \\\ //           || <||  >\  ||                        |>>||
-||>>|         \$/            ||  $$ --/  ||        One Hundred     |<<||
-||====================================================================||>||
-||//$\\\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\//$\\\||<||
-||(100)==================| FEDERAL RESERVE NOTE |================(100)||>||
-||\\\$//        ~         '------========--------'                \\\$//||\||
-||<< /        /$\              // ____ \\\                         \ >>||)||
-||>>|  12    //L\\\            // ///..) \\\         L38036133B   12 |<<||/||
-||<<|        \\\ //           || <||  >\  ||                        |>>||=||
-||>>|         \$/            ||  $$ --/  ||        One Hundred     |<<||
-||<<|      L38036133B        *\\\  |\_/  //* series                 |>>||
-||>>|  12                     *\\\/___\_//*   1989                  |<<||
-||<<\      Treasurer     ______/Franklin\________     Secretary 12 />>||
-||//$\                 ~|UNITED STATES OF AMERICA|~               /$\\\||
-||(100)===================  ONE HUNDRED DOLLARS =================(100)||
-||\\\$//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\$//||
-||====================================================================||
-    """, 'green', attrs=['bold']))
