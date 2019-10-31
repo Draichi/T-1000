@@ -14,7 +14,6 @@ from ray.rllib.env.base_env import _DUMMY_AGENT_ID
 from ray.rllib.evaluation.episode import _flatten_action
 from ray.rllib.policy.sample_batch import DEFAULT_POLICY_ID
 
-
 def find_results_folder():
     return os.getcwd() + '/results'
 
@@ -159,7 +158,6 @@ class DefaultMapping(collections.defaultdict):
         self[key] = value = self.default_factory(key)
         return value
 
-
 class Nostradamus:
 
     def __init__(self, assets, currency, granularity, datapoints):
@@ -237,18 +235,10 @@ class Nostradamus:
             'variables': variables
         }
 
-        df = {}
         for asset in assets:
-            df[asset] = {}
-            _, df[asset]['rollout'] = get_datasets(asset=asset,
-                                                   currency=currency,
-                                                   granularity=granularity,
-                                                   datapoints=datapoints)
-
-        for asset in assets:
-            config['df_complete'][asset] = df[asset]['rollout']
-            config['df_features'][asset] = df[asset]['rollout'].loc[:,
-                                                                    df[asset]['rollout'].columns != 'Date']
+            config['df_complete'][asset] = self.df[asset]['rollout']
+            config['df_features'][asset] = self.df[asset]['rollout'].loc[:,
+                                                                    self.df[asset]['rollout'].columns != 'Date']
 
         env_name = 'YesMan-v1'
 

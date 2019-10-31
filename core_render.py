@@ -49,17 +49,17 @@ class GraphGenerator:
 
         self.price_axs = {}
         self.volume_axs = {}
-        rowspan = 3
+        rowspan = len(assets)
         colspan = 4  # ! idk
         canvas_x_size = len(assets) * rowspan
         canvas_y_size = len(assets) + 2  # ? + balance and net_worth
 
         self.net_worth_ax = plt.subplot2grid(
-            (canvas_x_size, canvas_y_size), (0, 4), rowspan=4, colspan=1)
+            (canvas_x_size, canvas_y_size), (0, colspan), rowspan=4, colspan=1)
         self.net_worth_ax.yaxis.tick_right()
 
         self.balance_ax = plt.subplot2grid(
-            (canvas_x_size, canvas_y_size), (5, 4), rowspan=4, colspan=1)
+            (canvas_x_size, canvas_y_size), (5, colspan), rowspan=4, colspan=1)
         self.balance_ax.yaxis.tick_right()
 
         for index, asset in enumerate(assets):
@@ -113,7 +113,7 @@ class GraphGenerator:
     def _render_balance(self, shares_held, balance):
         # Clear the frame rendered last step
         self.balance_ax.clear()
-        x = np.arange(4)
+        x = np.arange(len(self.assets) + 1)
         y = [shares_held[asset] for asset in self.assets]
         y.append(balance)
         self.balance_ax.bar(x, y, color=BALANCE_COLOR)
