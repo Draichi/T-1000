@@ -58,7 +58,7 @@ def get_datasets(asset, currency, granularity, datapoints, df_train_size=0.75):
             response = requests.get(url, headers=headers)
             sp.hide()
             print_formatted_text(HTML(
-                u'<b>></b> <msg>{}/{}(s)</msg> <sub-msg>download complete</sub-msg>'.format(
+                u'<b>></b> <msg>{}/{}</msg> <sub-msg>download complete</sub-msg>'.format(
                     asset_icon, currency_icon)
             ), style=style)
             sp.show()
