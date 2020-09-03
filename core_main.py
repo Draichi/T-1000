@@ -260,7 +260,7 @@ class Nostradamus:
 
         self.generate_config_spec(lr_schedule=lr_schedule, df_type='train')
 
-        run(name="t-100_test",
+        run(name="t-1000",
             run_or_experiment=algo,
             stop={'timesteps_total': timesteps},
             checkpoint_freq=checkpoint_freq,
