@@ -28,11 +28,11 @@ Deep reinforcement learning multi-agent algorithmic trading framework that learn
 
 ```sh
 # make sure you have these installed
-sudo apt-get install gcc g++ build-essential python-dev python3-dev htop
+sudo apt-get install gcc g++ build-essential python-dev python3-dev -y
 # create env
-conda env create -f linux_env.yml
+conda env create -f t-1000.yml
 # activate it
-conda activate ray-0.8.0
+conda activate t-1000
 ```
 
 * * *
