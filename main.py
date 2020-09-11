@@ -1,7 +1,7 @@
 if __name__ == '__main__':
-    from utils import loading
+    from utils.data_processing import loading
     loading()
-    from core_main import Nostradamus
+    from t_1000.application.core import Nostradamus
     env = Nostradamus(assets=['XRP','BCH','LTC','BNB'],
                       currency='BTC',
                       granularity='day',

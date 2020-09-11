@@ -3,7 +3,8 @@ import gym
 from gym import spaces
 import numpy as np
 import colorama
-from core_render import GraphGenerator
+# from core_render import GraphGenerator
+from t_1000.render.graph_generator import GraphGenerator
 
 colorama.init()
 WINDOW_SIZE = 40
