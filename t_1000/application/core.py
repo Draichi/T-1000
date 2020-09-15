@@ -16,6 +16,9 @@ from ray.rllib.env.base_env import _DUMMY_AGENT_ID
 from ray.rllib.evaluation.episode import _flatten_action
 from ray.rllib.policy.sample_batch import DEFAULT_POLICY_ID
 
+env_name = 'YesMan-v1'
+
+
 def find_results_folder():
     return os.getcwd() + '/results'
 
@@ -160,7 +163,7 @@ class DefaultMapping(collections.defaultdict):
         self[key] = value = self.default_factory(key)
         return value
 
-class Nostradamus:
+class T1000:
 
     def __init__(self, assets, currency, granularity, datapoints):
 
@@ -242,7 +245,6 @@ class Nostradamus:
             config['df_features'][asset] = self.df[asset]['rollout'].loc[:,
                                                                     self.df[asset]['rollout'].columns != 'Date']
 
-        env_name = 'YesMan-v1'
 
         register_env(env_name, lambda config: TradingEnv(config))
         ray.init()
@@ -257,7 +259,7 @@ class Nostradamus:
         rollout(agent, env_name, num_steps, no_render)
 
     def train(self, algo, timesteps, checkpoint_freq, lr_schedule):
-        register_env("YesMan-v1", lambda config: TradingEnv(config))
+        register_env(env_name, lambda config: TradingEnv(config))
         ray.init()
 
         self.generate_config_spec(lr_schedule=lr_schedule, df_type='train')
