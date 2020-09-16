@@ -164,7 +164,6 @@ class DefaultMapping(collections.defaultdict):
         return value
 
 class T1000:
-
     def __init__(self, assets, currency, granularity, datapoints):
 
         self.assets = assets
@@ -197,7 +196,7 @@ class T1000:
     def generate_config_spec(self, lr_schedule, df_type):
         self.config_spec = {
             "lr_schedule": grid_search(lr_schedule),
-            "env": "YesMan-v1",
+            "env": env_name,
             "num_workers": 3,  # parallelism
             'observation_filter': 'MeanStdFilter',
             'vf_share_layers': True,
@@ -248,7 +247,6 @@ class T1000:
 
         register_env(env_name, lambda config: TradingEnv(config))
         ray.init()
-        # ? pq cls fica dessa cor ?
         cls = get_agent_class('PPO')
         agent = cls(env=env_name, config=agent_config)
         agent.restore(checkpoint_path)

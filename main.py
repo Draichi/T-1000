@@ -16,35 +16,21 @@ if __name__ == '__main__':
 
 	if not args.assets:
 		raise ValueError('-a cannot be null')
-
 	from utils import loading
 	loading()
 	from t_1000.application import T1000
 
-	env = T1000(assets=['XRP','BCH','LTC','BNB'],
-                      currency='BTC',
-                      granularity='day',
-                      datapoints=300)
+	env = T1000(assets=args.assets,
+				currency=args.currency,
+				granularity=args.granularity,
+				datapoints=args.datapoints)
+
 	if not args.checkpoint_path: # train
-		env.train(timesteps=3e5,
-		          checkpoint_freq=10,
-		          lr_schedule=[
-		              [
-		                  [0, 7e-5],  # [timestep, lr]
-		                  [1e6, 7e-6],
-		              ],
-		            #   [
-		            #       [0, 6e-5],
-		            #       [1e6, 6e-6],
-		            #   ],
-		            #   [
-		            #       [0, 5e-5],
-		            #       [1e6, 5e-6],
-		            #   ]
-		          ],
-		          algo='PPO')
+		env.train(timesteps=args.timesteps,
+		          checkpoint_freq=args.checkpoint_freq,
+		          lr_schedule=args.lr_schedule,
+		          algo=args.algo)
 	else: # test
-		checkpoint_path = 'results/t-1000/1_2020-09-03_07-41-091y8hnjtt/checkpoint_10/checkpoint-10'
-		env.backtest(checkpoint_path=checkpoint_path)
+		env.backtest(checkpoint_path=args.checkpoint_path)
 
               
