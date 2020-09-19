@@ -37,7 +37,26 @@ conda activate t-1000
 
 * * *
 
-## Using
+## Usage
+
+#### On command line
+
+```sh
+# to see all arguments available
+# $ python main.py --help
+
+# to train
+python main.py -a btc eth bnb -c usd
+
+# to test
+python main.py /
+    -a btc eth bnb /
+    -c usd /
+    --checkpoint_path results/t-1000/model-hash/checkpoint_750/checkpoint-750
+```
+
+
+#### On your own file
 
 ```py
 # instatiate the environment
