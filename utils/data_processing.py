@@ -3,6 +3,7 @@ import random
 from termcolor import colored
 
 import datetime
+import sqlite3
 import talib
 import os
 import colorama
@@ -41,11 +42,18 @@ def get_datasets(asset, currency, granularity, datapoints, df_train_size=0.75):
     Returns:
         pandas.Dataframe -- The OHLCV and indicators dataframe
     """
+    database_train_name = 'data/bot_train_{}_{}_{}.db'.format(
+        asset + currency, datapoints, granularity)
+
+    database_test_name = 'data/bot_test_{}_{}_{}.db'.format(
+        asset + currency, datapoints, granularity)
+
     df_train_path = 'datasets/bot_train_{}_{}_{}.csv'.format(
         asset + currency, datapoints, granularity)
     df_rollout_path = 'datasets/bot_rollout_{}_{}_{}.csv'.format(
         asset + currency, datapoints, granularity)
-    if not os.path.exists(df_rollout_path):
+    # if not os.path.exists(df_rollout_path):
+    if not os.path.exists(database_test_name):
         headers = {'User-Agent': 'Mozilla/5.0',
                    'authorization': 'Apikey 3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'}
 
@@ -163,9 +171,10 @@ def get_datasets(asset, currency, granularity, datapoints, df_train_size=0.75):
         train_size = round(len(df) * df_train_size)
         df_train = df[:train_size]
         df_rollout = df[train_size:]
+        
         df_train.to_csv(df_train_path)
         df_rollout.to_csv(df_rollout_path)
-        # re-read to avoid indexing issue w/ Ray
+        # ! re-read to avoid indexing issue w/ Ray
         df_train = pd.read_csv(df_train_path)
         df_rollout = pd.read_csv(df_rollout_path)
     else:

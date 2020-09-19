@@ -1,5 +1,6 @@
 import random
 import gym
+import sqlite3
 from gym import spaces
 import numpy as np
 import colorama
@@ -30,6 +31,22 @@ class TradingEnv(gym.Env):
         self.initial_bought = {}
         self.trades = {}
         self.current_price = {}
+        # train_conn = sqlite3.connect('../../data/bot_train_lendeth_150_hour.db')
+        # test_conn = sqlite3.connect('../../data/bot_test_lendeth_150_hour.db')
+
+
+        list_of_columns = ','.join(self.df_complete[self.assets_list[0]].keys())
+        train_conn = sqlite3.connect('data/bot_train_lendeth_150_hour.db')
+
+        train_db_connection = train_conn.cursor()
+        train_db_connection.execute('CREATE TABLE INDICATORS ({})'.format(list_of_columns))
+        train_conn.commit()
+        self.df_complete[self.assets_list[0]].to_sql('INDICATORS', train_conn, if_exists='replace')
+        train_db_connection.execute('SELECT * FROM INDICATORS')
+        print('env')
+        for row in train_db_connection:
+            print(row)
+            quit()
 
         # action space = buy and sell for each asset, pĺus hold position
         action_space = 1 + len(self.assets_list) * 2
