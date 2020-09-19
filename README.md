@@ -39,7 +39,7 @@ conda activate t-1000
 
 ## Usage
 
-#### On command line
+### On command line
 
 ```sh
 # to see all arguments available
@@ -55,8 +55,7 @@ python main.py /
     --checkpoint_path results/t-1000/model-hash/checkpoint_750/checkpoint-750
 ```
 
-
-#### On your own file
+### On your own file
 
 ```py
 # instatiate the environment
