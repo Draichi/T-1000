@@ -45,8 +45,6 @@ def get_datasets(asset, currency, granularity, datapoints, df_train_size=0.75):
         asset + currency, datapoints, granularity)
     df_rollout_path = 'datasets/bot_rollout_{}_{}_{}.csv'.format(
         asset + currency, datapoints, granularity)
-    asset_icon = '₿' if asset == 'BTC' else asset
-    currency_icon = '₿' if currency == 'BTC' else currency
     if not os.path.exists(df_rollout_path):
         headers = {'User-Agent': 'Mozilla/5.0',
                    'authorization': 'Apikey 3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'}
@@ -59,7 +57,7 @@ def get_datasets(asset, currency, granularity, datapoints, df_train_size=0.75):
             sp.hide()
             print_formatted_text(HTML(
                 u'<b>></b> <msg>{}/{}</msg> <sub-msg>download complete</sub-msg>'.format(
-                    asset_icon, currency_icon)
+                    asset, currency)
             ), style=style)
             sp.show()
 
@@ -174,7 +172,7 @@ def get_datasets(asset, currency, granularity, datapoints, df_train_size=0.75):
 
         print_formatted_text(HTML(
             u'<b>></b> <msg>{}/{}</msg> <sub-msg>cached</sub-msg>'.format(
-                asset_icon, currency_icon)
+                asset, currency)
         ), style=style)
 
         # print(colored('> feching ' + asset + '/' + currency + ' from cache :)', 'magenta'))

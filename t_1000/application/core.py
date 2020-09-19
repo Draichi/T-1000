@@ -4,15 +4,20 @@ import os
 import json
 import pickle
 import gym
-from utils import get_datasets
+# from utils import get_datasets
+from utils.data_processing import get_datasets
 from ray.tune import grid_search, run
-from core_env import TradingEnv
+from t_1000.env.trading_env import TradingEnv
+# from core_env import TradingEnv
 from ray.tune.registry import register_env
 from ray.rllib.agents.registry import get_agent_class
 from ray.rllib.env import MultiAgentEnv
 from ray.rllib.env.base_env import _DUMMY_AGENT_ID
 from ray.rllib.evaluation.episode import _flatten_action
 from ray.rllib.policy.sample_batch import DEFAULT_POLICY_ID
+
+env_name = 'YesMan-v1'
+
 
 def find_results_folder():
     return os.getcwd() + '/results'
@@ -158,8 +163,7 @@ class DefaultMapping(collections.defaultdict):
         self[key] = value = self.default_factory(key)
         return value
 
-class Nostradamus:
-
+class T1000:
     def __init__(self, assets, currency, granularity, datapoints):
 
         self.assets = assets
@@ -192,7 +196,7 @@ class Nostradamus:
     def generate_config_spec(self, lr_schedule, df_type):
         self.config_spec = {
             "lr_schedule": grid_search(lr_schedule),
-            "env": "YesMan-v1",
+            "env": env_name,
             "num_workers": 3,  # parallelism
             'observation_filter': 'MeanStdFilter',
             'vf_share_layers': True,
@@ -240,11 +244,9 @@ class Nostradamus:
             config['df_features'][asset] = self.df[asset]['rollout'].loc[:,
                                                                     self.df[asset]['rollout'].columns != 'Date']
 
-        env_name = 'YesMan-v1'
 
         register_env(env_name, lambda config: TradingEnv(config))
         ray.init()
-        # ? pq cls fica dessa cor ?
         cls = get_agent_class('PPO')
         agent = cls(env=env_name, config=agent_config)
         agent.restore(checkpoint_path)
@@ -255,7 +257,7 @@ class Nostradamus:
         rollout(agent, env_name, num_steps, no_render)
 
     def train(self, algo, timesteps, checkpoint_freq, lr_schedule):
-        register_env("YesMan-v1", lambda config: TradingEnv(config))
+        register_env(env_name, lambda config: TradingEnv(config))
         ray.init()
 
         self.generate_config_spec(lr_schedule=lr_schedule, df_type='train')
