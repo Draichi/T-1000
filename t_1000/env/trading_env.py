@@ -41,15 +41,14 @@ class TradingEnv(gym.Env):
 
         first_df_columns = self.df_features[self.assets_list[0]].columns
 
-        # ? colocar isso em uma função
-        # obs space = (number of columns * number of assets) + 4 (balance, cost, sales, net_worth) + (number of assets * 3 (shares bought, shares sold, shares held))
-        observation_space = (len(first_df_columns) *
-                             len(self.assets_list)) + 4 + (len(self.assets_list) * 3)
+        # obs space = (num assets, indicator + (balance, cost, sales, net_worth) + (shares bought, shares sold, shares held foreach asset))
+        observation_space = (len(self.assets_list),
+                             len(first_df_columns) + 4 + 3)
 
         self.observation_space = spaces.Box(
             low=-np.finfo(np.float32).max,
             high=np.finfo(np.float32).max,
-            shape=(observation_space, ),
+            shape=observation_space,
             dtype=np.float16)
 
     def reset(self):
@@ -109,24 +108,19 @@ class TradingEnv(gym.Env):
             self.shares_sold[asset] = 0.0
 
     def _next_observation(self):
-        shares_bought = np.array([self.shares_bought[asset]
-                                  for asset in self.assets_list])
-        shares_sold = np.array([self.shares_sold[asset]
-                                for asset in self.assets_list])
-        shares_held = np.array([self.shares_held[asset]
-                                for asset in self.assets_list])
-
-        current_row_of_all_dfs = np.concatenate([np.array(
-            self.df_features[asset].values[self.current_step]) for asset in self.assets_list])
-
-        observation_without_shares = np.append(current_row_of_all_dfs, [
-            self.balance,
-            self.cost,
-            self.sales,
-            self.net_worth
-        ])
-        observation = np.append(observation_without_shares, [
-                                shares_bought, shares_held, shares_sold])
+        observation = np.empty((0, 76), int)
+        for asset in self.assets_list:
+            current_step = np.array(self.df_features[asset].values[self.current_step])
+            current_step_with_shares = np.array([np.append(current_step, [
+                self.balance,
+                self.cost,
+                self.sales,
+                self.net_worth,
+                self.shares_bought[asset],
+                self.shares_sold[asset],
+                self.shares_held[asset]
+            ])])
+            observation = np.append(observation, current_step_with_shares, axis=0)
         return observation
 
     def _compute_current_price(self):
