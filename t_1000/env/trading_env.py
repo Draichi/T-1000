@@ -30,6 +30,7 @@ class TradingEnv(gym.Env):
         self.initial_bought = {}
         self.trades = {}
         self.current_price = {}
+        self.observation_length = len(self.df_features[self.assets_list[0]].columns) + 4 + 3 # 4,3 = (balance, cost, sales, net_worth) + (shares bought, shares sold, shares held foreach asset)
 
         # action space = buy and sell for each asset, pĺus hold position
         action_space = 1 + len(self.assets_list) * 2
@@ -39,11 +40,10 @@ class TradingEnv(gym.Env):
             high=np.array([action_space, 1]),
             dtype=np.float16)
 
-        first_df_columns = self.df_features[self.assets_list[0]].columns
 
         # obs space = (num assets, indicator + (balance, cost, sales, net_worth) + (shares bought, shares sold, shares held foreach asset))
         observation_space = (len(self.assets_list),
-                             len(first_df_columns) + 4 + 3)
+                             self.observation_length)
 
         self.observation_space = spaces.Box(
             low=-np.finfo(np.float32).max,
@@ -108,7 +108,7 @@ class TradingEnv(gym.Env):
             self.shares_sold[asset] = 0.0
 
     def _next_observation(self):
-        observation = np.empty((0, 76), int)
+        observation = np.empty((0, self.observation_length), int)
         for asset in self.assets_list:
             current_step = np.array(self.df_features[asset].values[self.current_step])
             current_step_with_shares = np.array([np.append(current_step, [
