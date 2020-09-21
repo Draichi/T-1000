@@ -6,7 +6,7 @@ if __name__ == '__main__':
 	parser.add_argument('-c', action="store", dest="currency", type=str, default='BTC')
 	parser.add_argument('-g', action="store", dest="granularity", type=str, default='hour')
 	parser.add_argument('-d', action="store", dest="datapoints", type=int, default=150)
-	parser.add_argument('-t', action="store", dest="timesteps", type=int, default=3e6)
+	parser.add_argument('-t', action="store", dest="timesteps", default=3e6)
 	parser.add_argument('-f', action="store", dest="checkpoint_freq", type=int, default=100)
 	parser.add_argument('-lr', action="store", dest="lr_schedule", default=[[[0, 6e-4], [3e6, 6e-5]]])
 	parser.add_argument('--algo', action="store", dest="algo", default='PPO', type=str)
@@ -26,7 +26,7 @@ if __name__ == '__main__':
 				datapoints=args.datapoints)
 
 	if not args.checkpoint_path: # train
-		env.train(timesteps=args.timesteps,
+		env.train(timesteps=int(float(args.timesteps)),
 		          checkpoint_freq=args.checkpoint_freq,
 		          lr_schedule=args.lr_schedule,
 		          algo=args.algo)
