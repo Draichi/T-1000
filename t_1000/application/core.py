@@ -245,7 +245,7 @@ class T1000:
                                                                     self.df[asset]['rollout'].columns != 'Date']
 
 
-        register_env(env_name, lambda config: TradingEnv(config))
+        register_env(env_name, lambda _: TradingEnv(config))
         ray.init()
         cls = get_agent_class('PPO')
         agent = cls(env=env_name, config=agent_config)
