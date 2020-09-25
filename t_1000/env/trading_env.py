@@ -219,42 +219,16 @@ class TradingEnv(gym.Env):
     # *--------------------------------------------------------------------
 
     def render(self, mode='live', **kwargs):
-        if self.visualization == None:
-            self.visualization = GraphGenerator(assets=self.assets_list, currency=self.currency, granularity=self.granularity[0],
-                                                datapoints=self.datapoints, df_complete=self.df_complete, df_features=self.df_features, variables=self.variables)
-        self.visualization.render(current_step=self.current_step, net_worth=self.net_worth, buy_and_hold=self.buy_and_hold,
-                                  trades=self.trades, shares_held=self.shares_held, balance=self.balance, window_size=WINDOW_SIZE)
 
-        # Render the environment to the screen
-        # if mode == 'file':
-        #     self._render_to_file(kwargs.get('filename', 'render.txt'))
+        if mode == 'file':
+            self._render_to_file(kwargs.get('filename', 'render.txt'))
 
-        # elif mode == 'live':
-        #     if self.visualization == None:
-        #         # ! continuear
-        #         self.visualization = StockTradingGraph(df_complete=self.df_complete)
-        #         self.visualization = StockTradingGraph(self.df1,
-        #                                                self.df2,
-        #                                                self.df3,
-        #                                                self.render_title,
-        #                                                self.histo,
-        #                                                self.s1,
-        #                                                self.s2,
-        #                                                self.s3,
-        #                                                self.trade_instrument)
-
-        #     # if self.current_step > LOOKBACK_WINDOW_SIZE:
-        #     self.visualization.render(self.current_step,
-        #                               self.net_worth,
-        #                               self.buy_and_hold,
-        #                               self.trades1,
-        #                               self.trades2,
-        #                               self.trades3,
-        #                               self.shares1_held,
-        #                               self.shares2_held,
-        #                               self.shares3_held,
-        #                               self.balance,
-        #                               window_size=LOOKBACK_WINDOW_SIZE)
+        elif mode == 'live':
+            if self.visualization == None:
+                self.visualization = GraphGenerator(assets=self.assets_list, currency=self.currency, granularity=self.granularity[0],
+                                                    datapoints=self.datapoints, df_complete=self.df_complete, df_features=self.df_features, variables=self.variables)
+            self.visualization.render(current_step=self.current_step, net_worth=self.net_worth, buy_and_hold=self.buy_and_hold,
+                                    trades=self.trades, shares_held=self.shares_held, balance=self.balance, window_size=WINDOW_SIZE)
 
     def close(self):
         if self.visualization != None:
