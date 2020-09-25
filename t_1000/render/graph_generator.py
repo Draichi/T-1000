@@ -237,12 +237,19 @@ class GraphGenerator:
         # Necessary to view frames before they are unrendered
         plt.pause(0.001)
 
-        print('\n current_step:', current_step)
-        print('trades:', trades)
-        print('balance:', balance)
-        print('net_worth:', net_worth)
-        print('shares_held:', shares_held)
-        print('\n')
+        # print trades info on console
+        date_values = self.df_complete[self.assets[0]]['Date'].values
+        last_step = current_step >= len(date_values) - 1
+        if last_step:
+            print('\n')
+            for asset in self.assets:
+                if trades[asset]:
+                    for trade in trades[asset]:
+                        print(self.df_complete[self.assets[0]]['Date'].values[trade['step']], trade['type'], trade['amount'], asset, trade['total'], self.currency)
+            print('\nbalance:', balance, self.currency)
+            print('net_worth:', net_worth, self.currency)
+            print('shares_held:', shares_held)
+            print('\n')
 
     def close(self):
         plt.close()
