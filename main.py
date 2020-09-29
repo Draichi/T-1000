@@ -21,7 +21,7 @@ if __name__ == '__main__':
 		raise ValueError('-a cannot be null')
 	from utils import loading
 	loading()
-	from t_1000.application import T1000
+	from t_1000 import T1000
 
 	env = T1000(algo=args.algo,
 				assets=args.assets,
