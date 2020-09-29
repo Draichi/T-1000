@@ -11,7 +11,7 @@ if __name__ == '__main__':
 	parser.add_argument('-b', action="store", dest="initial_account_balance", type=int, default=300)
 	parser.add_argument('-e', action="store", dest="exchange", type=str, default='Binance')
 	parser.add_argument('-ex', action="store", dest="exchange_commission", type=int, default=0.00075)
-	parser.add_argument('-lr', action="store", dest="lr_schedule", default=[[[0, 1e-4], [1e6, 8e-5]]]) # next should be 1e4 -> 8e-5
+	parser.add_argument('-lr', action="store", dest="lr_schedule", default=[[[0, 1e-4], [1e6, 8e-5]]])
 	parser.add_argument('--algo', action="store", dest="algo", default='PPO', type=str)
 	parser.add_argument('--checkpoint-path', action="store", dest="checkpoint_path", type=str)
 	parser.add_argument('--version', action='version', version='1.0')
