@@ -265,6 +265,7 @@ class T1000:
 
         run(name="t-1000",
             run_or_experiment=algo,
+            checkpoint_at_end=True,
             stop={'timesteps_total': timesteps},
             checkpoint_freq=checkpoint_freq,
             config=self.config_spec,
