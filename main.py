@@ -23,7 +23,8 @@ if __name__ == '__main__':
 	loading()
 	from t_1000.application import T1000
 
-	env = T1000(assets=args.assets,
+	env = T1000(algo=args.algo,
+				assets=args.assets,
 				currency=args.currency,
 				granularity=args.granularity,
 				datapoints=args.datapoints,
@@ -35,8 +36,7 @@ if __name__ == '__main__':
 	if not args.checkpoint_path: # train
 		env.train(timesteps=int(float(args.timesteps)),
 		          checkpoint_freq=args.checkpoint_freq,
-		          lr_schedule=args.lr_schedule,
-		          algo=args.algo)
+		          lr_schedule=args.lr_schedule)
 	else: # test
 		env.backtest(checkpoint_path=args.checkpoint_path)
 
