@@ -8,7 +8,7 @@ if __name__ == '__main__':
 	parser.add_argument('-d', action="store", dest="datapoints", type=int, default=150)
 	parser.add_argument('-t', action="store", dest="timesteps", default=3e6)
 	parser.add_argument('-f', action="store", dest="checkpoint_freq", type=int, default=100)
-	parser.add_argument('-b', action="store", dest="initial_account_balance", type=int, default=300)
+	parser.add_argument('-b', action="store", dest="initial_account_balance", type=float, default=300)
 	parser.add_argument('-e', action="store", dest="exchange", type=str, default='Binance')
 	parser.add_argument('-ex', action="store", dest="exchange_commission", type=int, default=0.00075)
 	parser.add_argument('-lr', action="store", dest="lr_schedule", default=[[[0, 1e-4], [1e6, 8e-5]]])
