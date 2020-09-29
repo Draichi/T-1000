@@ -1,4 +1,6 @@
 import numpy as np
+import pandas as pd
+from tabulate import tabulate
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib import style
@@ -36,6 +38,7 @@ class GraphGenerator:
         self.variables = variables
         self.candlestick_width = variables['candlestick_width'].get(
             granularity, 1)
+        self.date_values = self.df_complete[self.assets[0]]['Date'].values
 
         # ? benchmark strats
         self.buy_and_holds = np.zeros(len(df_complete[assets[0]]['Date']))
@@ -202,6 +205,26 @@ class GraphGenerator:
                     self.price_axs[asset].scatter(date, high_low, color=color, marker=marker, s=50)
                     self.price_axs[asset].annotate('{} {}'.format(total, self.currency), xy=(date, high_low), xytext=(date, high_low), color=color, fontsize=8)
 
+    def _print_trades_overview(self, balance, net_worth, shares_held, trades):
+        print('\nTrades')
+        for asset in self.assets:
+            df = pd.DataFrame(trades[asset])
+            if 'step' in df.columns.tolist():
+                df['Date'] = self.df_complete[asset]['Date'].values[df['step'] -1]
+                df['total ({})'.format(self.currency)] = df['total']
+                df.set_index('Date', inplace=True)
+                df.drop(['step', 'total'], axis=1, inplace=True)
+                x = tabulate(df, headers='keys', tablefmt='psql')
+                print(asset)
+                print(x)
+        shares_held[self.currency] = balance
+        df_shares_held = pd.DataFrame(shares_held, index=[0])
+        x_shares = tabulate(df_shares_held, headers='keys', tablefmt='psql')
+        print('\nPortfolio')
+        print(x_shares)
+        print('Net Worth:', net_worth, self.currency)
+        print('\n')
+
     def render(self, current_step, net_worth, buy_and_hold, trades, shares_held, balance, window_size):
         self.net_worths[current_step] = net_worth
         self.buy_and_holds[current_step] = buy_and_hold
@@ -236,6 +259,11 @@ class GraphGenerator:
 
         # Necessary to view frames before they are unrendered
         plt.pause(0.001)
+
+        # print trades info on console
+        last_step = current_step >= len(self.date_values) - 1
+        if last_step:
+            self._print_trades_overview(balance, net_worth, shares_held, trades)
 
     def close(self):
         plt.close()

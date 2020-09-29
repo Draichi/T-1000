@@ -30,6 +30,7 @@ class TradingEnv(gym.Env):
         self.initial_bought = {}
         self.trades = {}
         self.current_price = {}
+        self.observation_length = len(self.df_features[self.assets_list[0]].columns) + 4 + 3 # 4,3 = (balance, cost, sales, net_worth) + (shares bought, shares sold, shares held foreach asset)
 
         # action space = buy and sell for each asset, pĺus hold position
         action_space = 1 + len(self.assets_list) * 2
@@ -39,17 +40,15 @@ class TradingEnv(gym.Env):
             high=np.array([action_space, 1]),
             dtype=np.float16)
 
-        first_df_columns = self.df_features[self.assets_list[0]].columns
 
-        # ? colocar isso em uma função
-        # obs space = (number of columns * number of assets) + 4 (balance, cost, sales, net_worth) + (number of assets * 3 (shares bought, shares sold, shares held))
-        observation_space = (len(first_df_columns) *
-                             len(self.assets_list)) + 4 + (len(self.assets_list) * 3)
+        # obs space = (num assets, indicator + (balance, cost, sales, net_worth) + (shares bought, shares sold, shares held foreach asset))
+        observation_space = (len(self.assets_list),
+                             self.observation_length)
 
         self.observation_space = spaces.Box(
             low=-np.finfo(np.float32).max,
             high=np.finfo(np.float32).max,
-            shape=(observation_space, ),
+            shape=observation_space,
             dtype=np.float16)
 
     def reset(self):
@@ -109,24 +108,19 @@ class TradingEnv(gym.Env):
             self.shares_sold[asset] = 0.0
 
     def _next_observation(self):
-        shares_bought = np.array([self.shares_bought[asset]
-                                  for asset in self.assets_list])
-        shares_sold = np.array([self.shares_sold[asset]
-                                for asset in self.assets_list])
-        shares_held = np.array([self.shares_held[asset]
-                                for asset in self.assets_list])
-
-        current_row_of_all_dfs = np.concatenate([np.array(
-            self.df_features[asset].values[self.current_step]) for asset in self.assets_list])
-
-        observation_without_shares = np.append(current_row_of_all_dfs, [
-            self.balance,
-            self.cost,
-            self.sales,
-            self.net_worth
-        ])
-        observation = np.append(observation_without_shares, [
-                                shares_bought, shares_held, shares_sold])
+        observation = np.empty((0, self.observation_length), int)
+        for asset in self.assets_list:
+            current_step = np.array(self.df_features[asset].values[self.current_step])
+            current_step_with_shares = np.array([np.append(current_step, [
+                self.balance,
+                self.cost,
+                self.sales,
+                self.net_worth,
+                self.shares_bought[asset],
+                self.shares_sold[asset],
+                self.shares_held[asset]
+            ])])
+            observation = np.append(observation, current_step_with_shares, axis=0)
         return observation
 
     def _compute_current_price(self):
@@ -225,42 +219,16 @@ class TradingEnv(gym.Env):
     # *--------------------------------------------------------------------
 
     def render(self, mode='live', **kwargs):
-        if self.visualization == None:
-            self.visualization = GraphGenerator(assets=self.assets_list, currency=self.currency, granularity=self.granularity[0],
-                                                datapoints=self.datapoints, df_complete=self.df_complete, df_features=self.df_features, variables=self.variables)
-        self.visualization.render(current_step=self.current_step, net_worth=self.net_worth, buy_and_hold=self.buy_and_hold,
-                                  trades=self.trades, shares_held=self.shares_held, balance=self.balance, window_size=WINDOW_SIZE)
 
-        # Render the environment to the screen
-        # if mode == 'file':
-        #     self._render_to_file(kwargs.get('filename', 'render.txt'))
+        if mode == 'file':
+            self._render_to_file(kwargs.get('filename', 'render.txt'))
 
-        # elif mode == 'live':
-        #     if self.visualization == None:
-        #         # ! continuear
-        #         self.visualization = StockTradingGraph(df_complete=self.df_complete)
-        #         self.visualization = StockTradingGraph(self.df1,
-        #                                                self.df2,
-        #                                                self.df3,
-        #                                                self.render_title,
-        #                                                self.histo,
-        #                                                self.s1,
-        #                                                self.s2,
-        #                                                self.s3,
-        #                                                self.trade_instrument)
-
-        #     # if self.current_step > LOOKBACK_WINDOW_SIZE:
-        #     self.visualization.render(self.current_step,
-        #                               self.net_worth,
-        #                               self.buy_and_hold,
-        #                               self.trades1,
-        #                               self.trades2,
-        #                               self.trades3,
-        #                               self.shares1_held,
-        #                               self.shares2_held,
-        #                               self.shares3_held,
-        #                               self.balance,
-        #                               window_size=LOOKBACK_WINDOW_SIZE)
+        elif mode == 'live':
+            if self.visualization == None:
+                self.visualization = GraphGenerator(assets=self.assets_list, currency=self.currency, granularity=self.granularity[0],
+                                                    datapoints=self.datapoints, df_complete=self.df_complete, df_features=self.df_features, variables=self.variables)
+            self.visualization.render(current_step=self.current_step, net_worth=self.net_worth, buy_and_hold=self.buy_and_hold,
+                                    trades=self.trades, shares_held=self.shares_held, balance=self.balance, window_size=WINDOW_SIZE)
 
     def close(self):
         if self.visualization != None:
