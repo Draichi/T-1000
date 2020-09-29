@@ -125,12 +125,6 @@ $ htop
 ```
 * * *
 
-## Customizing
-
-Edit the commision and initial balance values in `/variables.json`
-
-* * *
-
 ## Credits
 
 -   [Papers](https://github.com/Draichi/Portfolio-Management-list/blob/master/README.md)

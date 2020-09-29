@@ -29,7 +29,7 @@ def loading():
         HTML(u'<b>> {}</b> <loading>loading...</loading>'.format(emoji.emojize(random.choice(emojis), use_aliases=True))), style=style)
 
 
-def get_datasets(asset, currency, granularity, datapoints, df_train_size=0.75):
+def get_datasets(asset, currency, granularity, datapoints, exchange, df_train_size=0.75):
     """Fetch the API and precess the desired pair
 
     Arguments:
@@ -49,8 +49,8 @@ def get_datasets(asset, currency, granularity, datapoints, df_train_size=0.75):
         headers = {'User-Agent': 'Mozilla/5.0',
                    'authorization': 'Apikey 3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'}
 
-        url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym={}&limit={}'.format(
-            granularity, asset, currency, datapoints)
+        url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym={}&limit={}&e={}'.format(
+            granularity, asset, currency, datapoints, exchange)
         with yaspin(text='Downloading datasets') as sp:
 
             response = requests.get(url, headers=headers)

@@ -163,7 +163,7 @@ class DefaultMapping(collections.defaultdict):
 
 
 class T1000:
-    def __init__(self, assets, currency, granularity, datapoints, checkpoint_path):
+    def __init__(self, assets, currency, granularity, datapoints, checkpoint_path, initial_account_balance, exchange_commission, exchange):
 
         self.assets = assets
         self.currency = currency
@@ -171,11 +171,22 @@ class T1000:
         self.datapoints = datapoints
         self.df = {}
         self.config_spec = {}
+        self.initial_account_balance = initial_account_balance
+        self.exchange_commission = exchange_commission
         if checkpoint_path:
             _, self.assets, self.currency, self.datapoints, self.granularity, _ = get_instruments_from_checkpoint(
                 checkpoint_path)
         self.check_variables_integrity()
-        self.populate_dfs()
+        self.populate_dfs(exchange=exchange)
+        self.config_spec_variables = {
+            "candlestick_width": {  # constants
+                "day": 1,
+                "hour": 0.04,
+                "minute": 0.0006
+            },
+            "initial_account_balance": self.initial_account_balance,
+            "commission": self.exchange_commission
+        }
 
     def check_variables_integrity(self):
         if type(self.assets) != list or len(self.assets) == 0:
@@ -187,13 +198,14 @@ class T1000:
         if type(self.datapoints) != int or 1 > self.datapoints > 2000:
             raise ValueError("Incorrect 'datapoints' value")
 
-    def populate_dfs(self):
+    def populate_dfs(self, exchange):
         for asset in self.assets:
             self.df[asset] = {}
             self.df[asset]['train'], self.df[asset]['rollout'] = get_datasets(asset=asset,
                                                                               currency=self.currency,
                                                                               granularity=self.granularity,
-                                                                              datapoints=self.datapoints)
+                                                                              datapoints=self.datapoints,
+                                                                              exchange=exchange)
 
     def generate_config_spec(self, lr_schedule, df_type):
         self.config_spec = {
@@ -209,17 +221,10 @@ class T1000:
                 'datapoints': self.datapoints,
                 'df_complete': {},
                 'df_features': {},
-                'variables': {}
+                'variables': self.config_spec_variables
             },
         }
-        self.add_variables_to_config_spec()
         self.add_dfs_to_config_spec(df_type=df_type)
-
-    def add_variables_to_config_spec(self):
-        connection = open('variables.json', 'r')
-        variables = json.load(connection)
-        connection.close()
-        self.config_spec['env_config']['variables'] = variables
 
     def add_dfs_to_config_spec(self, df_type):
         for asset in self.assets:
@@ -228,7 +233,7 @@ class T1000:
                                                                                                self.df[asset][df_type].columns != 'Date']
 
     def backtest(self, checkpoint_path):
-        agent_config, assets, currency, datapoints, granularity, variables = get_instruments_from_checkpoint(
+        agent_config, assets, currency, datapoints, granularity, _ = get_instruments_from_checkpoint(
             checkpoint_path)
 
         config = {
@@ -238,7 +243,7 @@ class T1000:
             'datapoints': datapoints,
             'df_complete': {},
             'df_features': {},
-            'variables': variables
+            'variables': self.config_spec_variables
         }
 
         for asset in assets:
