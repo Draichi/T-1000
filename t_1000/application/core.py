@@ -4,11 +4,9 @@ import os
 import json
 import pickle
 import gym
-# from utils import get_datasets
 from utils.data_processing import get_datasets
 from ray.tune import grid_search, run
 from t_1000.env.trading_env import TradingEnv
-# from core_env import TradingEnv
 from ray.tune.registry import register_env
 from ray.rllib.agents.registry import get_agent_class
 from ray.rllib.env import MultiAgentEnv
@@ -163,8 +161,9 @@ class DefaultMapping(collections.defaultdict):
         self[key] = value = self.default_factory(key)
         return value
 
+
 class T1000:
-    def __init__(self, assets, currency, granularity, datapoints):
+    def __init__(self, assets, currency, granularity, datapoints, checkpoint_path):
 
         self.assets = assets
         self.currency = currency
@@ -172,6 +171,9 @@ class T1000:
         self.datapoints = datapoints
         self.df = {}
         self.config_spec = {}
+        if checkpoint_path:
+            _, self.assets, self.currency, self.datapoints, self.granularity, _ = get_instruments_from_checkpoint(
+                checkpoint_path)
         self.check_variables_integrity()
         self.populate_dfs()
 
@@ -242,8 +244,7 @@ class T1000:
         for asset in assets:
             config['df_complete'][asset] = self.df[asset]['rollout']
             config['df_features'][asset] = self.df[asset]['rollout'].loc[:,
-                                                                    self.df[asset]['rollout'].columns != 'Date']
-
+                                                                         self.df[asset]['rollout'].columns != 'Date']
 
         register_env(env_name, lambda _: TradingEnv(config))
         ray.init()

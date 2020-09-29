@@ -50,8 +50,6 @@ python main.py -a btc eth bnb -c usd
 
 # to test
 python main.py /
-    -a btc eth bnb /
-    -c usd /
     --checkpoint_path results/t-1000/model-hash/checkpoint_750/checkpoint-750
 ```
 
