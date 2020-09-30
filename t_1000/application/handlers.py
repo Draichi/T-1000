@@ -2,7 +2,7 @@ import os
 import pickle
 
 def find_results_folder():
-    return os.getcwd() + '/results'
+    return os.getcwd() + '/models'
 
 
 def get_instruments_from_checkpoint(checkpoint):

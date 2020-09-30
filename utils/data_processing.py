@@ -41,9 +41,9 @@ def get_datasets(asset, currency, granularity, datapoints, exchange, df_train_si
     Returns:
         pandas.Dataframe -- The OHLCV and indicators dataframe
     """
-    df_train_path = 'datasets/bot_train_{}_{}_{}.csv'.format(
+    df_train_path = 'data/bot_train_{}_{}_{}.csv'.format(
         asset + currency, datapoints, granularity)
-    df_rollout_path = 'datasets/bot_rollout_{}_{}_{}.csv'.format(
+    df_rollout_path = 'data/bot_rollout_{}_{}_{}.csv'.format(
         asset + currency, datapoints, granularity)
     if not os.path.exists(df_rollout_path):
         headers = {'User-Agent': 'Mozilla/5.0',

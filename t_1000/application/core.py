@@ -118,7 +118,7 @@ class T1000:
 
         self.generate_config_spec(lr_schedule=lr_schedule, df_type='train')
 
-        run(name="t-1000",
+        run(name=self.algo,
             run_or_experiment=self.algo,
             checkpoint_at_end=True,
             stop={'timesteps_total': timesteps},
