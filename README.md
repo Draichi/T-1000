@@ -115,7 +115,7 @@ Some nice tools to keep an eye while your agent train are (of course) `tensorboa
 
 ```sh
 # from the project home folder
-$ tensorboard --logdir=results
+$ tensorboard --logdir=models
 
 # show how your gpu is going
 $ gpustat -i
