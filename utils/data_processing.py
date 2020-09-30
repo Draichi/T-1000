@@ -77,7 +77,7 @@ def get_datasets(asset, currency, granularity, datapoints, exchange, df_train_si
         # https://github.com/mrjbq7/ta-lib/blob/master/docs/func.md
         open_price, high, low, close = np.array(df['open']), np.array(
             df['high']), np.array(df['low']), np.array(df['close'])
-        volume = np.array(df['volumefrom'])
+        volume = np.array(df['volumefrom'], dtype=float)
         # cycle indicators
         df.loc[:, 'HT_DCPERIOD'] = talib.HT_DCPERIOD(close)
         df.loc[:, 'HT_DCPHASE'] = talib.HT_DCPHASE(close)
