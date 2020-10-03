@@ -75,10 +75,10 @@ class TradingEnv(gym.Env):
 
     def compute_reward(self):
         net_worth_and_buyhold_mean = (self.net_worth + self.buy_and_hold) / 2
-        mean = (self.net_worth - self.buy_and_hold) / \
+        reward = (self.net_worth - self.buy_and_hold) / \
             net_worth_and_buyhold_mean
 
-        reward = self.net_worth - self.initial_balance
+        # reward = self.net_worth - self.initial_balance
         return reward
 
     def _reset_trades(self):
