@@ -171,6 +171,7 @@ class TradingEnv(gym.Env):
         for asset in self.assets_list:
             if self.shares_sold[asset] > 0 or self.shares_bought[asset] > 0:
                 self.trades[asset].append({
+                    'price': self.current_price[asset],
                     'step': self.current_step,
                     'amount': self.shares_sold[asset] if self.shares_sold[asset] > 0 else self.shares_bought[asset],
                     'total': self.sales if self.shares_sold[asset] > 0 else self.cost,
