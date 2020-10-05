@@ -1,5 +1,4 @@
 import collections
-import json
 import gym
 from ray.rllib.env import MultiAgentEnv
 from ray.rllib.env.base_env import _DUMMY_AGENT_ID
