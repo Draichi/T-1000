@@ -205,24 +205,32 @@ class GraphGenerator:
                     self.price_axs[asset].scatter(date, high_low, color=color, marker=marker, s=50)
                     self.price_axs[asset].annotate('{} {}'.format(total, self.currency), xy=(date, high_low), xytext=(date, high_low), color=color, fontsize=8)
 
-    def _print_trades_overview(self, balance, net_worth, shares_held, trades):
+    def _print_trades_overview(self, balance, net_worth, shares_held, trades, buy_and_hold):
         print('\nTrades')
         for asset in self.assets:
             df = pd.DataFrame(trades[asset])
             if 'step' in df.columns.tolist():
-                df['Date'] = self.df_complete[asset]['Date'].values[df['step'] -1]
+                df[asset] = self.df_complete[asset]['Date'].values[df['step'] -1]
+                df['amount ({})'.format(asset)] = df['amount']
+                df['price ({})'.format(self.currency)] = df['price']
                 df['total ({})'.format(self.currency)] = df['total']
-                df.set_index('Date', inplace=True)
-                df.drop(['step', 'total'], axis=1, inplace=True)
+                df.set_index(asset, inplace=True)
+                df.drop(['step', 'total', 'price', 'amount'], axis=1, inplace=True)
                 x = tabulate(df, headers='keys', tablefmt='psql')
                 print(asset)
                 print(x)
         shares_held[self.currency] = balance
         df_shares_held = pd.DataFrame(shares_held, index=[0])
         x_shares = tabulate(df_shares_held, headers='keys', tablefmt='psql')
+
+        abs_diff = net_worth - buy_and_hold
+        avg = (net_worth + buy_and_hold) / 2
+        percentage_diff = abs_diff / avg * 100
+
         print('\nPortfolio')
         print(x_shares)
-        print('Net Worth:', net_worth, self.currency)
+        print('Net Worth: {} {} ({:.3f}%)'.format(net_worth, self.currency, percentage_diff))
+        print('Buy \'n hold:', buy_and_hold, self.currency)
         print('\n')
 
     def render(self, current_step, net_worth, buy_and_hold, trades, shares_held, balance, window_size):
@@ -263,7 +271,7 @@ class GraphGenerator:
         # print trades info on console
         last_step = current_step >= len(self.date_values) - 1
         if last_step:
-            self._print_trades_overview(balance, net_worth, shares_held, trades)
+            self._print_trades_overview(balance, net_worth, shares_held, trades, buy_and_hold)
 
     def close(self):
         plt.close()

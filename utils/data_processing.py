@@ -41,9 +41,9 @@ def get_datasets(asset, currency, granularity, datapoints, exchange, df_train_si
     Returns:
         pandas.Dataframe -- The OHLCV and indicators dataframe
     """
-    df_train_path = 'datasets/bot_train_{}_{}_{}.csv'.format(
+    df_train_path = 'data/bot_train_{}_{}_{}.csv'.format(
         asset + currency, datapoints, granularity)
-    df_rollout_path = 'datasets/bot_rollout_{}_{}_{}.csv'.format(
+    df_rollout_path = 'data/bot_rollout_{}_{}_{}.csv'.format(
         asset + currency, datapoints, granularity)
     if not os.path.exists(df_rollout_path):
         headers = {'User-Agent': 'Mozilla/5.0',
@@ -77,7 +77,7 @@ def get_datasets(asset, currency, granularity, datapoints, exchange, df_train_si
         # https://github.com/mrjbq7/ta-lib/blob/master/docs/func.md
         open_price, high, low, close = np.array(df['open']), np.array(
             df['high']), np.array(df['low']), np.array(df['close'])
-        volume = np.array(df['volumefrom'])
+        volume = np.array(df['volumefrom'], dtype=float)
         # cycle indicators
         df.loc[:, 'HT_DCPERIOD'] = talib.HT_DCPERIOD(close)
         df.loc[:, 'HT_DCPHASE'] = talib.HT_DCPHASE(close)

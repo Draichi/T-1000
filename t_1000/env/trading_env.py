@@ -66,14 +66,20 @@ class TradingEnv(gym.Env):
         self._take_action(action)
         self.current_step += 1
 
-        net_worth_and_buyhold_mean = (self.net_worth + self.buy_and_hold) / 2
-        reward = (self.net_worth - self.buy_and_hold) / \
-            net_worth_and_buyhold_mean
+        reward = self.compute_reward()
         done = self.net_worth <= 0 or self.balance <= 0 or self.current_step >= len(
             self.df_features[self.assets_list[0]].loc[:, 'open'].values) - 1
         obs = self._next_observation()
 
         return obs, reward, done, {}
+
+    def compute_reward(self):
+        net_worth_and_buyhold_mean = (self.net_worth + self.buy_and_hold) / 2
+        reward = (self.net_worth - self.buy_and_hold) / \
+            net_worth_and_buyhold_mean
+
+        # reward = self.net_worth - self.initial_balance
+        return reward
 
     def _reset_trades(self):
         for asset in self.assets_list:
@@ -165,6 +171,7 @@ class TradingEnv(gym.Env):
         for asset in self.assets_list:
             if self.shares_sold[asset] > 0 or self.shares_bought[asset] > 0:
                 self.trades[asset].append({
+                    'price': self.current_price[asset],
                     'step': self.current_step,
                     'amount': self.shares_sold[asset] if self.shares_sold[asset] > 0 else self.shares_bought[asset],
                     'total': self.sales if self.shares_sold[asset] > 0 else self.cost,

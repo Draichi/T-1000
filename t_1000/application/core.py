@@ -1,29 +1,27 @@
 import ray
-import collections
-import os
-import json
-import pickle
-import gym
+from t_1000.application.handlers import find_results_folder, get_instruments_from_checkpoint
 from utils.data_processing import get_datasets
 from ray.tune import grid_search, run
 from t_1000.env.trading_env import TradingEnv
 from ray.tune.registry import register_env
 from ray.rllib.agents.registry import get_agent_class
+import collections
+import gym
 from ray.rllib.env import MultiAgentEnv
 from ray.rllib.env.base_env import _DUMMY_AGENT_ID
-from ray.rllib.evaluation.episode import _flatten_action
 from ray.rllib.policy.sample_batch import DEFAULT_POLICY_ID
+from ray.rllib.evaluation.episode import _flatten_action
+
+
 
 env_name = 'YesMan-v1'
 
+class DefaultMapping(collections.defaultdict):
+    """default_factory now takes as an argument the missing key."""
 
-def find_results_folder():
-    return os.getcwd() + '/results'
-
-
-def trial_name_string(trial):
-    return str('1')
-
+    def __missing__(self, key):
+        self[key] = value = self.default_factory(key)
+        return value
 
 def default_policy_agent_mapping(_):
     return DEFAULT_POLICY_ID
@@ -108,63 +106,10 @@ def rollout(agent, env_name, num_steps, no_render=True):
                 env.render()
             steps += 1
             obs = next_obs
-        print("Episode reward", reward_total)
-
-
-def get_instruments_from_checkpoint(checkpoint):
-    config = {}
-    # Load configuration from file
-    config_dir = os.path.dirname(checkpoint)
-    config_path = os.path.join(config_dir, "params.pkl")
-    if not os.path.exists(config_path):
-        config_path = os.path.join(config_dir, "../params.pkl")
-    if not os.path.exists(config_path):
-        raise ValueError(
-            "Could not find params.pkl in either the checkpoint dir or "
-            "its parent directory.")
-    else:
-        with open(config_path, "rb") as f:
-            config = pickle.load(f)
-    if config['env_config']:
-        env_config = config['env_config']
-        if env_config['assets']:
-            assets = env_config['assets']
-        else:
-            raise ValueError('assets does not exists in env_config')
-        if env_config['currency']:
-            currency = env_config['currency']
-        else:
-            raise ValueError('currency does not exists in env_config')
-        if env_config['datapoints']:
-            datapoints = env_config['datapoints']
-        else:
-            raise ValueError('datapoints does not exists in env_config')
-        if env_config['granularity']:
-            granularity = env_config['granularity']
-        else:
-            raise ValueError('granularity does not exists in env_config')
-        if env_config['variables']:
-            variables = env_config['variables']
-        else:
-            raise ValueError('variables does not exists in env_config')
-    else:
-        raise ValueError('env_config does not exists in params.pkl')
-    if "num_workers" in config:
-        config["num_workers"] = min(2, config["num_workers"])
-    return config, assets, currency, datapoints, granularity, variables
-
-
-class DefaultMapping(collections.defaultdict):
-    """default_factory now takes as an argument the missing key."""
-
-    def __missing__(self, key):
-        self[key] = value = self.default_factory(key)
-        return value
-
 
 class T1000:
-    def __init__(self, assets, currency, granularity, datapoints, checkpoint_path, initial_account_balance, exchange_commission, exchange):
-
+    def __init__(self, algo, assets, currency, granularity, datapoints, checkpoint_path, initial_account_balance, exchange_commission, exchange):
+        self.algo = algo
         self.assets = assets
         self.currency = currency
         self.granularity = granularity
@@ -174,7 +119,7 @@ class T1000:
         self.initial_account_balance = initial_account_balance
         self.exchange_commission = exchange_commission
         if checkpoint_path:
-            _, self.assets, self.currency, self.datapoints, self.granularity, _ = get_instruments_from_checkpoint(
+            _, self.assets, self.currency, self.datapoints, self.granularity = get_instruments_from_checkpoint(
                 checkpoint_path)
         self.check_variables_integrity()
         self.populate_dfs(exchange=exchange)
@@ -187,6 +132,9 @@ class T1000:
             "initial_account_balance": self.initial_account_balance,
             "commission": self.exchange_commission
         }
+
+    def trial_name_string(self, trial):
+        return '{}_{}_{}_{}'.format('-'.join(self.assets), self.currency, self.granularity, self.datapoints)
 
     def check_variables_integrity(self):
         if type(self.assets) != list or len(self.assets) == 0:
@@ -233,7 +181,7 @@ class T1000:
                                                                                                self.df[asset][df_type].columns != 'Date']
 
     def backtest(self, checkpoint_path):
-        agent_config, assets, currency, datapoints, granularity, _ = get_instruments_from_checkpoint(
+        agent_config, assets, currency, datapoints, granularity = get_instruments_from_checkpoint(
             checkpoint_path)
 
         config = {
@@ -253,7 +201,7 @@ class T1000:
 
         register_env(env_name, lambda _: TradingEnv(config))
         ray.init()
-        cls = get_agent_class('PPO')
+        cls = get_agent_class(self.algo)
         agent = cls(env=env_name, config=agent_config)
         agent.restore(checkpoint_path)
 
@@ -262,17 +210,17 @@ class T1000:
 
         rollout(agent, env_name, num_steps, no_render)
 
-    def train(self, algo, timesteps, checkpoint_freq, lr_schedule):
+    def train(self, timesteps, checkpoint_freq, lr_schedule):
         register_env(env_name, lambda config: TradingEnv(config))
         ray.init()
 
         self.generate_config_spec(lr_schedule=lr_schedule, df_type='train')
 
-        run(name="t-1000",
-            run_or_experiment=algo,
+        run(name=self.algo,
+            run_or_experiment=self.algo,
             checkpoint_at_end=True,
             stop={'timesteps_total': timesteps},
             checkpoint_freq=checkpoint_freq,
             config=self.config_spec,
             local_dir=find_results_folder(),
-            trial_name_creator=trial_name_string)
+            trial_name_creator=self.trial_name_string)
