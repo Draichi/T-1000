@@ -9,6 +9,7 @@ import colorama
 import requests
 import pandas as pd
 import numpy as np
+from dotenv import load_dotenv
 from yaspin import yaspin
 from prompt_toolkit import HTML, print_formatted_text
 from prompt_toolkit.styles import Style
@@ -41,13 +42,17 @@ def get_datasets(asset, currency, granularity, datapoints, exchange, df_train_si
     Returns:
         pandas.Dataframe -- The OHLCV and indicators dataframe
     """
+    load_dotenv()
+    CRYPTOCOMPARE_API_KEY = os.getenv('CRYPTOCOMPARE_API_KEY')
+    if not CRYPTOCOMPARE_API_KEY:
+        raise EnvironmentError('CRYPTOCOMPARE_API_KEY not found on .env')
     df_train_path = 'data/bot_train_{}_{}_{}.csv'.format(
         asset + currency, datapoints, granularity)
     df_rollout_path = 'data/bot_rollout_{}_{}_{}.csv'.format(
         asset + currency, datapoints, granularity)
     if not os.path.exists(df_rollout_path):
         headers = {'User-Agent': 'Mozilla/5.0',
-                   'authorization': 'Apikey 3d7d3e9e6006669ac00584978342451c95c3c78421268ff7aeef69995f9a09ce'}
+                   'authorization': 'Apikey {}'.format(CRYPTOCOMPARE_API_KEY)}
 
         url = 'https://min-api.cryptocompare.com/data/histo{}?fsym={}&tsym={}&limit={}&e={}'.format(
             granularity, asset, currency, datapoints, exchange)
@@ -64,9 +69,7 @@ def get_datasets(asset, currency, granularity, datapoints, exchange, df_train_si
         json_response = response.json()
         status = json_response['Response']
         if status == "Error":
-            print(colored('=== {} ==='.format(
-                json_response['Message']), 'red'))
-            raise AssertionError()
+            raise AssertionError(colored(json_response['Message'], 'red'))
         result = json_response['Data']
         df = pd.DataFrame(result)
         # print(df.tail())

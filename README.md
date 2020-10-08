@@ -18,7 +18,9 @@ Deep reinforcement learning multi-agent algorithmic trading framework that learn
 
 ## Prerequisites
 
--   [Miniconda](https://conda.io/docs/user-guide/install/index.html) or Anaconda
+-   [Miniconda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html) or Anaconda
+
+An API Key on [CryptoCompare](https://min-api.cryptocompare.com/)
 
 * * *
 
@@ -27,6 +29,8 @@ Deep reinforcement learning multi-agent algorithmic trading framework that learn
 ### Ubuntu
 
 ```sh
+# paste your API Key on .env
+cp .env.example .env
 # make sure you have these installed
 sudo apt-get install gcc g++ build-essential python-dev python3-dev -y
 # create env
