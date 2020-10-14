@@ -135,6 +135,8 @@ class TradingEnv(gym.Env):
                                                        self.df_features[asset].loc[self.current_step, 'close'])
 
     def _buy(self, asset, amount):
+        # check here for a env variable (train, test or trade)
+        # and creates an order
         self.shares_bought[asset] = self.balance * \
             amount / self.current_price[asset]
         self.cost = self.shares_bought[asset] * \
