@@ -1,6 +1,6 @@
 import ray
 from t_1000.application.handlers import find_results_folder, get_instruments_from_checkpoint
-from utils.data_processing import get_datasets
+from utils.data_processing import GenerateDatasets
 from ray.tune import grid_search, run
 from t_1000.env.trading_env import TradingEnv
 from ray.tune.registry import register_env
@@ -149,11 +149,12 @@ class T1000:
     def populate_dfs(self, exchange):
         for asset in self.assets:
             self.df[asset] = {}
-            self.df[asset]['train'], self.df[asset]['rollout'] = get_datasets(asset=asset,
-                                                                              currency=self.currency,
-                                                                              granularity=self.granularity,
-                                                                              datapoints=self.datapoints,
-                                                                              exchange=exchange)
+            datasets = GenerateDatasets(asset=asset,
+                                        currency=self.currency,
+                                        granularity=self.granularity,
+                                        datapoints=self.datapoints,
+                                        exchange=exchange)
+            self.df[asset]['train'], self.df[asset]['rollout'] = datasets.df_train, datasets.df_rollout
 
     def generate_config_spec(self, lr_schedule, df_type):
         self.config_spec = {
