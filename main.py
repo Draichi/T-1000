@@ -14,8 +14,15 @@ if __name__ == '__main__':
 	parser.add_argument('-lr', action="store", dest="lr_schedule", default=[[[0, 1e-4], [1e6, 8e-5]]])
 	parser.add_argument('--algo', action="store", dest="algo", default='PPO', type=str)
 	parser.add_argument('--checkpoint-path', action="store", dest="checkpoint_path", type=str)
+	parser.add_argument('--prod', action="store_true", dest="is_prod")
 	parser.add_argument('--version', action='version', version='1.0')
 	args = parser.parse_args()
+
+	if args.is_prod:
+		# - fetch data again and create prod df
+		# - run rollout passing only the last row of prod df
+		# - output only the action from t-1000 (tuple)
+		pass
 
 	if not args.checkpoint_path and not args.assets:
 		raise ValueError('-a cannot be null')
@@ -40,4 +47,3 @@ if __name__ == '__main__':
 	else: # test
 		env.backtest(checkpoint_path=args.checkpoint_path)
 
-              
