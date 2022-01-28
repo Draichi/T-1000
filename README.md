@@ -131,6 +131,12 @@ $ htop
 ```
 * * *
 
+## Note of archiving
+
+This repository is no longer maintaned
+
+Other versions are running on private mode
+
 ## Credits
 
 -   [Papers](https://github.com/Draichi/Portfolio-Management-list/blob/master/README.md)
