@@ -14,7 +14,11 @@
 
 Deep reinforcement learning multi-agent algorithmic trading framework that learns to trade from experience and then evaluate with brand new data
 
-> This repository is no longer maintained
+## Note of archiving
+
+This repository is no longer maintaned
+
+Other versions are running on private mode
 
 * * *
 
@@ -130,12 +134,6 @@ $ gpustat -i
 $ htop
 ```
 * * *
-
-## Note of archiving
-
-This repository is no longer maintaned
-
-Other versions are running on private mode
 
 ## Credits
 
