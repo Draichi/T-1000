@@ -1,0 +1,9 @@
+{
+  "python.analysis.typeCheckingMode": "basic",
+  "editor.minimap.maxColumn": 80,
+  "editor.wordWrapColumn": 80,
+  "editor.wordWrap": "wordWrapColumn",
+  "editor.rulers": [80],
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": ["source.formatDocument"]
+}
