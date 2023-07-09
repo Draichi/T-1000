@@ -4,7 +4,7 @@ import pandas as pd
 import requests
 from dotenv import load_dotenv
 from ray import data as ray_data
-from ta import add_all_ta_features
+# from ta import add_all_ta_features
 
 
 class Market:
@@ -57,7 +57,7 @@ class Market:
 
                 self.data_frames[asset] = self.__fetch_api(asset)
 
-                self.data_frames[asset] = self.__add_indicators(asset)
+                # self.data_frames[asset] = self.__add_indicators(asset)
 
                 self.__save_complete_data_frame_to_csv(asset)
 
@@ -100,18 +100,19 @@ class Market:
 
         pandas_data_frame['Date'] = pd.to_datetime(
             arg=to_datetime_arg, utc=True, unit='s')
+        pandas_data_frame.set_index('Date', inplace=True)
 
         return pandas_data_frame
 
-    def __add_indicators(self, asset: str) -> pd.DataFrame:
-        """Get the `self.raw_data_frame` data_frame and adds the market indicators for the given time series.
+    # def __add_indicators(self, asset: str) -> pd.DataFrame:
+    #     """Get the `self.raw_data_frame` data_frame and adds the market indicators for the given time series.
 
-            Returns:
-                raw_data_frame (pandas.DataFrame): A new data_frame based on `self.raw_data_frame` but with the indicators on it"""
-        data_frame_with_indicators = {}
-        data_frame_with_indicators[asset] = add_all_ta_features(
-            self.data_frames[asset], open="open", high="high", low="low", close="close", volume="volumeto")
-        return data_frame_with_indicators[asset]
+    #         Returns:
+    #             raw_data_frame (pandas.DataFrame): A new data_frame based on `self.raw_data_frame` but with the indicators on it"""
+    #     data_frame_with_indicators = {}
+    #     data_frame_with_indicators[asset] = add_all_ta_features(
+    #         self.data_frames[asset], open="open", high="high", low="low", close="close", volume="volumeto")
+    #     return data_frame_with_indicators[asset]
 
     def __split_data_frames(self, asset: str) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Split a data_frame for a selected asset into train_data_frame and test_data_frame
