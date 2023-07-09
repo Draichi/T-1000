@@ -7,6 +7,9 @@ from ray import data as ray_data
 # from ta import add_all_ta_features
 
 
+# salvar data_frame sem splitar entre train e test
+# salvar data_frame com o nome {dia}-{mes}-{ano}.csv
+
 class Market:
     """An abstraction of a crypto market
 

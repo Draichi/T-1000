@@ -11,16 +11,13 @@ def main():
 
     ModelCatalog.register_custom_model("T-1000", TradingEnvironment)
 
+    # data_frame = get_data_frame()
+
     config = (
         get_trainable_cls('PPO')
         .get_default_config()
         .environment(TradingEnvironment, env_config={
-            'assets': ['BTC'],
-            'currency': 'USD',
-            'granularity': 'hour',
-            'datapoints': 150,
-            'df_complete': {},
-            'df_features': {},
+            'data_frame': {},
         },)
         .framework('torch')
         .rollouts(num_rollout_workers=1)

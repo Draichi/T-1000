@@ -1,5 +1,6 @@
 import gymnasium as gym
 import numpy as np
+import pandas as pd
 import random
 from gymnasium import spaces
 from ray.rllib.env.env_context import EnvContext
@@ -9,7 +10,8 @@ class TradingEnvironment(gym.Env):
     def __init__(self, config: EnvContext):
 
         self.current_step: int = 0
-        self.df_features = config['df_features']
+        self.data_frame = config['data_frame']
+        self.df_features = self.__compute_df_features()
         
         self.exchange_commission = 0.00075
         initial_balance = 1000
@@ -55,6 +57,9 @@ class TradingEnvironment(gym.Env):
     def net_worth(self, value: float):
         self._net_worth = value
 
+    def __compute_df_features(self) -> pd.DataFrame:
+        return self.data_frame
+
     def __reset_net_worth(self):
         self.net_worth = self.initial_balance
 
@@ -65,8 +70,8 @@ class TradingEnvironment(gym.Env):
 
     def _compute_current_price(self):
         self.current_price = random.uniform(
-            self.df_features.loc[self.current_step, 'open'],
-            self.df_features.loc[self.current_step, 'close'])
+            self.df_features.at[self.current_step, 'open'],
+            self.df_features.at[self.current_step, 'close'])
 
     def __buy(self, amount: float):
         self.shares_bought = self.balance * \
