@@ -10,9 +10,10 @@ class TradingEnvironment(gym.Env):
     def __init__(self, config: EnvContext):
 
         self.current_step: int = 0
+        self.current_price: float = 0.0
         self.data_frame = config['data_frame']
         self.df_features = self.__compute_df_features()
-        
+
         self.exchange_commission = 0.00075
         initial_balance = 1000
         self._net_worth = initial_balance
@@ -26,28 +27,21 @@ class TradingEnvironment(gym.Env):
         self.initial_bought = 0
         self.trades: list = []
 
-        # 4,3 = (balance, cost, sales, net_worth) + (shares bought, shares sold, shares held)
+        # 2,3 = (balance, net_worth) + (shares bought, shares sold, shares held)
         self.observation_length = len(
-            self.df_features.columns) + 4 + 3
+            self.df_features.columns) + 2 + 3
         
-        print('observation length',self.observation_length)
-
         # action space = buy and sell and hold position
-        action_space = 3
+        self.action_space = spaces.Discrete(3)
 
-
-        self.action_space = spaces.Box(
-            low=np.array([0, 0]),
-            high=np.array([action_space, 1]),
-            dtype=np.float16)
+        max_value_from_data_frame = self.df_features.max().max()
 
         self.observation_space = spaces.Box(
-            low=-np.finfo(np.float32).max,
-            high=np.finfo(np.float32).max,
+            low=0,
+            high=max_value_from_data_frame * 10,
             shape=(self.observation_length,),
-            dtype=np.float16)
+            dtype=np.float32)
 
-    
     @property
     def net_worth(self) -> float:
         """Returns the foo var"""
@@ -58,7 +52,7 @@ class TradingEnvironment(gym.Env):
         self._net_worth = value
 
     def __compute_df_features(self) -> pd.DataFrame:
-        return self.data_frame
+        return self.data_frame.loc[:, self.data_frame.columns != 'Date']
 
     def __reset_net_worth(self):
         self.net_worth = self.initial_balance
@@ -68,7 +62,7 @@ class TradingEnvironment(gym.Env):
         self.shares = 0
         self.shares = 0
 
-    def _compute_current_price(self):
+    def __compute_current_price(self):
         self.current_price = random.uniform(
             self.df_features.at[self.current_step, 'open'],
             self.df_features.at[self.current_step, 'close'])
@@ -146,8 +140,6 @@ class TradingEnvironment(gym.Env):
             self.df_features.values[self.current_step])
         current_state = np.array([np.append(current_market_state, [
             self.balance,
-            self.cost,
-            self.sales,
             self.net_worth,
             self.shares_bought,
             self.shares_sold,
@@ -162,8 +154,7 @@ class TradingEnvironment(gym.Env):
         """Take an action within the environment"""
         action_type = action[0]
         action_strength = action[1]
-        # TODO
-        # - compute_current_price()
+        self.__compute_current_price()
 
         """bounds of action_space doesn't seem to work, so this line is necessary to not overflow actions"""
         if 0 < action_strength <= 1 and action_type > 0:
@@ -181,21 +172,21 @@ class TradingEnvironment(gym.Env):
     def compute_reward(self) -> None:
         pass
 
+    # TODO: return obs, reward, done, truncated, info
     def step(self, action: list[float]):
         """Execute one time step within the environment"""
-        # TODO
         self.__take_action(action)
         self.current_step += 1
 
-    def reset(self):
+    # TODO: return obs, info
+    def reset(self, *, seed=None, options=None):
         """Reset the ExchangeEnvironment to it's initial state"""
         self.current_step = 0
-        print('\nself.observation_space.sample():',self.observation_space.sample())
         self.reset_balance()
         self.reset_trades()
         print("Resetting environment")
-        # TODO
         self._get_first_price()
+        self.__compute_current_price()
         self.__compute_initial_bought()
 
         return self.__get_next_observation()

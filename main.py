@@ -2,22 +2,25 @@ import ray
 from ray.rllib.models import ModelCatalog
 from t1000.trading_environment import TradingEnvironment
 import os
+from ray.tune.registry import register_env
 from ray.tune.logger import pretty_print
 from ray.tune.registry import get_trainable_cls
+from t1000.market import get_data_frame
 
 def main():
     print("Running")
     ray.init(local_mode=True)
 
-    ModelCatalog.register_custom_model("T-1000", TradingEnvironment)
+    register_env("T-1000", lambda config: TradingEnvironment(config))
 
-    # data_frame = get_data_frame()
+
+    data_frame = get_data_frame()
 
     config = (
         get_trainable_cls('PPO')
         .get_default_config()
-        .environment(TradingEnvironment, env_config={
-            'data_frame': {},
+        .environment('T-1000', env_config={
+            'data_frame': data_frame,
         },)
         .framework('torch')
         .rollouts(num_rollout_workers=1)
