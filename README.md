@@ -14,11 +14,6 @@
 
 Deep reinforcement learning multi-agent algorithmic trading framework that learns to trade from experience and then evaluate with brand new data
 
-## Note of archiving
-
-This repository is no longer maintaned
-
-Other versions are running on private mode
 
 * * *
 
