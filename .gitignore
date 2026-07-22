@@ -1,5 +1,25 @@
-**/__pycache__
-*.csv
-/.vscode
-/models
-.env
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Data & artifacts -- any subdirectory (raw, processed, raw_14mo, run_1m,
+# backtest/<timestamp>, etc.), not just today's fixed names, so a future
+# differently-named fetch/run doesn't slip past this.
+data/*
+!data/.gitkeep
+checkpoints/*
+!checkpoints/.gitkeep
+runs/*
+!runs/.gitkeep
+
+# BigQuery / GCP credentials
+*.json
+!configs/*.json
+
