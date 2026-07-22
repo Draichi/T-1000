@@ -1,0 +1,24 @@
+# PPO hyperparameters for the Uniswap V3 LP agent.
+# device=cpu: the observation/policy network is small (~30 features, 128x128
+# MLP), so CPU often beats MPS/CUDA on an Apple Silicon dev box due to
+# per-step kernel-launch overhead outweighing the tiny matmuls involved.
+# Switch to "cuda" unmodified for a real cloud-GPU training run.
+policy: MlpPolicy
+net_arch: [128, 128]
+n_steps: 2048
+batch_size: 64
+n_epochs: 10
+gamma: 0.99
+gae_lambda: 0.95
+clip_range: 0.2
+ent_coef: 0.01
+learning_rate_start: 0.0003 # default 0.0003
+learning_rate_end: 0.00001 # default 0.00001
+device: cpu
+
+n_envs: 8
+episode_hours: 720
+step_hours: 1.0
+initial_notional_usd: 10000.0
+
+checkpoint_save_freq: 20000
