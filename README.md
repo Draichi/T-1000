@@ -8,6 +8,18 @@ gas cost, against a simulator validated with real on-chain data.
 
 ![preview](./preview.gif)
 
+Animated replay of a backtest over a 6-month held-out period (2025-01-01 to
+2025-06-30) the agent never trained on. Top panel: portfolio value over
+time, PPO (blue) vs. the full-range baseline (gray). Middle panel: the
+ETH/USD price (white line) with each policy's current position range drawn
+as a band underneath it, plus the PPO agent's action for that step in the
+top-right corner. Bottom panel: cumulative gas cost paid by each policy. As
+the price falls and later recovers, the PPO agent repeatedly narrows and
+shifts its range to stay concentrated near the current price (and exits to
+cash during the roughest stretch), trading a higher gas bill for
+better fee capture and less exposure to impermanent loss than the static
+baseline.
+
 For a beginner-friendly, step-by-step explanation of how the simulator and
 the RL pipeline actually work under the hood (including how Uniswap V3 fee
 accounting works, explained from scratch), see
@@ -188,9 +200,16 @@ value, price with position-range bands, cumulative gas cost) unless
 
 **Result obtained**: with the reduced local training run (4096 steps), PPO
 **does not beat** the baseline (P&L of -7563 vs -930 USD over the 2-week
-test window), expected for such a short training run. The full training
-pipeline (millions of steps on a GPU) is the natural next step to give the
-agent a real chance at learning a competitive policy.
+test window), expected for such a short training run.
+
+With a full training run (2M timesteps, 8 months of the 14-month dataset,
+`ent_coef` lowered from 0.01 to 0.001 after diagnosing excessive policy
+entropy/action-thrashing in an earlier checkpoint), PPO **does beat** the
+baseline over the 6-month held-out period it never trained on: P&L of
++1574 vs -29 USD, Sharpe 4.55 vs 0.14, and a smaller max drawdown (-9.0%
+vs -13.4%), at the cost of paying more gas ($330 vs $68) from actively
+narrowing and shifting its range to track the price instead of sitting
+in a static wide range.
 
 
 ## Security-oriented design principles
@@ -223,11 +242,13 @@ before ever trusting it to train an agent. See
    relative to the pool's real liquidity, historical prices are an exact
    replay of real swaps, without simulating the effect of the agent's
    position on the execution price.
-3. **"Beating the baseline in 6 months" is not guaranteed by the
-   architecture**, it's an empirical result of training. With this run's
-   reduced local training, we honestly document that the agent does not
-   yet beat the baseline; this is expected, and the full cloud-GPU training
-   pipeline is what gives that comparison a fair chance.
+3. **"Beating the baseline" is not guaranteed by the architecture**, it's an
+   empirical result of training. The reduced local training run (4096
+   steps) does not beat the baseline, expected for such a short run. A full
+   run (2M timesteps, tuned `ent_coef`) does beat it over a 6-month
+   held-out period (see the backtest results above), but this is a single
+   seed over a single eval window, not a guarantee that holds across all
+   market regimes or checkpoints.
 4. **Gas calibration is approximate**: `gas_model.DEFAULT_GAS_UNITS` uses
    order-of-magnitude estimates (not a precise decoding of
    NonfungiblePositionManager function selectors, which often bundle
