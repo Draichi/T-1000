@@ -6,6 +6,8 @@ liquidity position on the Uniswap V3 ETH/USDC 0.05% pool
 re-adjust the range. Maximizing fees earned minus impermanent loss minus
 gas cost, against a simulator validated with real on-chain data.
 
+![preview](./preview.gif)
+
 For a beginner-friendly, step-by-step explanation of how the simulator and
 the RL pipeline actually work under the hood (including how Uniswap V3 fee
 accounting works, explained from scratch), see
