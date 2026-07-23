@@ -318,11 +318,26 @@ class UniswapV3LPEnv(gym.Env):
 
         truncated = self.current_ts >= self.episode_end_ts or self.current_ts >= self.data_end_ts
         terminated = False
+        if self.position_tick_lower is None:
+            range_lower_usd = range_upper_usd = None
+        else:
+            lo = human_price_usd_per_eth(sqrt_price_x96_from_tick(self.position_tick_lower))
+            hi = human_price_usd_per_eth(sqrt_price_x96_from_tick(self.position_tick_upper))
+            range_lower_usd, range_upper_usd = min(lo, hi), max(lo, hi)
         info = {
             "portfolio_value_usd": portfolio_value,
             "gas_cost_usd": gas_cost,
             "unclaimed_fees_usd": self.unclaimed_fees_usd,
             "in_range": self.position_tick_lower is not None
             and self.position_tick_lower <= self.engine.pool.tick < self.position_tick_upper,
+            # Captured here (not read from live env attributes after step()
+            # returns) because VecEnv wrappers auto-reset the underlying env
+            # on the same call that reports truncated=True, so by the time a
+            # caller inspects env.current_ts/env._current_price() on the
+            # terminal step, they'd already reflect the *next* episode.
+            "timestamp": self.current_ts,
+            "price_usd": self._current_price(),
+            "range_lower_usd": range_lower_usd,
+            "range_upper_usd": range_upper_usd,
         }
         return self._build_obs(), reward, terminated, truncated, info

@@ -22,6 +22,7 @@ import yaml
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
+from t1000.actions import Action
 from t1000.baseline_policy import FullRangeBaselinePolicy
 from t1000.data_loading import load_processed_dataset
 from t1000.env import UniswapV3LPEnv
@@ -55,25 +56,37 @@ def _range_prices(env) -> tuple:
 
 
 def _new_history(env) -> dict:
+    # Safe to read straight from env here (unlike _append_history): this
+    # runs right after reset(), before any VecEnv auto-reset could have
+    # occurred.
     lo, hi = _range_prices(env)
     return {
+        "timestamp": [env.current_ts],
         "portfolio_value_usd": [env._portfolio_value_usd()],
         "price_usd": [env._current_price()],
         "range_lower_usd": [lo],
         "range_upper_usd": [hi],
         "gas_cost_usd": [0.0],
         "in_range": [False],
+        "action": [None],
     }
 
 
-def _append_history(history: dict, env, info: dict) -> None:
-    lo, hi = _range_prices(env)
+def _append_history(history: dict, info: dict, action: int) -> None:
+    # Every field below is sourced from `info`, not from live env
+    # attributes: VecEnv wrappers auto-reset the underlying env on the same
+    # step() call that reports truncated=True, so by the time this function
+    # runs, env attributes like current_ts/_current_price() would already
+    # reflect the *next* episode for the terminal step. env.py's step()
+    # captures these before that happens.
+    history["timestamp"].append(info["timestamp"])
     history["portfolio_value_usd"].append(info["portfolio_value_usd"])
-    history["price_usd"].append(env._current_price())
-    history["range_lower_usd"].append(lo)
-    history["range_upper_usd"].append(hi)
+    history["price_usd"].append(info["price_usd"])
+    history["range_lower_usd"].append(info["range_lower_usd"])
+    history["range_upper_usd"].append(info["range_upper_usd"])
     history["gas_cost_usd"].append(info["gas_cost_usd"])
     history["in_range"].append(info["in_range"])
+    history["action"].append(Action(action).name)
 
 
 def run_baseline(env_fn, seed: int) -> dict:
@@ -85,7 +98,7 @@ def run_baseline(env_fn, seed: int) -> dict:
     while not (terminated or truncated):
         action, _ = policy.predict(obs, deterministic=True)
         obs, _, terminated, truncated, info = env.step(int(action))
-        _append_history(history, env, info)
+        _append_history(history, info, int(action))
     return history
 
 
@@ -105,27 +118,27 @@ def run_ppo(model_path, vecnorm_path, env_fn, seed: int) -> dict:
         action, _ = model.predict(obs, deterministic=True)
         obs, _, dones, infos = venv.step(action)
         done = bool(dones[0])
-        _append_history(history, raw_env, infos[0])
+        _append_history(history, infos[0], int(action[0]))
     return history
 
 
-def plot_backtest(baseline_history: dict, ppo_history: dict, step_hours: float, out_path: Path) -> None:
-    hours_b = [i * step_hours for i in range(len(baseline_history["portfolio_value_usd"]))]
-    hours_p = [i * step_hours for i in range(len(ppo_history["portfolio_value_usd"]))]
+def plot_backtest(baseline_history: dict, ppo_history: dict, out_path: Path) -> None:
+    ts_b = pd.to_datetime(baseline_history["timestamp"])
+    ts_p = pd.to_datetime(ppo_history["timestamp"])
 
     fig, axes = plt.subplots(3, 1, figsize=(11, 10), sharex=True)
 
     ax = axes[0]
-    ax.plot(hours_b, baseline_history["portfolio_value_usd"], label="baseline (full-range)", color="tab:gray")
-    ax.plot(hours_p, ppo_history["portfolio_value_usd"], label="PPO", color="tab:blue")
+    ax.plot(ts_b, baseline_history["portfolio_value_usd"], label="baseline (full-range)", color="tab:gray")
+    ax.plot(ts_p, ppo_history["portfolio_value_usd"], label="PPO", color="tab:blue")
     ax.set_ylabel("Portfolio value (USD)")
     ax.set_title("Backtest: PPO vs full-range baseline")
     ax.legend()
 
     ax = axes[1]
-    ax.plot(hours_p, ppo_history["price_usd"], label="ETH/USD price", color="black", linewidth=1)
+    ax.plot(ts_p, ppo_history["price_usd"], label="ETH/USD price", color="black", linewidth=1)
     ax.fill_between(
-        hours_b,
+        ts_b,
         pd.Series(baseline_history["range_lower_usd"], dtype=float),
         pd.Series(baseline_history["range_upper_usd"], dtype=float),
         step="post",
@@ -134,7 +147,7 @@ def plot_backtest(baseline_history: dict, ppo_history: dict, step_hours: float, 
         label="baseline range",
     )
     ax.fill_between(
-        hours_p,
+        ts_p,
         pd.Series(ppo_history["range_lower_usd"], dtype=float),
         pd.Series(ppo_history["range_upper_usd"], dtype=float),
         step="post",
@@ -148,11 +161,12 @@ def plot_backtest(baseline_history: dict, ppo_history: dict, step_hours: float, 
     ax = axes[2]
     baseline_cum_gas = pd.Series(baseline_history["gas_cost_usd"]).cumsum()
     ppo_cum_gas = pd.Series(ppo_history["gas_cost_usd"]).cumsum()
-    ax.plot(hours_b, baseline_cum_gas, label="baseline cumulative gas", color="tab:gray")
-    ax.plot(hours_p, ppo_cum_gas, label="PPO cumulative gas", color="tab:blue")
+    ax.plot(ts_b, baseline_cum_gas, label="baseline cumulative gas", color="tab:gray")
+    ax.plot(ts_p, ppo_cum_gas, label="PPO cumulative gas", color="tab:blue")
     ax.set_ylabel("Cumulative gas cost (USD)")
-    ax.set_xlabel("Hours into episode")
+    ax.set_xlabel("Date")
     ax.legend()
+    fig.autofmt_xdate()
 
     fig.tight_layout()
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -219,7 +233,7 @@ def main():
 
     if not args.no_plot:
         plot_path = out_dir / "backtest_plot.png"
-        plot_backtest(baseline_history, ppo_history, cfg["step_hours"], plot_path)
+        plot_backtest(baseline_history, ppo_history, plot_path)
         print(f"Saved -> {plot_path}")
 
     pnl_diff = ppo_metrics["episode_pnl_usd"] - baseline_metrics["episode_pnl_usd"]
