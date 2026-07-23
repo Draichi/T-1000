@@ -11,40 +11,6 @@ the RL pipeline actually work under the hood (including how Uniswap V3 fee
 accounting works, explained from scratch), see
 [`docs/HOW_IT_WORKS.md`](docs/HOW_IT_WORKS.md).
 
-## Security-oriented design principles
-
-This is classical RL, not an LLM system, but it's built around a few
-principles that carry over directly from AI security/safety engineering:
-
-- **Don't trust the reward, verify it against ground truth.** RL agents are
-  well known for exploiting bugs in their reward function or environment
-  model instead of solving the intended task (a core concern in AI safety
-  literature, e.g. Amodei et al., *Concrete Problems in AI Safety*). Here,
-  the entire environment (`FeeEngine`) reimplements Uniswap V3's tick-level
-  fee accounting from raw on-chain logs, an accounting bug wouldn't just be
-  a wrong number, it would silently teach the agent to "earn" fees that
-  don't exist in reality. That's why the project ships a dedicated check
-  (`scripts/validate.py`) comparing the simulator's output against
-  independently-observable, real on-chain settlement (`Collect - Burn`)
-  before ever trusting it to train an agent. See
-  [`docs/HOW_IT_WORKS.md`](docs/HOW_IT_WORKS.md#why-this-is-easy-to-get-wrong).
-- **Fail closed on out-of-distribution states, don't extrapolate silently.**
-  While iterating on this project, a backtest episode that ran past the
-  edge of the historical dataset kept stepping with a frozen price instead
-  of ending, and the (undertrained) policy fell into a degenerate loop
-  calling `COLLECT` every step, bleeding gas for fees that weren't
-  accruing, a textbook out-of-distribution failure, not a training problem.
-  The fix wasn't to patch that one backtest window, it was to make the
-  environment fail closed: detect when it's about to step past
-  ground-truth data and terminate the episode there, instead of silently
-  extrapolating into an unvalidated regime (`src/t1000/env.py`).
-- **Cost-aware by construction, not by penalty tuning.** Every action
-  incurs real transaction cost (gas, calibrated from historical
-  `base_fee_per_gas`), so the trained policy can't optimize a reward that
-  quietly ignores execution cost, a common source of unsafe or unrealistic
-  policies in financial and security-adjacent RL settings, where the
-  cheapest-looking action on paper is often the one an unconstrained agent
-  over-selects.
 
 ## Setup
 
@@ -68,7 +34,7 @@ explicitly on every `fetch_data.py` invocation:
 uv run python scripts/fetch_data.py --project <your-gcp-project-id> --start ... --end ... --dry-run
 ```
 
-## Structure
+### Structure
 
 ```
 scripts/
@@ -82,7 +48,7 @@ tests/                    # pytest
 configs/ppo_default.yaml  # PPO hyperparameters
 ```
 
-## 1. Fetch historical data (BigQuery)
+### 1. Fetch historical data (BigQuery)
 
 ```bash
 # always run --dry-run first to see estimated bytes before spending quota
@@ -99,7 +65,7 @@ pipeline with a reduced local training run. For a full training run on a
 cloud GPU, fetch a wider window (adjusting `--start`/`--end`). Every rerun
 bills scanned bytes again.
 
-## 2. Build the processed dataset
+### 2. Build the processed dataset
 
 ```bash
 uv run python scripts/build_dataset.py --raw-dir data/raw --out-dir data/processed
@@ -121,7 +87,7 @@ the limitations section below), and serves as a data-quality signal, not a
 fatal error (the simulator always self-corrects using the real liquidity
 value reported on every swap).
 
-## 3. Run the tests
+### 3. Run the tests
 
 ```bash
 uv run pytest tests/ -q
@@ -133,7 +99,7 @@ impermanent loss (cross-checked against the classic closed-form full-range
 formula), the Gymnasium environment contract, the baseline policy, metrics,
 and checkpoint resume.
 
-## 4. Validate the simulator against real on-chain data
+### 4. Validate the simulator against real on-chain data
 
 ```bash
 uv run python scripts/validate.py --processed-dir data/processed
@@ -155,7 +121,7 @@ a bug in the fee engine (see the limitations section). The script
 automatically separates and labels the two groups
 (`--max-duration-blocks`).
 
-## 5. Train (reduced local PPO)
+### 5. Train (reduced local PPO)
 
 ```bash
 uv run python scripts/train.py \
@@ -197,7 +163,7 @@ still essentially-random policy (few PPO updates) rebalances the range
 excessively often, repeatedly paying gas, an expected and documented
 outcome, not a goal of this run (see `runs/episode_metrics.jsonl`).
 
-## 6. Backtest vs baseline
+### 6. Backtest vs baseline
 
 ```bash
 uv run python scripts/backtest.py \
@@ -223,6 +189,21 @@ value, price with position-range bands, cumulative gas cost) unless
 test window), expected for such a short training run. The full training
 pipeline (millions of steps on a GPU) is the natural next step to give the
 agent a real chance at learning a competitive policy.
+
+
+## Security-oriented design principles
+
+RL agents are well known for exploiting bugs in their reward function or environment
+model instead of solving the intended task (a core concern in AI safety
+literature, e.g. Amodei et al., *Concrete Problems in AI Safety*). Here,
+the entire environment (`FeeEngine`) reimplements Uniswap V3's tick-level
+fee accounting from raw on-chain logs, an accounting bug wouldn't just be
+a wrong number, it would silently teach the agent to "earn" fees that
+don't exist in reality. That's why the project ships a dedicated check
+(`scripts/validate.py`) comparing the simulator's output against
+independently-observable, real on-chain settlement (`Collect - Burn`)
+before ever trusting it to train an agent. See
+[`docs/HOW_IT_WORKS.md`](docs/HOW_IT_WORKS.md#why-this-is-easy-to-get-wrong).
 
 ## Known limitations (read before interpreting the results)
 
