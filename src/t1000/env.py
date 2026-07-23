@@ -136,12 +136,13 @@ class UniswapV3LPEnv(gym.Env):
         self.unclaimed_fees_usd = 0.0
         self.cash_usd = initial_notional_usd
         self.hours_since_rebalance = 0.0
-        self.price_history: list = []
+        self.return_history: list = []  # per-step log returns of the pool price
         self.volume_history: list = []
         self.current_ts = None
         self.episode_end_ts = None
         self.episode_start_ts = None
         self.price_at_episode_start = None
+        self.prev_price = None
         self.prev_portfolio_value = None
 
     def _current_price(self) -> float:
@@ -199,6 +200,10 @@ class UniswapV3LPEnv(gym.Env):
         liquidity = _liquidity_for_budget(
             investable, self.engine.pool.sqrt_price_x96, tick_lower, tick_upper, self._current_price()
         )
+        if liquidity <= 0:
+            # Degenerate range/price: opening would debit cash for a worthless
+            # position, evaporating the capital. Stay in cash instead.
+            return
         self.engine.open_shadow_position(tick_lower, tick_upper)
         self.position_tick_lower = tick_lower
         self.position_tick_upper = tick_upper
@@ -243,8 +248,8 @@ class UniswapV3LPEnv(gym.Env):
             current_tick=self.engine.pool.tick,
             price_at_episode_start_usd=self.price_at_episode_start,
             current_price_usd=self._current_price(),
-            returns_24h=self.price_history[-24:],
-            returns_7d=self.price_history[-168:],
+            returns_24h=self.return_history[-24:],
+            returns_7d=self.return_history[-168:],
             recent_volume_usd=sum(self.volume_history[-1:]) if self.volume_history else 0.0,
             volume_log_mean=self.market_stats.volume_log_mean,
             volume_log_std=self.market_stats.volume_log_std,
@@ -276,13 +281,14 @@ class UniswapV3LPEnv(gym.Env):
 
         self.current_ts = self.episode_start_ts
         self.price_at_episode_start = self._current_price()
+        self.prev_price = self.price_at_episode_start
         self.position_tick_lower = None
         self.position_tick_upper = None
         self.position_liquidity = 0.0
         self.unclaimed_fees_usd = 0.0
         self.cash_usd = self.initial_notional_usd
         self.hours_since_rebalance = 0.0
-        self.price_history = []
+        self.return_history = []
         self.volume_history = []
         self.prev_portfolio_value = self._portfolio_value_usd()
 
@@ -309,7 +315,9 @@ class UniswapV3LPEnv(gym.Env):
         self._accrue_fees()
         gas_cost = self._apply_action(action)
 
-        self.price_history.append(self._current_price())
+        price_now = self._current_price()
+        self.return_history.append(float(np.log(price_now / self.prev_price)))
+        self.prev_price = price_now
         self.volume_history.append(volume_usd)
 
         portfolio_value = self._portfolio_value_usd()

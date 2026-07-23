@@ -99,23 +99,37 @@ def precompute_snapshots(
     """Walks `events` (sorted, with a `.timestamp` attribute) once, saving a
     full engine snapshot at least every `cadence_seconds`. Pass an existing
     `engine` (e.g. freshly constructed) to inspect it afterwards, such as its
-    `liquidity_mismatches` data-quality counter."""
+    `liquidity_mismatches` data-quality counter.
+
+    A snapshot taken at timestamp T always contains ALL events with
+    timestamp <= T: events sharing one timestamp (same block) must land
+    entirely inside or entirely after a snapshot, or the `timestamp > snap_ts`
+    replay mask in env.reset() would silently skip the leftover events of the
+    snapshot's own block."""
     out_dir = Path(out_dir)
     if engine is None:
         engine = FeeEngine()
     entries: list[tuple[Any, Path]] = []
     next_snapshot_ts = None
+    prev_ts = None
+
+    def _save(ts) -> None:
+        path = out_dir / snapshot_filename(ts)
+        save_snapshot(engine, path)
+        entries.append((ts, path))
 
     for event in events:
-        apply_event(engine, event)
         ts = event.timestamp
         if next_snapshot_ts is None:
             next_snapshot_ts = ts
-        if ts >= next_snapshot_ts:
-            path = out_dir / snapshot_filename(ts)
-            save_snapshot(engine, path)
-            entries.append((ts, path))
-            next_snapshot_ts = ts + timedelta(seconds=cadence_seconds)
+        if prev_ts is not None and ts > prev_ts and prev_ts >= next_snapshot_ts:
+            _save(prev_ts)
+            next_snapshot_ts = prev_ts + timedelta(seconds=cadence_seconds)
+        apply_event(engine, event)
+        prev_ts = ts
+
+    if prev_ts is not None and prev_ts >= next_snapshot_ts:
+        _save(prev_ts)
 
     return SnapshotIndex(entries)
 

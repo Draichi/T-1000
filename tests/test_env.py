@@ -185,3 +185,34 @@ def test_reset_is_reproducible_with_same_seed(env):
     start_ts_2 = env.episode_start_ts
     assert start_ts_1 == start_ts_2
     np.testing.assert_array_equal(obs1, obs2)
+
+
+def test_volatility_features_do_not_saturate(env):
+    """Regression: the env used to feed raw USD prices where the observation
+    builder expects log returns, pinning both volatility features at the 1.0
+    clip from the second step onward."""
+    from t1000.observations import FEATURE_NAMES
+
+    vol_24h_idx = FEATURE_NAMES.index("volatility_24h")
+    vol_7d_idx = FEATURE_NAMES.index("volatility_7d")
+
+    env.reset(seed=7)
+    obs = None
+    for _ in range(30):
+        obs, _, _, _, _ = env.step(Action.HOLD)
+
+    assert 0.0 < obs[vol_24h_idx] < 1.0
+    assert 0.0 < obs[vol_7d_idx] < 1.0
+    # hourly log returns of a few tens of ticks are well under the vol scale
+    assert max(abs(r) for r in env.return_history) < 0.05
+
+
+def test_open_position_with_zero_liquidity_does_not_burn_cash(env):
+    """Regression: a degenerate range used to debit the invested cash while
+    opening a position worth nothing, evaporating the capital."""
+    env.reset(seed=8)
+    cash_before = env.cash_usd
+    tick = env.engine.pool.tick
+    env._open_position(tick, tick)  # zero-width range -> zero liquidity
+    assert env.position_tick_lower is None
+    assert env.cash_usd == cash_before

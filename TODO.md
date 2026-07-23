@@ -4,11 +4,11 @@ Consolidated from the reward-function and environment reviews (`src/t1000/env.py
 
 ## P0 — Bugs
 
-- [ ] **Volatility features saturate at 1.0.** The env accumulates *prices* in `price_history` (`env.py:312`) and passes slices of it as `returns_24h`/`returns_7d` (`env.py:246-247`), but `realized_vol` (`observations.py:59`) expects log returns. The std of USD prices divided by `VOL_24H_SCALE = 0.05` pins the clip at 1.0 from the 2nd step onward — `volatility_24h` and `volatility_7d` become constants and the agent is blind to volatility. Fix: store `log(p_t / p_{t-1})` in the history.
+- [x] **Volatility features saturate at 1.0.** The env accumulates *prices* in `price_history` (`env.py:312`) and passes slices of it as `returns_24h`/`returns_7d` (`env.py:246-247`), but `realized_vol` (`observations.py:59`) expects log returns. The std of USD prices divided by `VOL_24H_SCALE = 0.05` pins the clip at 1.0 from the 2nd step onward — `volatility_24h` and `volatility_7d` become constants and the agent is blind to volatility. Fix: store `log(p_t / p_{t-1})` in the history.
 
-- [ ] **Events in the snapshot's block are dropped on reset.** `precompute_snapshots` (`snapshot.py:109-118`) saves the snapshot right after the first event with `ts >= next_snapshot_ts`; remaining events of the same block (same timestamp) end up outside the snapshot AND outside the reset replay (mask `timestamp > snap_ts`, `env.py:273`). `liquidity_net`/`liquidity_gross` from dropped Mint/Burn events stay wrong in the `tick_map` for the whole episode. Fix: only snapshot when the timestamp advances (before the first event of a new timestamp). Requires regenerating snapshots.
+- [x] **Events in the snapshot's block are dropped on reset.** `precompute_snapshots` (`snapshot.py:109-118`) saves the snapshot right after the first event with `ts >= next_snapshot_ts`; remaining events of the same block (same timestamp) end up outside the snapshot AND outside the reset replay (mask `timestamp > snap_ts`, `env.py:273`). `liquidity_net`/`liquidity_gross` from dropped Mint/Burn events stay wrong in the `tick_map` for the whole episode. Fix: only snapshot when the timestamp advances (before the first event of a new timestamp). Requires regenerating snapshots.
 
-- [ ] **Cash evaporates when computed liquidity is 0.** `_open_position` debits `investable` unconditionally (`env.py:207`) even when `_liquidity_for_budget` returns 0 (`env.py:52`) — capital vanishes and produces a large spurious negative reward. Fix: guard `if liquidity <= 0: don't open, don't debit`.
+- [x] **Cash evaporates when computed liquidity is 0.** `_open_position` debits `investable` unconditionally (`env.py:207`) even when `_liquidity_for_budget` returns 0 (`env.py:52`) — capital vanishes and produces a large spurious negative reward. Fix: guard `if liquidity <= 0: don't open, don't debit`.
 
 ## P1 — Reward design
 

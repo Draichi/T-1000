@@ -93,6 +93,48 @@ def test_snapshot_plus_replay_matches_full_replay(tmp_path):
     assert restored.tick_map == reference.tick_map
 
 
+def test_snapshot_boundary_never_splits_same_timestamp_events(tmp_path):
+    """Regression: several events can share one timestamp (same block). A
+    snapshot cut in the middle of such a group would strand the leftover
+    events -- outside the snapshot AND outside a `timestamp > snap_ts`
+    replay. Every snapshot at T must therefore contain exactly the events
+    with timestamp <= T."""
+    base = datetime(2024, 1, 1, tzinfo=timezone.utc)
+    events = []
+    tick = 0
+    for i in range(30):
+        ts = base + timedelta(hours=i)
+        # three events per block: a swap flanked by two mints
+        events.append(_make_event("Mint", {"tick_lower": -1000, "tick_upper": 1000, "amount": 1_000}, ts))
+        new_tick = tick + (5 if i % 2 == 0 else -3)
+        events.append(
+            _make_event(
+                "Swap",
+                {
+                    "amount0": 100 if i % 2 == 0 else -80,
+                    "amount1": -90 if i % 2 == 0 else 70,
+                    "sqrt_price_x96": sqrt_price_x96_from_tick(new_tick),
+                    "tick": new_tick,
+                    "liquidity": 10_000,
+                },
+                ts,
+            )
+        )
+        events.append(_make_event("Mint", {"tick_lower": -2000, "tick_upper": 2000, "amount": 500}, ts))
+        tick = new_tick
+
+    index = precompute_snapshots(events, tmp_path, cadence_seconds=3600 * 7)
+    assert len(index.entries) >= 2
+
+    for snap_ts, snap_path in index.entries:
+        restored = load_snapshot(snap_path)
+        reference = FeeEngine()
+        baked_in = sum(1 for e in events if e.timestamp <= snap_ts)
+        replay_events(reference, events, start_index=0, end_index=baked_in)
+        assert restored.pool == reference.pool
+        assert restored.tick_map == reference.tick_map
+
+
 def test_load_snapshot_index_from_dir_reconstructs_equivalent_index(tmp_path):
     events = _synthetic_events(40)
     original_index = precompute_snapshots(events, tmp_path, cadence_seconds=3600 * 10)
