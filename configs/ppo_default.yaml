@@ -11,7 +11,7 @@ n_epochs: 10
 gamma: 0.99
 gae_lambda: 0.95
 clip_range: 0.2
-ent_coef: 0.01
+ent_coef: 0.001 # default 0.01 -- lowered: at 0.01 the policy stayed at ~71% of max entropy after 920k steps, thrashing between actions every ~1.7 steps instead of committing
 learning_rate_start: 0.0003 # default 0.0003
 learning_rate_end: 0.00001 # default 0.00001
 device: cpu
