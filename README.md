@@ -232,3 +232,14 @@ before ever trusting it to train an agent. See
    multiple actions via `multicall` and would make per-action gas
    attribution ambiguous). `build_dataset.py` computes a "blurred" median
    (all NFPM interactions) only as a sanity signal.
+
+## Disclaimer
+
+This project's goal is to apply Deep RL to a real, financially-grounded
+environment, not to produce a profitable trading strategy. It is a research
+PoC: the simulator has known limitations (see above), the agent is not
+validated for live capital, and nothing here constitutes financial advice.
+Any commercial or real-money use of this code, including deploying the
+trained agent to manage a real Uniswap V3 position, is done entirely at
+your own risk. The author assumes no responsibility for financial losses
+resulting from such use.
