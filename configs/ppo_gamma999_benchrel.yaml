@@ -1,0 +1,26 @@
+# gamma999 winner config + benchmark-relative reward (TODO P1).
+# reward_mode=benchmark_relative subtracts the passive-HODL P&L of the
+# position's start-of-step token composition, so the learning signal is LP
+# alpha (fees - IL - gas) instead of ETH beta. Targets the May-2025 failure
+# mode: under absolute reward, sitting in cash through a rally looks free.
+policy: MlpPolicy
+net_arch: [128, 128]
+n_steps: 2048
+batch_size: 64
+n_epochs: 10
+gamma: 0.999 # episode-length credit horizon; see runs/EXPERIMENTS.md
+gae_lambda: 0.95
+clip_range: 0.2
+ent_coef: 0.001
+learning_rate_start: 0.0003
+learning_rate_end: 0.00001
+device: cpu
+
+reward_mode: benchmark_relative # default: absolute
+
+n_envs: 8
+episode_hours: 720
+step_hours: 1.0
+initial_notional_usd: 10000.0
+
+checkpoint_save_freq: 20000

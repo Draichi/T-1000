@@ -216,3 +216,62 @@ def test_open_position_with_zero_liquidity_does_not_burn_cash(env):
     env._open_position(tick, tick)  # zero-width range -> zero liquidity
     assert env.position_tick_lower is None
     assert env.cash_usd == cash_before
+
+
+@pytest.fixture
+def benchrel_env(tmp_path):
+    events_df, gas_df, swaps_df, index = _build_synthetic_dataset(tmp_path)
+    return UniswapV3LPEnv(
+        events_df=events_df,
+        gas_df=gas_df,
+        swaps_df=swaps_df,
+        snapshot_index=index,
+        start_ts=BASE_TS,
+        end_ts=BASE_TS + timedelta(hours=N_HOURS),
+        episode_hours=48,
+        step_hours=1.0,
+        initial_notional_usd=10_000.0,
+        reward_mode="benchmark_relative",
+    )
+
+
+def test_invalid_reward_mode_raises(tmp_path):
+    events_df, gas_df, swaps_df, index = _build_synthetic_dataset(tmp_path)
+    with pytest.raises(ValueError, match="reward_mode"):
+        UniswapV3LPEnv(
+            events_df=events_df,
+            gas_df=gas_df,
+            swaps_df=swaps_df,
+            snapshot_index=index,
+            start_ts=BASE_TS,
+            end_ts=BASE_TS + timedelta(hours=N_HOURS),
+            reward_mode="relative",
+        )
+
+
+def test_benchmark_relative_reward_is_zero_while_fully_in_cash(benchrel_env):
+    """All-cash portfolio has no price exposure: both the portfolio and its
+    HODL benchmark are flat, so a HOLD step must reward exactly 0 no matter
+    what the price did."""
+    benchrel_env.reset(seed=9)
+    for _ in range(5):
+        _, reward, _, _, _ = benchrel_env.step(Action.HOLD)
+        assert reward == 0.0
+
+
+def test_benchmark_relative_reward_subtracts_weth_price_exposure(benchrel_env):
+    """With a position open, the reward must equal the absolute-mode reward
+    minus (start-of-step WETH exposure x price change) -- i.e. holding
+    through a price move scores ~0, not the move itself."""
+    benchrel_env.reset(seed=10)
+    benchrel_env.step(Action.REBALANCE_WIDE)
+    assert benchrel_env.position_tick_lower is not None
+
+    for _ in range(10):
+        weth_before = benchrel_env._position_weth_amount()
+        price_before = benchrel_env.prev_price
+        pv_before = benchrel_env._portfolio_value_usd()
+        _, reward, _, _, info = benchrel_env.step(Action.HOLD)
+        absolute_reward = (info["portfolio_value_usd"] - pv_before) / benchrel_env.initial_notional_usd
+        expected = absolute_reward - weth_before * (info["price_usd"] - price_before) / benchrel_env.initial_notional_usd
+        assert reward == pytest.approx(expected, abs=1e-12)

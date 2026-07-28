@@ -18,6 +18,7 @@ checkpoints/*
 !checkpoints/.gitkeep
 runs/*
 !runs/.gitkeep
+!runs/EXPERIMENTS.md
 
 # BigQuery / GCP credentials
 *.json

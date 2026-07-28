@@ -95,8 +95,12 @@ class UniswapV3LPEnv(gym.Env):
         episode_hours: int = 720,
         step_hours: float = 1.0,
         initial_notional_usd: float = 10_000.0,
+        reward_mode: str = "absolute",
     ):
         super().__init__()
+        if reward_mode not in ("absolute", "benchmark_relative"):
+            raise ValueError(f"unknown reward_mode: {reward_mode!r}")
+        self.reward_mode = reward_mode
         # Standardize on tz-aware UTC, ns precision: real (BigQuery-sourced) data is
         # tz-aware, synthetic/test data is often naive, and episode/step timestamps
         # involve fractional-hour arithmetic (random reset offsets) that naturally
@@ -144,6 +148,7 @@ class UniswapV3LPEnv(gym.Env):
         self.price_at_episode_start = None
         self.prev_price = None
         self.prev_portfolio_value = None
+        self.prev_weth_exposure = 0.0
 
     def _current_price(self) -> float:
         return human_price_usd_per_eth(self.engine.pool.sqrt_price_x96)
@@ -167,6 +172,21 @@ class UniswapV3LPEnv(gym.Env):
 
     def _portfolio_value_usd(self) -> float:
         return self.cash_usd + self._position_value_usd() + self.unclaimed_fees_usd
+
+    def _position_weth_amount(self) -> float:
+        """Human-unit WETH currently held inside the position. This is the
+        portfolio's only price-exposed holding: cash is USD and unclaimed
+        fees are frozen in USD at accrual time."""
+        if self.position_tick_lower is None:
+            return 0.0
+        _, _, amount1_human = position_value_usd(
+            self.position_liquidity,
+            self.engine.pool.sqrt_price_x96,
+            self.position_tick_lower,
+            self.position_tick_upper,
+            self._current_price(),
+        )
+        return amount1_human
 
     def _accrue_fees(self) -> None:
         if self.position_tick_lower is None:
@@ -291,6 +311,7 @@ class UniswapV3LPEnv(gym.Env):
         self.return_history = []
         self.volume_history = []
         self.prev_portfolio_value = self._portfolio_value_usd()
+        self.prev_weth_exposure = 0.0
 
         return self._build_obs(), {}
 
@@ -316,13 +337,26 @@ class UniswapV3LPEnv(gym.Env):
         gas_cost = self._apply_action(action)
 
         price_now = self._current_price()
+        price_change_usd = price_now - self.prev_price
         self.return_history.append(float(np.log(price_now / self.prev_price)))
         self.prev_price = price_now
         self.volume_history.append(volume_usd)
 
         portfolio_value = self._portfolio_value_usd()
-        reward = (portfolio_value - self.prev_portfolio_value) / self.initial_notional_usd
+        pnl_usd = portfolio_value - self.prev_portfolio_value
+        if self.reward_mode == "benchmark_relative":
+            # Subtract the P&L a passive holder of last step's token
+            # composition would have made, so the reward is LP alpha
+            # (fees - IL - gas) instead of being dominated by ETH beta: a
+            # policy can no longer look good by merely being long WETH in an
+            # up-market or in cash in a down-market. The benchmark uses the
+            # start-of-step WETH amount (composition drifts as price crosses
+            # the range within the step; start-of-step is the same HODL
+            # convention as il.impermanent_loss_usd).
+            pnl_usd -= self.prev_weth_exposure * price_change_usd
+        reward = pnl_usd / self.initial_notional_usd
         self.prev_portfolio_value = portfolio_value
+        self.prev_weth_exposure = self._position_weth_amount()
 
         truncated = self.current_ts >= self.episode_end_ts or self.current_ts >= self.data_end_ts
         terminated = False

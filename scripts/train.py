@@ -49,6 +49,7 @@ def make_env_fn(events_df, gas_df, swaps_df, snapshot_index, start_ts, end_ts, c
             episode_hours=cfg["episode_hours"],
             step_hours=cfg["step_hours"],
             initial_notional_usd=cfg["initial_notional_usd"],
+            reward_mode=cfg.get("reward_mode", "absolute"),
         )
         # Monitor wraps the raw (pre-VecNormalize) env, so it reports the
         # un-normalized per-episode return/length that SB3 needs to compute
