@@ -8,7 +8,7 @@ net_arch: [128, 128]
 n_steps: 2048
 batch_size: 64
 n_epochs: 10
-gamma: 0.999 # episode-length credit horizon; see runs/EXPERIMENTS.md
+gamma: 0.999 # episode-length credit horizon; see experiments/LOG.md
 gae_lambda: 0.95
 clip_range: 0.2
 ent_coef: 0.001

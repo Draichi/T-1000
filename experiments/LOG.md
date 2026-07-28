@@ -1,4 +1,6 @@
-# Experiment log — post-fix retrains: gamma sweep (2026-07-28)
+# T-1000 experiment log
+
+# Round 1 — post-fix retrains: gamma sweep (2026-07-28)
 
 ## Context
 
@@ -114,3 +116,51 @@ mechanics for both. `scripts/backtest.py`, seed 0, deterministic policy.
    separate signal from initialization luck.
 5. When a config beats the baseline in ≥4/5 windows *including* an up-month,
    promote it to the deployment package (TODO Phase 1) as `agent_id` v1.
+
+# Round 2 — clean data, batch size, reward shaping + config sweep (2026-07-28, in flight)
+
+## Design
+
+Snapshots were regenerated with the fixed cutting logic into
+`data/processed_14mo_fixed` (from the existing raw 14mo parquet, no
+refetch), closing round 1's stale-snapshot caveat. Three 2M-step runs were
+launched in parallel on it, same train window as round 1
+(2024-05-01 → 2025-01-01), each isolating one variable:
+
+| run | config | isolates |
+|---|---|---|
+| `run_14mo_gamma999_fixedsnaps` | `configs/ppo_gamma999.yaml` | control: round-1 winner on clean data |
+| `run_14mo_gamma999_batch256` | `configs/ppo_gamma999_batch256.yaml` | batch_size 64 → 256 |
+| `run_14mo_gamma999_benchrel` | `configs/ppo_gamma999_benchrel.yaml` | `reward_mode: benchmark_relative` — reward = LP alpha (P&L minus start-of-step WETH exposure × price change); targets round 1's May-2025 rally failure |
+
+Wall-clock note: three parallel runs contend with each other (~85k steps/h
+each, ~20h+ per run, vs ~6h for round 1's two runs). Note for comparisons:
+benchrel's `ep_rew_mean` is on the alpha scale and not comparable to the
+absolute-reward runs — compare via `rollout/ep_pnl_usd_mean` and holdout
+backtest P&L.
+
+## Config sweep (queued behind the live runs)
+
+`experiments/manifest.yaml` defines 6 further variants: `width_scale`
+(narrow 0.5×, wide 2×), `gas_multiplier` (3×, 0.25×), shorter volatility
+lookbacks (12h/72h), and a benchrel × gas3x interaction arm. Base config =
+gamma999 + **batch_size 256** — adopted from the live A/B's stronger
+training curves *before* holdout confirmation; if the A/B inverts on
+holdout (as posfix did in round 1), the sweep should be re-run with 64.
+The sweep's original control and benchrel arms were dropped as duplicates
+of the live runs; those enter the leaderboard via
+`experiments/import_run.py` (holdout backtests only, no retraining).
+
+Pipeline (automated end-to-end): live trainings finish → import the 3 live
+runs → `run_sweep.py --max-parallel 4` (~12h; per-variant worktrees, hard
+preconditions: dataset ≥ 14 months, `data/*` git-ignored) →
+`aggregate_leaderboard.py` → `experiments/LEADERBOARD.md`, ranked by mean
+holdout Sharpe with paired t-tests vs the full-range and HODL 50/50
+baselines (|t| < 2 over 5 windows is flagged as noise).
+
+## Selection gate (unchanged from round 1)
+
+Same five 720h holdout windows (2025-01 … 2025-05). Promote only a config
+that beats the full-range baseline in ≥4/5 windows including an up-month.
+
+Results: pending.

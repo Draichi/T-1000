@@ -33,7 +33,7 @@ common:
     - ["2025-05-01", "2025-05-31"]
 
 # Applied to every variant on top of base_config (gamma=0.999 was the winner
-# of the earlier gamma sweep; see runs/EXPERIMENTS.md).
+# of the earlier gamma sweep; see experiments/LOG.md).
 common_overrides:
   gamma: 0.999
   # Adopted from the live batch-64 vs batch-256 A/B: the 256 arm's training
