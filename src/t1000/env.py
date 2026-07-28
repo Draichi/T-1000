@@ -96,11 +96,26 @@ class UniswapV3LPEnv(gym.Env):
         step_hours: float = 1.0,
         initial_notional_usd: float = 10_000.0,
         reward_mode: str = "absolute",
+        width_scale: float = 1.0,
+        gas_multiplier: float = 1.0,
+        vol_lookback_short_hours: float = 24.0,
+        vol_lookback_long_hours: float = 168.0,
     ):
         super().__init__()
         if reward_mode not in ("absolute", "benchmark_relative"):
             raise ValueError(f"unknown reward_mode: {reward_mode!r}")
+        if width_scale <= 0:
+            raise ValueError(f"width_scale must be > 0, got {width_scale}")
+        if gas_multiplier < 0:
+            raise ValueError(f"gas_multiplier must be >= 0, got {gas_multiplier}")
+        if not 0 < vol_lookback_short_hours <= vol_lookback_long_hours:
+            raise ValueError(
+                "need 0 < vol_lookback_short_hours <= vol_lookback_long_hours, "
+                f"got {vol_lookback_short_hours} / {vol_lookback_long_hours}"
+            )
         self.reward_mode = reward_mode
+        self.width_scale = width_scale
+        self.gas_multiplier = gas_multiplier
         # Standardize on tz-aware UTC, ns precision: real (BigQuery-sourced) data is
         # tz-aware, synthetic/test data is often naive, and episode/step timestamps
         # involve fractional-hour arithmetic (random reset offsets) that naturally
@@ -123,6 +138,10 @@ class UniswapV3LPEnv(gym.Env):
         self.data_end_ts = self.events_df["timestamp"].max()
         self.episode_hours = episode_hours
         self.step_hours = step_hours
+        # return_history holds one log return per *step*, so hour-denominated
+        # lookbacks must be converted (at step_hours=1 they're identical).
+        self._vol_lookback_short_steps = max(2, round(vol_lookback_short_hours / step_hours))
+        self._vol_lookback_long_steps = max(2, round(vol_lookback_long_hours / step_hours))
         self.initial_notional_usd = initial_notional_usd
         self.market_stats = MarketStats(swaps_df, self.gas_df)
 
@@ -236,7 +255,11 @@ class UniswapV3LPEnv(gym.Env):
         base_fee = self._current_base_fee()
         price = self._current_price()
         components = gas_components_for_action(action)
-        gas_cost = action_gas_cost_usd(components, base_fee, price, DEFAULT_GAS_UNITS) if components else 0.0
+        gas_cost = (
+            action_gas_cost_usd(components, base_fee, price, DEFAULT_GAS_UNITS) * self.gas_multiplier
+            if components
+            else 0.0
+        )
 
         if gas_cost > self.cash_usd:
             # Not enough liquid cash on hand to pay for this transaction --
@@ -246,7 +269,10 @@ class UniswapV3LPEnv(gym.Env):
 
         self.cash_usd -= gas_cost
 
-        target = target_range_for_action(action, self.engine.pool.tick, self.position_tick_lower, self.position_tick_upper)
+        target = target_range_for_action(
+            action, self.engine.pool.tick, self.position_tick_lower, self.position_tick_upper,
+            width_scale=self.width_scale,
+        )
 
         if action == Action.COLLECT:
             self._accrue_fees()
@@ -268,8 +294,8 @@ class UniswapV3LPEnv(gym.Env):
             current_tick=self.engine.pool.tick,
             price_at_episode_start_usd=self.price_at_episode_start,
             current_price_usd=self._current_price(),
-            returns_24h=self.return_history[-24:],
-            returns_7d=self.return_history[-168:],
+            returns_24h=self.return_history[-self._vol_lookback_short_steps:],
+            returns_7d=self.return_history[-self._vol_lookback_long_steps:],
             recent_volume_usd=sum(self.volume_history[-1:]) if self.volume_history else 0.0,
             volume_log_mean=self.market_stats.volume_log_mean,
             volume_log_std=self.market_stats.volume_log_std,

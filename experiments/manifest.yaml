@@ -1,0 +1,87 @@
+# Experiment sweep manifest: 6 PPO variants over position width, rebalance
+# cost, and observation lookback, plus one reward x gas interaction arm --
+# all trained on the same data/config base and evaluated on the same fixed
+# holdout windows.
+#
+# The original control and benchrel arms were dropped from the sweep: they
+# are already covered by the live runs run_14mo_gamma999_batch256 (anchor)
+# and run_14mo_gamma999_benchrel (reward axis; note: batch 64). When those
+# finish, bring them onto the leaderboard without retraining via
+# experiments/import_run.py.
+#
+# Launch with:  python experiments/run_sweep.py            (respects preconditions)
+# Aggregate:    python experiments/aggregate_leaderboard.py
+#
+# Every knob referenced here is a plain config key read by scripts/train.py /
+# scripts/backtest.py (see UniswapV3LPEnv.__init__ for semantics/validation).
+
+base_config: configs/ppo_default.yaml
+
+common:
+  processed_dir: data/processed_14mo_fixed
+  train_start: "2024-05-01"
+  train_end: "2024-12-31"          # holdout months below are never seen in training
+  total_timesteps: 2000000
+  seed: 0
+  # Fixed holdout: five 720h (30-day) monthly windows, identical for every
+  # variant. backtest.py runs exactly one 720h episode from each start.
+  holdout_windows:
+    - ["2025-01-01", "2025-01-31"]
+    - ["2025-02-01", "2025-03-03"]
+    - ["2025-03-01", "2025-03-31"]
+    - ["2025-04-01", "2025-05-01"]
+    - ["2025-05-01", "2025-05-31"]
+
+# Applied to every variant on top of base_config (gamma=0.999 was the winner
+# of the earlier gamma sweep; see runs/EXPERIMENTS.md).
+common_overrides:
+  gamma: 0.999
+  # Adopted from the live batch-64 vs batch-256 A/B: the 256 arm's training
+  # curves look stronger so far. Holdout confirmation is still pending; if
+  # the A/B inverts on holdout (it happened with posfix), rerun with 64.
+  batch_size: 256
+
+variants:
+  - name: narrow
+    overrides:
+      width_scale: 0.5           # bands become +/-1% / 2.5% / 5%
+    hypothesis: >-
+      Tighter bands concentrate liquidity for higher fee capture; risk is
+      more out-of-range time, IL, and rebalance gas.
+
+  - name: wide
+    overrides:
+      width_scale: 2.0           # bands become +/-4% / 10% / 20%
+    hypothesis: >-
+      Wider bands trade fee density for staying in range through drawdowns
+      with far fewer rebalances (less gas).
+
+  - name: gas3x
+    overrides:
+      gas_multiplier: 3.0
+    hypothesis: >-
+      Training under 3x rebalance cost forces selectivity; the policy should
+      generalize better to gas-spike regimes and over-trading should vanish.
+
+  - name: gas_quarter
+    overrides:
+      gas_multiplier: 0.25
+    hypothesis: >-
+      Near-free rebalancing reveals the unconstrained policy: how much of the
+      current behavior is gas avoidance vs genuine range management.
+
+  - name: shortlook
+    overrides:
+      vol_lookback_short_hours: 12
+      vol_lookback_long_hours: 72
+    hypothesis: >-
+      Shorter volatility windows (12h/3d instead of 24h/7d) react faster to
+      regime changes, at the cost of noisier features.
+
+  - name: benchrel_gas3x
+    overrides:
+      reward_mode: benchmark_relative
+      gas_multiplier: 3.0
+    hypothesis: >-
+      Interaction arm: alpha-only reward plus expensive rebalances applies the
+      strongest selectivity pressure -- only fee capture net of IL can pay.

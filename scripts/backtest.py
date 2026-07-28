@@ -43,6 +43,10 @@ def make_env_fn(events_df, gas_df, swaps_df, snapshot_index, start_ts, end_ts, c
             step_hours=cfg["step_hours"],
             initial_notional_usd=cfg["initial_notional_usd"],
             reward_mode=cfg.get("reward_mode", "absolute"),
+            width_scale=cfg.get("width_scale", 1.0),
+            gas_multiplier=cfg.get("gas_multiplier", 1.0),
+            vol_lookback_short_hours=cfg.get("vol_lookback_short_hours", 24.0),
+            vol_lookback_long_hours=cfg.get("vol_lookback_long_hours", 168.0),
         )
 
     return _init

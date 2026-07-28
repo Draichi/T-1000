@@ -20,6 +20,8 @@ runs/*
 !runs/.gitkeep
 !runs/EXPERIMENTS.md
 
+.claude/
+
 # BigQuery / GCP credentials
 *.json
 !configs/*.json

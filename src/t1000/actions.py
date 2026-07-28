@@ -58,9 +58,14 @@ def target_range_for_action(
     current_tick: int,
     position_tick_lower: Optional[int],
     position_tick_upper: Optional[int],
+    width_scale: float = 1.0,
 ) -> Optional[tuple[int, int]]:
     """Returns the (tick_lower, tick_upper) the action results in (rounded to
-    TICK_SPACING), or None if the action results in no open position."""
+    TICK_SPACING), or None if the action results in no open position.
+
+    width_scale multiplies REBALANCE_WIDTH_PCT, so one policy family can be
+    trained on systematically narrower/wider bands without new actions;
+    SHIFT_UP/SHIFT_DOWN keep the existing position's width regardless."""
     spacing = constants.TICK_SPACING
 
     if action in (Action.HOLD, Action.COLLECT):
@@ -72,7 +77,7 @@ def target_range_for_action(
         return None
 
     if action in REBALANCE_WIDTH_PCT:
-        delta = _price_pct_to_tick_delta(REBALANCE_WIDTH_PCT[action])
+        delta = _price_pct_to_tick_delta(REBALANCE_WIDTH_PCT[action] * width_scale)
         lower = round_tick_to_spacing(_clip_tick(current_tick - delta), spacing)
         upper = round_tick_to_spacing(_clip_tick(current_tick + delta), spacing)
         if lower >= upper:
@@ -81,7 +86,7 @@ def target_range_for_action(
 
     if action in (Action.SHIFT_UP, Action.SHIFT_DOWN):
         if position_tick_lower is None or position_tick_upper is None:
-            delta = _price_pct_to_tick_delta(REBALANCE_WIDTH_PCT[Action.REBALANCE_MEDIUM])
+            delta = _price_pct_to_tick_delta(REBALANCE_WIDTH_PCT[Action.REBALANCE_MEDIUM] * width_scale)
             width = 2 * delta
         else:
             width = position_tick_upper - position_tick_lower

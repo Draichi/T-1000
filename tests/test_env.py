@@ -275,3 +275,62 @@ def test_benchmark_relative_reward_subtracts_weth_price_exposure(benchrel_env):
         absolute_reward = (info["portfolio_value_usd"] - pv_before) / benchrel_env.initial_notional_usd
         expected = absolute_reward - weth_before * (info["price_usd"] - price_before) / benchrel_env.initial_notional_usd
         assert reward == pytest.approx(expected, abs=1e-12)
+
+
+def _make_env(dataset, **kwargs):
+    events_df, gas_df, swaps_df, index = dataset
+    params = dict(
+        events_df=events_df,
+        gas_df=gas_df,
+        swaps_df=swaps_df,
+        snapshot_index=index,
+        start_ts=BASE_TS,
+        end_ts=BASE_TS + timedelta(hours=N_HOURS),
+        episode_hours=48,
+        step_hours=1.0,
+        initial_notional_usd=10_000.0,
+    )
+    params.update(kwargs)
+    return UniswapV3LPEnv(**params)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"width_scale": 0.0},
+        {"width_scale": -1.0},
+        {"gas_multiplier": -0.1},
+        {"vol_lookback_short_hours": 336.0, "vol_lookback_long_hours": 168.0},
+        {"vol_lookback_short_hours": 0.0},
+    ],
+)
+def test_invalid_sweep_knobs_raise(tmp_path, kwargs):
+    dataset = _build_synthetic_dataset(tmp_path)
+    with pytest.raises(ValueError):
+        _make_env(dataset, **kwargs)
+
+
+def test_width_scale_narrows_opened_range(tmp_path):
+    dataset = _build_synthetic_dataset(tmp_path)
+    widths = {}
+    for scale in (1.0, 0.5):
+        env = _make_env(dataset, width_scale=scale)
+        env.reset(seed=11)
+        env.step(Action.REBALANCE_MEDIUM)
+        widths[scale] = env.position_tick_upper - env.position_tick_lower
+    assert 0 < widths[0.5] < widths[1.0]
+    # tick span is ~log-linear in price width, so half the pct width should
+    # land near half the tick span (spacing rounding allows some slack)
+    assert widths[0.5] == pytest.approx(widths[1.0] / 2, rel=0.1)
+
+
+def test_gas_multiplier_scales_gas_cost(tmp_path):
+    dataset = _build_synthetic_dataset(tmp_path)
+    costs = {}
+    for mult in (1.0, 3.0):
+        env = _make_env(dataset, gas_multiplier=mult)
+        env.reset(seed=12)
+        _, _, _, _, info = env.step(Action.REBALANCE_MEDIUM)
+        costs[mult] = info["gas_cost_usd"]
+    assert costs[1.0] > 0
+    assert costs[3.0] == pytest.approx(3 * costs[1.0])
