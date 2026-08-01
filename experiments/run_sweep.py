@@ -59,8 +59,11 @@ def build_variant_config(manifest: dict, variant: dict) -> dict:
 def setup_worktree(main_root: Path, name: str) -> Path:
     wt = main_root / ".claude" / "worktrees" / f"sweep-{name}"
     if not wt.exists():
+        # --detach: master is checked out in the main worktree, and git refuses
+        # to check the same branch out twice. We never commit here, so a
+        # detached HEAD at master is equivalent.
         subprocess.run(
-            ["git", "-C", str(main_root), "worktree", "add", str(wt), "master"],
+            ["git", "-C", str(main_root), "worktree", "add", "--detach", str(wt), "master"],
             check=True,
         )
         # The sweep knobs (reward_mode, width_scale, gas_multiplier, lookbacks)

@@ -4,9 +4,9 @@
 # holdout windows.
 #
 # The original control and benchrel arms were dropped from the sweep: they
-# are already covered by the live runs run_14mo_gamma999_batch256 (anchor)
-# and run_14mo_gamma999_benchrel (reward axis; note: batch 64). When those
-# finish, bring them onto the leaderboard without retraining via
+# are already covered by the live runs run_14mo_gamma999_fixedsnaps (anchor:
+# gamma999 + batch 64) and run_14mo_gamma999_benchrel (reward axis). Those
+# were brought onto the leaderboard without retraining via
 # experiments/import_run.py.
 #
 # Launch with:  python experiments/run_sweep.py            (respects preconditions)
@@ -33,13 +33,17 @@ common:
     - ["2025-05-01", "2025-05-31"]
 
 # Applied to every variant on top of base_config (gamma=0.999 was the winner
-# of the earlier gamma sweep; see experiments/LOG.md).
+# of the earlier gamma sweep; see runs/EXPERIMENTS.md).
 common_overrides:
   gamma: 0.999
-  # Adopted from the live batch-64 vs batch-256 A/B: the 256 arm's training
-  # curves look stronger so far. Holdout confirmation is still pending; if
-  # the A/B inverts on holdout (it happened with posfix), rerun with 64.
-  batch_size: 256
+  # The live batch-64 vs batch-256 A/B inverted on holdout (as posfix did in
+  # round 1): batch 64 (fixedsnaps) beat batch 256 on every holdout metric
+  # (Sharpe -0.71 vs -1.21, P&L -$1,735 vs -$4,072, worst DD -19.4% vs
+  # -31.3%) despite weaker-looking training curves. Per the rule documented
+  # here before the results were in, the sweep runs with 64. The natural
+  # control/anchor on the leaderboard is therefore the imported fixedsnaps
+  # arm (gamma999 + batch 64, no other overrides).
+  batch_size: 64
 
 variants:
   - name: narrow

@@ -163,4 +163,100 @@ baselines (|t| < 2 over 5 windows is flagged as noise).
 Same five 720h holdout windows (2025-01 … 2025-05). Promote only a config
 that beats the full-range baseline in ≥4/5 windows including an up-month.
 
-Results: pending.
+Results — live runs (2026-07-30):
+
+| Arm | Batch | Reward | Mean Sharpe | Total P&L | vs baseline | Wins | Worst DD |
+|-----|------:|--------|------------:|----------:|------------:|-----:|---------:|
+| fixedsnaps | 64 | absolute | -0.71 | -$1,735 | +$3,117 (t=1.2) | 4/5 | -19.4% |
+| batch256 | 256 | absolute | -1.21 | -$4,072 | +$780 (t=0.4) | 3/5 | -31.3% |
+| benchrel_b64 | 64 | benchmark-relative | -5.19 | -$984 | +$3,868 (t=1.1) | 4/5 | -9.4% |
+
+Full-range baseline total: -$4,852; HODL 50/50 total: -$293 (Jan-May 2025
+was a down market; every arm lost money in absolute terms).
+
+1. **The batch A/B inverted on holdout**, as posfix did in round 1: batch
+   256 had the stronger training curves but batch 64 (fixedsnaps) beat it
+   on every holdout metric. Per the rule pre-registered in
+   `manifest.yaml`, the config sweep was relaunched with `batch_size: 64`;
+   fixedsnaps is now the sweep's control/anchor arm.
+2. **benchmark_relative protects capital**: smallest loss (-$984), by far
+   the best worst-case drawdown (-9.4%), and the only arm to beat HODL
+   50/50 in 4/5 windows. But it repeats the round-1 rally failure mode,
+   losing the May up-month by -$1,457 (an alpha-only reward gives no
+   credit for beta, so no incentive to hold exposure into a rally). Its
+   very negative Sharpe reflects a low-variance, slightly-bleeding equity
+   path rather than large losses.
+3. **Gate: no promotion.** fixedsnaps formally meets the 4/5-with-up-month
+   rule, but the May win is +$33 and the paired t vs baseline is 1.2,
+   inside noise for 5 windows. benchrel_b64 fails the up-month clause.
+
+Config-sweep results (2026-08-01) -- 6 variants, 2M steps each, batch 64,
+seed 0, evaluated on the same 5 fixed holdout windows (full table in
+LEADERBOARD.md; totals in USD over the 5 windows):
+
+| Variant | Sharpe | P&L | vs own baseline | Wins | Worst DD |
+|---|---:|---:|---:|---:|---:|
+| shortlook | -0.30 | -405 | +4,447 (t=1.6) | 3/5 | -24.8% |
+| benchrel_gas3x | -0.44 | -3,423 | +2,394 (t=1.3) | 4/5 | -36.9% |
+| gas3x | -0.91 | -3,399 | +2,418 (t=1.1) | 4/5 | -36.3% |
+| gas_quarter | -1.26 | -2,718 | +852 (t=0.5) | 3/5 | -24.1% |
+| wide | -1.61 | -4,820 | -1,928 (t=-0.8) | 1/5 | -29.2% |
+| narrow | -3.11 | -6,133 | -869 (t=-0.4) | 2/5 | -32.1% |
+
+Reading caveat: the baseline policy opens REBALANCE_WIDE bands, which scale
+with `width_scale`, and `gas_multiplier` applies to the baseline too -- each
+arm is compared against a baseline living in the same modified world.
+"vs baseline" deltas are therefore not comparable across arms; absolute P&L
+is comparable only where env economics are unchanged (shortlook exactly
+matches the anchor's economics).
+
+Findings:
+
+4. **shortlook is the sweep winner and the round's headline.** Faster
+   volatility features (12h/3d instead of 24h/7d) produced the best
+   absolute P&L of all 9 leaderboard arms (-$405 vs anchor fixedsnaps
+   -$1,735 -- a ~$1,330 improvement from an observation-only change) and
+   the best Sharpe (-0.30). It recovers ~92% of the passive baseline's
+   bleed and is statistically indistinguishable from HODL 50/50
+   (t=-0.0), i.e. it reaches the "don't LP at all" frontier. It also won
+   the May up-month vs baseline (+$1,628) but takes only 3/5 windows, so
+   it fails the gate's win-count clause. Supports the perception
+   hypothesis: stale volatility features were a binding constraint.
+5. **Both width arms lose -- the default widths are near-optimal.**
+   narrow (-$6,133) is the worst arm on the board: doubled fee density
+   did not pay for the extra IL, out-of-range time, and rebalance gas.
+   wide (-$4,820) even loses to its own passive baseline in 4/5 windows
+   and is significantly worse than HODL (t=-3.0): with +/-4%/10%/20%
+   bands the agent's actions barely differ from the baseline's, so gas
+   and worse fee density dominate. Changing width in either direction
+   hurts.
+6. **Gas pressure shapes behavior but does not create edge.** gas3x beats
+   its (3x-cost) baseline in 4/5 windows -- trained selectivity survives
+   expensive-gas worlds -- but still loses the May up-month and lands at
+   -$3,399. gas_quarter shows near-free rebalancing does NOT unlock
+   hidden performance (-$2,718, 3/5): the current policy's caution is not
+   primarily gas avoidance, and the binding constraint is policy/signal
+   quality, not friction.
+7. **benchrel_gas3x fixes benchrel's rally failure at a heavy price.**
+   The interaction arm wins May vs baseline (+$180, where benchrel_b64
+   lost it by -$1,457) and takes 4/5 windows incl. the up-month --
+   formally the only gate-passing arm this round. But t=1.3 is inside
+   noise, total P&L (-$3,423) is far worse than benchrel_b64's -$984,
+   and worst DD balloons to -36.9% (vs benchrel_b64's -9.4%): the 3x gas
+   pressure traded benchrel's capital protection for baseline-relative
+   wins. No promotion.
+8. **Gate: no promotion (round 2 closes).** benchrel_gas3x passes the
+   formal clauses but is inside noise and strictly dominated on absolute
+   metrics; shortlook has the best absolute numbers but only 3/5 wins.
+   Every arm remains at or below the HODL frontier: range management
+   alone did not turn P&L positive in this (mostly down) regime.
+
+Round-2 conclusion and next steps: the cheapest lever found is
+observation quality (shortlook), not reward shaping, width, or gas.
+Natural round-3 candidates, in order: (a) multi-seed rerun of shortlook
+to de-noise the headline result; (b) shortlook x benchmark_relative
+interaction arm (best perception + capital-protecting reward); (c) fresh
+holdout windows (2025-06 onward) to break the 5-window noise floor;
+(d) if positive absolute P&L stays out of reach, the game-changing
+extensions documented earlier (delta hedge via perps, explicit
+out-of-pool regime sitting) rather than more knob-turning.

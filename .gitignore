@@ -19,6 +19,7 @@ checkpoints/*
 runs/*
 !runs/.gitkeep
 !runs/EXPERIMENTS.md
+experiments/results/*
 
 .claude/
 
