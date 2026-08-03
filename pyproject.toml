@@ -18,7 +18,7 @@ dependencies = [
     "pyyaml>=6.0.3",
     "requests>=2.32.0",
     "stable-baselines3[extra]>=2.9.0",
-    "torch>=2.12.1",
+    "torch>=2.13.0",
 ]
 
 [build-system]
