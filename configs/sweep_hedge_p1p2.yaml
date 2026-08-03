@@ -1,0 +1,36 @@
+# Round-3 hedge arm: real short-perp delta-hedge (hedge_enabled), isolated
+# from every other sweep axis (default 24h/168h vol lookbacks, NOT combined
+# with shortlook -- one change at a time, matching this project's round-2/3
+# methodology of testing single knobs before interaction arms). Anchor
+# hyperparams (gamma 0.999, batch 64) match the round-2/3 sweep winner.
+#
+# reward_mode is "absolute", not "benchmark_relative": the real hedge's P&L
+# already flows into cash_usd/portfolio_value_usd every step, so absolute
+# reward already reflects hedged P&L; benchmark_relative would additionally
+# subtract the same beta term again (env.py raises ValueError if both are
+# set -- see TODO.md P1 and the delta-hedge plan).
+#
+# Requires a --processed-dir containing funding_rate.parquet (see
+# scripts/fetch_funding.py + scripts/build_dataset.py).
+policy: MlpPolicy
+net_arch: [128, 128]
+n_steps: 2048
+batch_size: 64
+n_epochs: 10
+gamma: 0.999
+gae_lambda: 0.95
+clip_range: 0.2
+ent_coef: 0.001
+learning_rate_start: 0.0003
+learning_rate_end: 0.00001
+device: cpu
+
+reward_mode: absolute
+hedge_enabled: true
+
+n_envs: 8
+episode_hours: 720
+step_hours: 1.0
+initial_notional_usd: 10000.0
+
+checkpoint_save_freq: 20000

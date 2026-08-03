@@ -1,0 +1,34 @@
+# Round-3 interaction arm: shortlook's faster volatility perception (12h/72h
+# lookbacks) x benchmark_relative reward (LP alpha instead of ETH beta), on
+# the P1/P2-fixed env (real swap cost, floating uncollected fees, unleaked
+# MarketStats). Neither ingredient alone cleared the promotion gate: plain
+# shortlook doesn't reliably beat baseline under real costs (see
+# experiments/round3_shortlook_p1p2_multiseed.md); plain benchrel_b64
+# (pre-fix, see experiments/LOG.md on master) protected capital best of any
+# round-2 arm but lost the May up-month by -$1,457. This tests whether
+# faster vol features let the alpha-only reward hold beta into a rally
+# instead of sitting out of it.
+policy: MlpPolicy
+net_arch: [128, 128]
+n_steps: 2048
+batch_size: 64
+n_epochs: 10
+gamma: 0.999
+gae_lambda: 0.95
+clip_range: 0.2
+ent_coef: 0.001
+learning_rate_start: 0.0003
+learning_rate_end: 0.00001
+device: cpu
+
+reward_mode: benchmark_relative
+
+n_envs: 8
+episode_hours: 720
+step_hours: 1.0
+initial_notional_usd: 10000.0
+
+checkpoint_save_freq: 20000
+
+vol_lookback_short_hours: 12
+vol_lookback_long_hours: 72

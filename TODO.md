@@ -2,6 +2,47 @@
 
 Consolidated from the reward-function and environment reviews (`src/t1000/env.py` and supporting modules), 2026-07-22/23. Ordered by priority.
 
+## Status check (2026-08-02): does this beat doing nothing?
+
+After round 2 (9 variants, `experiments/LEADERBOARD.md`) and round 3 (shortlook,
+shortlook x benchmark_relative, real hedge — `experiments/round3_*.md`), **no
+configuration across 12+ variants and two reward-shaping approaches has beaten
+the passive full-range baseline with statistical significance.** Round 2's
+"best" variant (`shortlook`) is itself flagged `~ baseline` (paired |t| < 2)
+and has worse total P&L than simply holding 50/50 ETH/USDC. This is the honest
+state, not a setback to route around.
+
+The infrastructure (simulator accounting, test suite, hedge mechanics, data
+pipeline) is solid and reusable regardless of what comes next — that part has
+real value. But every conclusion so far rests on only 5 paired 30-day holdout
+windows from one 5-month stretch (Jan-May 2025, a single up-month sample),
+which `LEADERBOARD.md` already flags as within-noise for most variants. Before
+sinking more RL compute into this, two cheap things should settle whether
+there's a real, if modest, edge to find, or whether passive full-range is
+close to optimal for this pool/timeframe/notional:
+
+- [ ] **Expand the holdout window set.** Fetch additional months via
+  `scripts/fetch_data.py` (before 2024-05 and/or after 2025-06) to get more
+  than one up/down-market sample — always `--dry-run` first (README's cost
+  note: ~1.5GB/day scanned, the existing 14-month fetch already used ~700GB
+  of the 1TB/month free tier). This only needs new backtests against
+  *existing* checkpoints for windows outside the training period — no
+  retraining, no additional Mac compute, until/unless a wider *training*
+  window is separately decided on.
+- [ ] **Simple heuristic baseline as a sanity check.** A trivial rule (e.g.
+  rebalance whenever price exits the range, fixed width) run against the
+  passive baseline on the same windows, with zero training cost. If even a
+  simple heuristic can't beat baseline either, that's strong evidence the
+  ceiling here is low regardless of policy sophistication, and further RL
+  tuning is unlikely to change the conclusion.
+
+Decide the next round based on these two results: if a real (if noisy) edge
+shows up, continue refining (partial-hedge ratio, redefined hedged gate, more
+seeds); if not, the honest conclusion is that passive full-range LP is
+near-optimal here, which is itself a legitimate finding worth writing up. The
+deployment work below stays correctly blocked either way until something
+clears a statistically solid gate.
+
 ## P0 — Bugs
 
 - [x] **Volatility features saturate at 1.0.** The env accumulates *prices* in `price_history` (`env.py:312`) and passes slices of it as `returns_24h`/`returns_7d` (`env.py:246-247`), but `realized_vol` (`observations.py:59`) expects log returns. The std of USD prices divided by `VOL_24H_SCALE = 0.05` pins the clip at 1.0 from the 2nd step onward — `volatility_24h` and `volatility_7d` become constants and the agent is blind to volatility. Fix: store `log(p_t / p_{t-1})` in the history.
@@ -12,21 +53,23 @@ Consolidated from the reward-function and environment reviews (`src/t1000/env.py
 
 ## P1 — Reward design
 
-- [ ] **Reward dominated by ETH beta, not LP skill.** Reward = ΔMTM includes direct price exposure while in position; LP alpha (fees − IL − gas) is buried in noise and the agent can learn mere market direction from the training window. Recommended fix: benchmark-relative reward — subtract the value change of a passive HODL of the position's current token composition (`impermanent_loss_usd` in `il.py:25` already does nearly this). It becomes implicit "fees − IL − gas" with no double-counting.
+- [x] **Reward dominated by ETH beta, not LP skill.** Fixed via `reward_mode="benchmark_relative"` (`env.py`): subtracts the start-of-step total WETH exposure (position + uncollected WETH-denominated fees) × price change, so the reward is LP alpha (fees − IL − gas − swap) with no double-counting. See `experiments/LOG.md` round 2 for the live A/B (protects capital, but loses the up-month — alpha-only reward gives no credit for holding beta into a rally).
 
-- [ ] **Rebalancing has no swap cost.** `_close_position`/`_open_position` (`env.py:186`, `env.py:199`) convert position↔cash at mid price with no pool fee or slippage — gas only. Frequent rebalances are systematically underpriced; backtests overstate live execution. Fix: charge fee tier + estimated slippage on the notional swapped when opening/closing.
+- [x] **`benchmark_relative` is synthetic, not real hedged P&L.** Implemented `hedge_enabled`/`funding_df` on `UniswapV3LPEnv`: a real short-perp hedge sized to `_total_weth_exposure()`, settled into a segregated `hedge_margin_usd` ledger every step via `_hedge_price_pnl_usd`/`_hedge_funding_usd` (kept out of `cash_usd` so a losing hedge can't strand the LP position — see the P0-style bug this fixed, caught by a real-data zero-training smoke test before any retrain compute was spent). Mutually exclusive with `reward_mode="benchmark_relative"` (both would remove the same beta term — see `env.py`'s `__init__` validation). 3-seed retrain results in `experiments/round3_hedge_p1p2_multiseed.md`: mechanically correct and the best seed beats a *hedged* full-range baseline in 5/5 holdout windows including the May up-month — but no seed beats the *original* (unhedged) baseline gate, and by construction none ever could in a strong up-month, since hedging deliberately cancels the price appreciation that makes the unhedged baseline win there. **Conclusion: the promotion gate as originally defined is not a coherent target for hedged configs** — it needs a hedged reference baseline, or a partial-hedge ratio that lets some beta through, to be evaluated meaningfully. See "Next steps" below before pursuing either.
 
-- [ ] **Uncollected fees are frozen in USD.** Each accrued chunk is converted at the then-current price and never floats again (`env.py:179`); the WETH portion should track the price until `COLLECT`. As is, `COLLECT`'s reward is strictly −gas (its only instrumental value: refilling cash for the gas-affordability check at `env.py:216`).
+- [x] **Rebalancing has no swap cost.** `_open_position` now charges `fee_tier + estimated_slippage` on the notional that must actually move from one token to the other when opening a position, netted against what a just-closed position already held (`_position_amount1_usd`/`_swap_cost_usd`); `EXIT_TO_CASH` charges the full WETH-denominated side, since cash carries zero price exposure. Reported separately in `info["swap_cost_usd"]` (backtest CSVs, TensorBoard).
+
+- [x] **Uncollected fees are frozen in USD.** `unclaimed_fees_usd` is now a computed property over token-unit accrual (`unclaimed_fee_amount0`/`unclaimed_fee_amount1`); the WETH-denominated portion floats with the current price on every read and only stops moving once `COLLECT` withdraws it. `benchmark_relative`'s exposure netting was extended to include it (`_total_weth_exposure`), since it now carries real price exposure too.
 
 ## P2 — Performance
 
-- [ ] **O(N) mask over the entire `events_df` on every step/reset.** `env.py:295` and `env.py:273` build boolean masks over the whole DataFrame — with millions of events × 720 steps × n_envs, this is the training bottleneck. Fix: pre-extract the timestamp column as a numpy array and use `np.searchsorted` (O(log N)).
+- [x] **O(N) mask over the entire `events_df` on every step/reset.** Replaced with `Series.searchsorted` (binary search) over the now-asserted-sorted timestamp column, same pattern already used for `gas_df`'s base-fee lookup.
 
 ## P2 — Data hygiene / leakage
 
-- [ ] **`MarketStats` computed over the full dataset.** `train.py:213`/`backtest.py:203` pass the entire `swaps_df`/`gas_df`; volume mean/std and gas percentiles (`env.py:123`) include the evaluation period during training. Fix: filter by the env's `start_ts`/`end_ts` before computing.
+- [x] **`MarketStats` computed over the full dataset.** `UniswapV3LPEnv` now accepts `market_stats_start`/`market_stats_end` to scope stats computation independently of the episode replay window. `train.py` passes its own train window (fixes the leakage automatically — training stats no longer see the holdout months). `backtest.py`/`run_sweep.py` pass the *training* window explicitly so eval-time normalization matches what the checkpoint was actually trained on, instead of leaking eval-period stats or drifting to eval-window stats; falls back to the unfiltered dataset when omitted, for backward compat with ad-hoc manual runs.
 
-- [ ] **`events_df` is neither sorted nor validated.** The env sorts `gas_df` but trusts that `events_df` arrives in (block, log_index) order (`env.py:106-112`). Add a defensive sort or a monotonicity assert.
+- [x] **`events_df` is neither sorted nor validated.** `UniswapV3LPEnv.__init__` now raises if `events_df["timestamp"]` isn't monotonically increasing (also required by the searchsorted fix above).
 
 ## P3 — Realism and observation
 
@@ -42,21 +85,6 @@ Consolidated from the reward-function and environment reviews (`src/t1000/env.py
 - [ ] `self._np_random_local` is assigned and never used (`env.py:128`).
 - [ ] Degenerate case: if `end_ts - start_ts < episode_hours`, the episode starts at `start_ts` and runs past `end_ts` up to `data_end_ts` (`env.py:265-269`).
 - [ ] Cheap sanity clamp on the fee deltas in `_accrue_fees` (`env.py:175-176`): a wrapped delta ≈ 2^256 × float would blow up the reward; currently unreachable thanks to shadow-tick pinning, but it protects against bad data.
-
-## Deployment — HITL advisory dashboard (planned)
-
-Decisions: agent is advisory-only (human executes on mainnet manually and confirms fills); data feed = BigQuery behind an `EventSource` interface (RPC/web3 later); FastAPI + plain HTML; hourly cadence; validation via paper-trading on real mainnet data (no testnet — Sepolia pools have no organic liquidity, the signal is meaningless there). Full design in the plan file; summary checklist:
-
-- [ ] **Retrain gate (blocking).** The best checkpoint (`run_14mo_lowent`) was trained on pre-fix code (saturated volatility features, old snapshot cut). After the P0 fixes the obs distribution changed: regenerate snapshots, retrain, re-backtest before any live artifact is exported.
-- [ ] **Post-retrain check: did the policy absorb the volatility signal?** Plot the distribution of chosen actions bucketed by `volatility_24h`/`volatility_7d` over backtest rollouts. Expected if the (now un-saturated) features are being used: REBALANCE_NARROW dominates in low-vol buckets, WIDE/EXIT_TO_CASH grow in high-vol buckets. A flat distribution across buckets means the features still carry no weight. Also sanity-log early in training that both features vary in (0, 1) instead of pinning at 1.0.
-- [ ] **Phase 0:** add `fastapi`/`uvicorn`; extract `decode_logs` from `build_dataset.py` into `src/t1000/`; add `MarketStats.from_precomputed(...)`.
-- [ ] **Phase 1 — `PinnedLPEnv` + deployment package.** Subclass `UniswapV3LPEnv` (pinned non-random reset, `append_events`, `apply_confirmed_execution`, state persistence via `snapshot.py`). Inference without VecEnv wrapping: standalone `vecnorm.normalize_obs` + `PPO.predict(deterministic=True)`; parity tests vs `backtest.py:105-122`. Package = model.zip + vecnormalize.pkl + market_stats.json + sorted base-fee array + gas_units + manifest (sha256, git commit, obs/action shapes — `DeploymentPackage.load` hard-fails on mismatch).
-- [ ] **Phase 2 — ingestion.** `BigQueryEventSource` (reuses `fetch_data.py` queries), monthly parquet store with decimal-string bigints, cursor + `(block_number, log_index)` dedup, one-time backfill from last processed snapshot to now.
-- [ ] **Phase 3 (v1) — paper trading + read-only dashboard.** Hourly asyncio loop (idempotent, cursor advances only on success), PPO + baseline paper sessions, staleness guard ("DO NOT ACT" if data > 2h old), equity chart + `compute_episode_metrics`.
-- [ ] **Phase 4 (v2) — HITL.** Recommendation card (action, target range in USD, gas estimate, swap-cost warning, baseline opinion, action probs), confirm form (actual ticks/USD/gas/tx hash; "did nothing" is valid), manual reconcile form, append-only ledger.
-- [ ] **Free-tier internet hosting.** Recommended: Google Cloud Run (GCP creds already exist for BigQuery) — scale-to-zero web service + Cloud Scheduler firing the hourly tick endpoint + state/history in GCS (all within free tiers). Alternatives: Fly.io with a small volume, HF Spaces (Docker). Being public, the HITL endpoints (`/api/confirm`, `/api/reconcile`) must require a secret token; read-only pages can stay open.
-- [ ] **Performance history since deploy.** Append-only per-tick ledger in durable storage (GCS): timestamp, agent_id, action recommended, portfolio value (paper + HITL-tracked), price, data freshness. Never overwritten on restarts/redeploys; equity curve and metrics always rendered from the full ledger since day zero.
-- [ ] **Multi-agent support + comparison.** Deployment packages are versioned per agent (`deploy/<agent_id>/` with manifest identity); every history row is keyed by `agent_id`. Swapping in a new agent starts a new ledger segment without touching the old one; the dashboard overlays current vs previous agents' equity on one chart with deploy-date markers, and a retired agent can optionally keep running in shadow (paper) mode for a true A/B against the active one.
 
 ## Strengths (don't touch without reason)
 

@@ -16,6 +16,7 @@ dependencies = [
     "pyarrow>=24.0.0",
     "pycryptodome>=3.23.0",
     "pyyaml>=6.0.3",
+    "requests>=2.32.0",
     "stable-baselines3[extra]>=2.9.0",
     "torch>=2.12.1",
 ]

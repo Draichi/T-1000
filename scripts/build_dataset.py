@@ -146,6 +146,16 @@ def main():
         "toward zero as the tick map converges)"
     )
 
+    funding_path = raw_dir / "funding_rate.parquet"
+    if funding_path.exists():
+        # No decoding needed (unlike the on-chain logs above) -- fetch_funding.py
+        # already writes this in its final (timestamp, funding_rate) shape.
+        funding_df = pd.read_parquet(funding_path)
+        funding_df.to_parquet(out_dir / "funding_rate.parquet", index=False)
+        print(f"  wrote {len(funding_df):,} rows -> funding_rate.parquet")
+    else:
+        print("  no funding_rate.parquet in --raw-dir, skipping (hedge_enabled datasets need it)")
+
 
 if __name__ == "__main__":
     main()

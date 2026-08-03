@@ -30,7 +30,10 @@ from t1000.metrics import compute_episode_metrics
 from t1000.tick_math import human_price_usd_per_eth, sqrt_price_x96_from_tick
 
 
-def make_env_fn(events_df, gas_df, swaps_df, snapshot_index, start_ts, end_ts, cfg):
+def make_env_fn(
+    events_df, gas_df, swaps_df, snapshot_index, start_ts, end_ts, cfg,
+    train_start=None, train_end=None, funding_df=None,
+):
     def _init():
         return UniswapV3LPEnv(
             events_df=events_df,
@@ -47,6 +50,14 @@ def make_env_fn(events_df, gas_df, swaps_df, snapshot_index, start_ts, end_ts, c
             gas_multiplier=cfg.get("gas_multiplier", 1.0),
             vol_lookback_short_hours=cfg.get("vol_lookback_short_hours", 24.0),
             vol_lookback_long_hours=cfg.get("vol_lookback_long_hours", 168.0),
+            # Volume/gas normalization stats must match what the checkpoint
+            # was trained with, not the (unseen, out-of-distribution-by-design)
+            # eval window -- pass the original training window if known.
+            # Falls back to unfiltered swaps_df/gas_df when omitted.
+            market_stats_start=train_start,
+            market_stats_end=train_end,
+            hedge_enabled=cfg.get("hedge_enabled", False),
+            funding_df=funding_df,
         )
 
     return _init
@@ -72,6 +83,9 @@ def _new_history(env) -> dict:
         "range_lower_usd": [lo],
         "range_upper_usd": [hi],
         "gas_cost_usd": [0.0],
+        "swap_cost_usd": [0.0],
+        "hedge_pnl_usd": [0.0],
+        "hedge_funding_usd": [0.0],
         "in_range": [False],
         "action": [None],
     }
@@ -90,6 +104,9 @@ def _append_history(history: dict, info: dict, action: int) -> None:
     history["range_lower_usd"].append(info["range_lower_usd"])
     history["range_upper_usd"].append(info["range_upper_usd"])
     history["gas_cost_usd"].append(info["gas_cost_usd"])
+    history["swap_cost_usd"].append(info["swap_cost_usd"])
+    history["hedge_pnl_usd"].append(info["hedge_pnl_usd"])
+    history["hedge_funding_usd"].append(info["hedge_funding_usd"])
     history["in_range"].append(info["in_range"])
     history["action"].append(Action(action).name)
 
@@ -187,6 +204,12 @@ def main():
     parser.add_argument("--vecnormalize", required=True)
     parser.add_argument("--eval-start", required=True)
     parser.add_argument("--eval-end", required=True)
+    parser.add_argument(
+        "--train-start", default=None,
+        help="training window start, used only to scope volume/gas normalization stats to "
+        "match what the checkpoint was trained on (default: unfiltered, i.e. the full dataset)",
+    )
+    parser.add_argument("--train-end", default=None)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument(
         "--out-dir",
@@ -202,10 +225,16 @@ def main():
     with open(args.config) as f:
         cfg = yaml.safe_load(f)
 
+    hedge_enabled = cfg.get("hedge_enabled", False)
     print("Loading processed dataset...")
-    events_df, gas_df, swaps_df, snapshot_index = load_processed_dataset(args.processed_dir)
+    events_df, gas_df, swaps_df, snapshot_index, funding_df = load_processed_dataset(
+        args.processed_dir, load_funding=hedge_enabled
+    )
 
-    env_fn = make_env_fn(events_df, gas_df, swaps_df, snapshot_index, args.eval_start, args.eval_end, cfg)
+    env_fn = make_env_fn(
+        events_df, gas_df, swaps_df, snapshot_index, args.eval_start, args.eval_end, cfg,
+        train_start=args.train_start, train_end=args.train_end, funding_df=funding_df,
+    )
 
     print("Running baseline (full-range) policy...")
     baseline_history = run_baseline(env_fn, args.seed)

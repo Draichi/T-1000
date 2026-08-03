@@ -1,0 +1,28 @@
+# Sanity retrain of the round-2 sweep winner (shortlook: 12h/72h volatility
+# lookbacks, gamma 0.999, batch 64) on the P1/P2-fixed env (swap cost,
+# floating uncollected fees, unleaked MarketStats, searchsorted perf fix).
+# Mirrors experiments/manifest.yaml's common_overrides + shortlook variant --
+# see TODO.md for what changed and experiments/LOG.md for the prior (stale)
+# result this is meant to re-check.
+policy: MlpPolicy
+net_arch: [128, 128]
+n_steps: 2048
+batch_size: 64
+n_epochs: 10
+gamma: 0.999
+gae_lambda: 0.95
+clip_range: 0.2
+ent_coef: 0.001
+learning_rate_start: 0.0003
+learning_rate_end: 0.00001
+device: cpu
+
+n_envs: 8
+episode_hours: 720
+step_hours: 1.0
+initial_notional_usd: 10000.0
+
+checkpoint_save_freq: 20000
+
+vol_lookback_short_hours: 12
+vol_lookback_long_hours: 72

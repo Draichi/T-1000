@@ -37,7 +37,7 @@ def _make_learning_rate(cfg):
     return LinearSchedule(start=cfg["learning_rate_start"], end=cfg["learning_rate_end"], end_fraction=1.0)
 
 
-def make_env_fn(events_df, gas_df, swaps_df, snapshot_index, start_ts, end_ts, cfg):
+def make_env_fn(events_df, gas_df, swaps_df, snapshot_index, start_ts, end_ts, cfg, funding_df=None):
     def _init():
         env = UniswapV3LPEnv(
             events_df=events_df,
@@ -54,6 +54,13 @@ def make_env_fn(events_df, gas_df, swaps_df, snapshot_index, start_ts, end_ts, c
             gas_multiplier=cfg.get("gas_multiplier", 1.0),
             vol_lookback_short_hours=cfg.get("vol_lookback_short_hours", 24.0),
             vol_lookback_long_hours=cfg.get("vol_lookback_long_hours", 168.0),
+            # Scope volume/gas normalization stats to the training window
+            # itself (start_ts/end_ts here IS the training window) so they
+            # never see the holdout period's distribution.
+            market_stats_start=start_ts,
+            market_stats_end=end_ts,
+            hedge_enabled=cfg.get("hedge_enabled", False),
+            funding_df=funding_df,
         )
         # Monitor wraps the raw (pre-VecNormalize) env, so it reports the
         # un-normalized per-episode return/length that SB3 needs to compute
@@ -72,6 +79,9 @@ TB_METRIC_NAMES = {
     "max_drawdown": "ep_drawdown_mean",
     "gas_adjusted_apr": "ep_gas_adjusted_apr_mean",
     "episode_gas_cost_usd": "ep_gas_cost_mean",
+    "episode_swap_cost_usd": "ep_swap_cost_mean",
+    "episode_hedge_pnl_usd": "ep_hedge_pnl_mean",
+    "episode_hedge_funding_usd": "ep_hedge_funding_mean",
     "rebalance_count": "ep_rebalance_count_mean",
 }
 
@@ -90,6 +100,9 @@ class EpisodeMetricsCallback(BaseCallback):
         self.step_hours = step_hours
         self._histories: dict = {}
         self._gas_histories: dict = {}
+        self._swap_histories: dict = {}
+        self._hedge_pnl_histories: dict = {}
+        self._hedge_funding_histories: dict = {}
         self._rebalance_counts: dict = {}
         self._recent = {name: deque(maxlen=100) for name in TB_METRIC_NAMES}
 
@@ -102,17 +115,26 @@ class EpisodeMetricsCallback(BaseCallback):
             if pv is not None:
                 self._histories.setdefault(i, []).append(pv)
                 self._gas_histories.setdefault(i, []).append(info.get("gas_cost_usd", 0.0))
+                self._swap_histories.setdefault(i, []).append(info.get("swap_cost_usd", 0.0))
+                self._hedge_pnl_histories.setdefault(i, []).append(info.get("hedge_pnl_usd", 0.0))
+                self._hedge_funding_histories.setdefault(i, []).append(info.get("hedge_funding_usd", 0.0))
                 if i < len(actions) and int(actions[i]) != Action.HOLD:
                     self._rebalance_counts[i] = self._rebalance_counts.get(i, 0) + 1
             if i < len(dones) and dones[i]:
                 history = self._histories.pop(i, [])
                 gas_history = self._gas_histories.pop(i, [])
+                swap_history = self._swap_histories.pop(i, [])
+                hedge_pnl_history = self._hedge_pnl_histories.pop(i, [])
+                hedge_funding_history = self._hedge_funding_histories.pop(i, [])
                 rebalance_count = self._rebalance_counts.pop(i, 0)
                 if len(history) > 1:
                     metrics = compute_episode_metrics(history, self.step_hours)
                     metrics["timesteps"] = int(self.num_timesteps)
                     metrics["env_index"] = i
                     metrics["episode_gas_cost_usd"] = float(sum(gas_history))
+                    metrics["episode_swap_cost_usd"] = float(sum(swap_history))
+                    metrics["episode_hedge_pnl_usd"] = float(sum(hedge_pnl_history))
+                    metrics["episode_hedge_funding_usd"] = float(sum(hedge_funding_history))
                     metrics["rebalance_count"] = rebalance_count
                     with open(self.log_path, "a") as f:
                         f.write(json.dumps(metrics) + "\n")
@@ -210,12 +232,18 @@ def main():
     log_dir = Path(args.log_dir)
     log_dir.mkdir(parents=True, exist_ok=True)
 
+    hedge_enabled = cfg.get("hedge_enabled", False)
     print("Loading processed dataset...")
-    events_df, gas_df, swaps_df, snapshot_index = load_processed_dataset(args.processed_dir)
+    events_df, gas_df, swaps_df, snapshot_index, funding_df = load_processed_dataset(
+        args.processed_dir, load_funding=hedge_enabled
+    )
     print(f"  {len(events_df):,} events, {len(snapshot_index.entries)} snapshots")
 
     env_fns = [
-        make_env_fn(events_df, gas_df, swaps_df, snapshot_index, args.train_start, args.train_end, cfg)
+        make_env_fn(
+            events_df, gas_df, swaps_df, snapshot_index, args.train_start, args.train_end, cfg,
+            funding_df=funding_df,
+        )
         for _ in range(n_envs)
     ]
     vec_env_cls = SubprocVecEnv if args.subproc else DummyVecEnv

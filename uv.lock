@@ -2442,6 +2442,7 @@ dependencies = [
     { name = "pyarrow" },
     { name = "pycryptodome" },
     { name = "pyyaml" },
+    { name = "requests" },
     { name = "stable-baselines3", extra = ["extra"] },
     { name = "torch" },
 ]
@@ -2465,6 +2466,7 @@ requires-dist = [
     { name = "pyarrow", specifier = ">=24.0.0" },
     { name = "pycryptodome", specifier = ">=3.23.0" },
     { name = "pyyaml", specifier = ">=6.0.3" },
+    { name = "requests", specifier = ">=2.32.0" },
     { name = "stable-baselines3", extras = ["extra"], specifier = ">=2.9.0" },
     { name = "torch", specifier = ">=2.12.1" },
 ]
