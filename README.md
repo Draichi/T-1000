@@ -18,12 +18,110 @@ the price falls and later recovers, the PPO agent repeatedly narrows and
 shifts its range to stay concentrated near the current price (and exits to
 cash during the roughest stretch), trading a higher gas bill for
 better fee capture and less exposure to impermanent loss than the static
-baseline.
+baseline. That is what the agent *does*; whether it is worth doing is a
+separate question, answered in the [Conclusion](#conclusion): it is not.
 
 For a beginner-friendly, step-by-step explanation of how the simulator and
 the RL pipeline actually work under the hood (including how Uniswap V3 fee
 accounting works, explained from scratch), see
 [`docs/HOW_IT_WORKS.md`](docs/HOW_IT_WORKS.md).
+
+
+## Conclusion
+
+**The study finished with a negative result: active management of a
+concentrated liquidity position on this pool does not beat simply holding
+the two tokens.** This holds across 25 distinct configurations (13 trained
+PPO variants and 12 deterministic rule-based policies), evaluated on five
+fixed 30-day holdout windows (Jan-May 2025) that no policy trained on.
+
+Totals over the five paired windows, $10,000 notional each:
+
+| Policy | Total P&L | vs HODL 50/50 | Windows won | Paired t |
+|---|---:|---:|:---:|---:|
+| HODL 50/50 (hold half USDC, half WETH) | **-$293** | n/a | n/a | n/a |
+| Best rule (±10% band, 24h patience, no periodic collect) | -$584 | -$291 | 2/5 | -0.20 |
+| Best PPO variant (`shortlook`) | -$405 | -$111 | 3/5 | -0.0 |
+| Full-range baseline (the original reference) | -$4,954 | -$4,661 | 0/5 | -3.83 |
+
+Nothing clears the promotion gate (beat HODL in ≥4/5 windows, including the
+up-month, at paired |t| ≥ 2). The best performers are *statistically tied*
+with holding the tokens, not ahead of it.
+
+### Why: the mechanism, not just the scoreboard
+
+A concentrated liquidity position is economically a **short volatility**
+position: you are short gamma, and the fee income is the premium you collect
+for it. Impermanent loss is not a tax to be outsmarted, it is the downside of
+the option you sold. So the question is never "can the agent beat IL?" but
+"does the premium pay for the gamma?"
+
+By the portfolio identity, `P&L_LP ≈ P&L_HODL + fees - IL - costs`. For the
+best rule-based policy that gives **fees - IL ≈ -$185 over five months on
+$10,000**, against ~$106 of gas and swap costs. Fee income and impermanent
+loss cancel almost exactly. The ETH/USDC 0.05% pool is approximately
+efficiently priced, which is what one should expect from the tightest fee
+tier on the most liquid pair, where professional market makers and JIT
+liquidity exist precisely to arbitrage that spread to zero.
+
+(This figure is derived from the accounting identity, not measured
+directly. Measuring fees and IL as separate logged series would make it a
+result rather than an inference.)
+
+What a policy *does* control is not the size of IL but its
+**crystallization**. For a range that is never rebalanced, IL depends only on
+the start and end price: it is path-independent. Path dependence enters
+solely through rebalancing: every re-centering realizes the divergence and
+resets the reference basket. Chasing price in a choppy month therefore
+ratchets losses in. That controllable surface was worth about $4,400 over the
+five windows, and a single constant, waiting 24 hours before re-centering,
+captured nearly all of it.
+
+A related consequence: the delta-hedged arm (short perp sized to the
+position's WETH exposure) could not fix this either, because **a delta hedge
+neutralizes the linear term while IL is the second-order one**. Delta is not
+gamma. Hedging IL would require options, not perpetual futures.
+
+### The methodological finding
+
+For most of this project's life, every result was scored against a passive
+full-range baseline. That reference turned out to be a weak opponent: adding
+24 hours of rebalance patience beats it by **+$4,370 over five windows at
+paired t = 2.65**, statistically distinct, where the best trained variant
+managed +$4,447 at t = 1.6 and was correctly flagged as noise. A one-line
+rule matched two million training timesteps' worth of apparent edge, and
+cleared a significance bar the RL runs never did.
+
+The consequence is uncomfortable and worth stating plainly: twelve PPO
+variants were trained, ranked and discussed against a benchmark that was
+measuring the wrong thing. No unit test catches this: the code was correct,
+the statistics were correct, and the conclusion was wrong because the
+comparison was unfair. The gate was re-baselined onto HODL 50/50 (the actual
+opportunity cost of the capital) in
+[`experiments/aggregate_leaderboard.py`](experiments/aggregate_leaderboard.py);
+the full analysis is in
+[`experiments/round4_heuristic_sweep.md`](experiments/round4_heuristic_sweep.md).
+
+**If you take one transferable lesson from this repository, take this one:
+sweep the neighbourhood of your baseline before you spend compute beating
+it.** A benchmark does not measure a result, it defines one.
+
+### Scope of the claim
+
+The negative result is well-supported *within its scope* and should not be
+read wider than it is. It covers one pool, one fee tier, one notional, and
+five 30-day windows drawn from a single five-month stretch with only one
+up-month. Market impact is not modeled. The "fees ≈ IL" decomposition is
+derived rather than measured. A wider fetch (more months, more market
+regimes) is the cheapest way to strengthen or overturn it, and needs no
+retraining, only new backtests against existing checkpoints.
+
+What the project does deliver: a Uniswap V3 fee simulator validated against
+real on-chain settlement to 0.000001% on short-duration positions, a paired
+evaluation harness with an explicit statistical gate, and an honest negative
+result with an identified mechanism. A negative result with a mechanism is a
+finding; it is only the finance literature that has the bad habit of not
+publishing them.
 
 
 ## Setup
@@ -32,7 +130,7 @@ Requires [`uv`](https://docs.astral.sh/uv/) and a Google Cloud account with
 BigQuery access (the 1TB/month free tier is enough). You'll need your own GCP
 project with billing enabled (billing is what unlocks the free tier's query
 quota; the public `crypto_ethereum` dataset itself is free to query within
-that quota) — BigQuery bills the *querying* project, not the dataset owner.
+that quota). BigQuery bills the *querying* project, not the dataset owner.
 
 ```bash
 uv sync
@@ -204,12 +302,17 @@ test window), expected for such a short training run.
 
 With a full training run (2M timesteps, 8 months of the 14-month dataset,
 `ent_coef` lowered from 0.01 to 0.001 after diagnosing excessive policy
-entropy/action-thrashing in an earlier checkpoint), PPO **does beat** the
-baseline over the 6-month held-out period it never trained on: P&L of
-+1574 vs -29 USD, Sharpe 4.55 vs 0.14, and a smaller max drawdown (-9.0%
-vs -13.4%), at the cost of paying more gas ($330 vs $68) from actively
-narrowing and shifting its range to track the price instead of sitting
-in a static wide range.
+entropy/action-thrashing in an earlier checkpoint), PPO beats the full-range
+baseline over one 6-month held-out period: P&L of +1574 vs -29 USD, Sharpe
+4.55 vs 0.14, and a smaller max drawdown (-9.0% vs -13.4%), at the cost of
+paying more gas ($330 vs $68).
+
+**This single-window result did not survive systematic evaluation.** Read
+the [Conclusion](#conclusion) before citing it. Across five paired holdout
+windows the same class of policy is statistically tied with HODL 50/50, and
+the full-range baseline it beats here is itself beaten by a one-line rule.
+Both facts point the same way: a single favourable window against a weak
+reference is not evidence of edge.
 
 
 ## Security-oriented design principles
@@ -242,13 +345,12 @@ before ever trusting it to train an agent. See
    relative to the pool's real liquidity, historical prices are an exact
    replay of real swaps, without simulating the effect of the agent's
    position on the execution price.
-3. **"Beating the baseline" is not guaranteed by the architecture**, it's an
-   empirical result of training. The reduced local training run (4096
-   steps) does not beat the baseline, expected for such a short run. A full
-   run (2M timesteps, tuned `ent_coef`) does beat it over a 6-month
-   held-out period (see the backtest results above), but this is a single
-   seed over a single eval window, not a guarantee that holds across all
-   market regimes or checkpoints.
+3. **The agent does not beat holding the two tokens.** See the
+   [Conclusion](#conclusion). Single-window wins over the full-range
+   baseline (reported in step 6 above) did not survive evaluation across
+   five paired holdout windows, and the full-range baseline itself is beaten
+   by a trivial rule. Treat any "beats the baseline" claim in this
+   repository as scoped to its specific window and reference.
 4. **Gas calibration is approximate**: `gas_model.DEFAULT_GAS_UNITS` uses
    order-of-magnitude estimates (not a precise decoding of
    NonfungiblePositionManager function selectors, which often bundle

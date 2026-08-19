@@ -1,20 +1,26 @@
 # Experiment sweep leaderboard
 
-Generated 2026-08-01 from experiments/results/ (9 variants x 5 holdout windows). Ranked by mean holdout Sharpe (risk-adjusted), ties by total P&L. `~ baseline` = paired |t| < 2 vs BOTH baselines: treat as noise, not edge.
+Generated 2026-08-19 from experiments/results/ (9 variants x 5 holdout windows). Ranked by mean holdout Sharpe (risk-adjusted), ties by total P&L.
 
-| # | Variant | Mean Sharpe | Total P&L | vs full-range | vs HODL 50/50 | Wins | Worst DD | Signal |
-|---|---------|------------:|----------:|--------------:|--------------:|-----:|---------:|--------|
-| 1 | shortlook | -0.30 | $-405 | $+4,447 (t=1.6) | $-111 (t=-0.0) | 3/5 | -24.8% | ~ baseline |
-| 2 | benchrel_gas3x | -0.44 | $-3,423 | $+2,394 (t=1.3) | $-3,130 (t=-1.4) | 4/5 | -36.9% | ~ baseline |
-| 3 | fixedsnaps | -0.71 | $-1,735 | $+3,117 (t=1.2) | $-1,442 (t=-0.5) | 4/5 | -19.4% | ~ baseline |
-| 4 | gas3x | -0.91 | $-3,399 | $+2,418 (t=1.1) | $-3,105 (t=-1.0) | 4/5 | -36.3% | ~ baseline |
-| 5 | batch256 | -1.21 | $-4,072 | $+780 (t=0.4) | $-3,779 (t=-2.1) | 3/5 | -31.3% | distinct |
-| 6 | gas_quarter | -1.26 | $-2,718 | $+852 (t=0.5) | $-2,425 (t=-1.3) | 3/5 | -24.1% | ~ baseline |
-| 7 | wide | -1.61 | $-4,820 | $-1,928 (t=-0.8) | $-4,527 (t=-3.0) | 1/5 | -29.2% | distinct |
-| 8 | narrow | -3.11 | $-6,133 | $-869 (t=-0.4) | $-5,840 (t=-2.7) | 2/5 | -32.1% | distinct |
-| 9 | benchrel_b64 | -5.19 | $-984 | $+3,868 (t=1.1) | $-690 (t=-0.2) | 4/5 | -9.4% | ~ baseline |
+**Promotion gate (all three, vs HODL 50/50):** beat HODL in 4/5 windows, *including* the up-month (2025-05-01), at paired t >= 2. The reference is HODL, not the full-range LP baseline -- see `experiments/round4_heuristic_sweep.md` for why the old reference was too weak to promote against. The `vs full-range` column is kept for continuity with rounds 1-3 only.
 
-## Statistically indistinguishable from baseline
+| # | Variant | Mean Sharpe | Total P&L | vs HODL 50/50 | Wins vs HODL | Up-month | vs full-range | Worst DD | Gate |
+|---|---------|------------:|----------:|--------------:|-------------:|:--------:|--------------:|---------:|------|
+| 1 | shortlook | -0.30 | $-405 | $-111 (t=-0.0) | 3/5 | yes | $+4,447 (t=1.6) | -24.8% | 3/5 wins, t=-0.0 |
+| 2 | benchrel_gas3x | -0.44 | $-3,423 | $-3,130 (t=-1.4) | 1/5 | no | $+2,394 (t=1.3) | -36.9% | 1/5 wins, loses up-month, t=-1.4 |
+| 3 | fixedsnaps | -0.71 | $-1,735 | $-1,442 (t=-0.5) | 2/5 | no | $+3,117 (t=1.2) | -19.4% | 2/5 wins, loses up-month, t=-0.5 |
+| 4 | gas3x | -0.91 | $-3,399 | $-3,105 (t=-1.0) | 2/5 | no | $+2,418 (t=1.1) | -36.3% | 2/5 wins, loses up-month, t=-1.0 |
+| 5 | batch256 | -1.21 | $-4,072 | $-3,779 (t=-2.1) | 0/5 | no | $+780 (t=0.4) | -31.3% | 0/5 wins, loses up-month, t=-2.1 |
+| 6 | gas_quarter | -1.26 | $-2,718 | $-2,425 (t=-1.3) | 2/5 | no | $+852 (t=0.5) | -24.1% | 2/5 wins, loses up-month, t=-1.3 |
+| 7 | wide | -1.61 | $-4,820 | $-4,527 (t=-3.0) | 1/5 | no | $-1,928 (t=-0.8) | -29.2% | 1/5 wins, loses up-month, t=-3.0 |
+| 8 | narrow | -3.11 | $-6,133 | $-5,840 (t=-2.7) | 1/5 | no | $-869 (t=-0.4) | -32.1% | 1/5 wins, loses up-month, t=-2.7 |
+| 9 | benchrel_b64 | -5.19 | $-984 | $-690 (t=-0.2) | 4/5 | no | $+3,868 (t=1.1) | -9.4% | loses up-month, t=-0.2 |
+
+## Gate result
+
+**No variant clears the gate.** 
+
+## Statistically indistinguishable from HODL 50/50
 
 - shortlook
 - benchrel_gas3x
@@ -37,20 +43,6 @@ With only 5 paired windows, these deltas are within noise; do not promote them o
 - [narrow](results/narrow/card.md) -- overrides `{"width_scale": 0.5}`
 - [benchrel_b64](results/benchrel_b64/card.md) -- overrides `{"imported_from": "checkpoints/run_14mo_gamma999_benchrel", "batch_size": 64, "reward_mode": "benchmark_relative"}`
 
-## Proposed README diff for the winner (CAUTION: winner is itself ~ baseline)
+## No README diff proposed
 
-```diff
---- a/README.md
-+++ b/README.md
-@@ results section: append after the existing results table @@
-+## Best sweep variant: shortlook
-+
-+Selected from a 9-variant sweep (see `experiments/LEADERBOARD.md`), holdout = 5 unseen 30-day windows (Jan-May 2025):
-+
-+| Metric | Value |
-+|---|---|
-+| Config overrides | `{"vol_lookback_short_hours": 12, "vol_lookback_long_hours": 72}` |
-+| Total holdout P&L | $-405 (baseline $-4,852, HODL $-293) |
-+| Windows beating baseline | 3/5 |
-+| Mean Sharpe / worst drawdown | -0.30 / -24.8% |
-```
+`shortlook` only tops the Sharpe ranking; it fails the gate (3/5 wins, t=-0.0). Nothing here is promotable, so no README snippet is generated.
